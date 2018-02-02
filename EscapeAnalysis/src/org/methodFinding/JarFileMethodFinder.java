@@ -1,16 +1,19 @@
 package org.methodFinding;
 
 import org.asm.JarClass;
-import org.asm.JarVisitor;
-import org.packagePrivateClasses.JavaClassList;
+import org.asm.JarFileListVisitor;
+import org.tree.JavaClass;
+import org.tree.JavaClassList;
 
-public class JarFileMethodFinder extends JarVisitor
+public class JarFileMethodFinder extends JarFileListVisitor
 {
-	JavaClassList _packagePrivateClasses;
+	JavaClass classHierarchy;
+	JavaClassList packagePrivateClasses;
 	
-	public JarFileMethodFinder(JavaClassList packagePrivateClasses) {
+	public JarFileMethodFinder(JavaClass classHierarchy, JavaClassList packagePrivateClasses) {
 		
-		_packagePrivateClasses = packagePrivateClasses;
+		this.classHierarchy = classHierarchy;
+		this.packagePrivateClasses = packagePrivateClasses;
 	}
 	
 	public void visitPublicClass(JarClass jarClass)	{
@@ -29,21 +32,16 @@ public class JarFileMethodFinder extends JarVisitor
 		visitClass(jarClass);
 	}
 	
-	public void visitPublicInterface(JarClass jarClass) {
-		visitClass(jarClass);
-	}
-	
-	public void visitPackagePrivateInterface(JarClass jarClass) {
-		visitClass(jarClass);
-	}
-	
 	private void visitClass(JarClass jarClass) {
 		
-		System.out.println(">> VISIT CLASS: " + jarClass.name());
+		JavaClass javaClass = this.classHierarchy.find(jarClass.name());
 		
-		JarClassMethodFinder methodFinder = new JarClassMethodFinder(_packagePrivateClasses);
+		if(javaClass == null) {
+			System.out.format("Class %s was not found.\n", jarClass.name());
+		}
+		
+		JarClassMethodFinder methodFinder = new JarClassMethodFinder(javaClass, this.packagePrivateClasses);
 		
 		jarClass.accept(methodFinder);
-		
 	}
 }

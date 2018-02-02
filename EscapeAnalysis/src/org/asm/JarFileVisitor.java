@@ -1,6 +1,6 @@
 package org.asm;
 
-public abstract class JarVisitor 
+public abstract class JarFileVisitor 
 {
 	public void visitPublicClass(JarClass jarClass) {}
 	

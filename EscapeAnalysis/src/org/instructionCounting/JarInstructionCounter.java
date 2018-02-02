@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.asm.JarClass;
-import org.asm.JarVisitor;
+import org.asm.JarFileVisitor;
 
-public class JarInstructionCounter extends JarVisitor {
+public class JarInstructionCounter extends JarFileVisitor {
 
 	private Map<Integer, Integer> opcodeCount = new HashMap<Integer, Integer>();
 

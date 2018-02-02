@@ -2,38 +2,31 @@ package org.methodFinding;
 
 import java.util.ArrayList;
 
-import org.asm.TemplateMethodVisitor;
-import org.asm.jvm.AccessFlags;
-import org.asm.jvm.StatementFilter2;
-import org.connectionGraph.ConnectionGraphBuilder;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.packagePrivateClasses.JavaClass;
-import org.packagePrivateClasses.JavaClassList;
-import org.packagePrivateClasses.JavaMethod;
+import org.tree.JavaClass;
+import org.tree.JavaClassList;
+import org.tree.JavaMethod;
 
-public class JarClassMethodFinder extends ClassVisitor {
+class JarClassMethodFinder extends ClassVisitor {
 
-	JavaClassList _packagePrivateClasses;
+	JavaClass currentClass;
+	JavaClassList packagePrivateClasses;
 	ArrayList<MethodFinder> _methodFinders = new ArrayList<MethodFinder>();
 	
-	public JarClassMethodFinder(JavaClassList packagePrivateClasses) {
+	public JarClassMethodFinder(JavaClass currentClass, JavaClassList packagePrivateClasses) {
 		super(Opcodes.ASM6);
 		
-		_packagePrivateClasses = packagePrivateClasses;
+		this.currentClass = currentClass;
+		this.packagePrivateClasses = packagePrivateClasses;
 	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		
-		
-		
-		System.out.format(">> VISIT METHOD: %s, desc: %s\n", name, desc);
-
+		JavaMethod currentMethod = new JavaMethod(access, name, desc, signature, exceptions);
 	
-		//return new StatementFilter2(builder);
-		return new TemplateMethodVisitor(Opcodes.ASM6);
+		return new MethodFinder(this.currentClass, currentMethod, this.packagePrivateClasses);
 	}
 }

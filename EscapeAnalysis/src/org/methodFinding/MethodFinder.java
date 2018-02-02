@@ -4,20 +4,22 @@ import java.util.ArrayList;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.packagePrivateClasses.JavaClass;
-import org.packagePrivateClasses.JavaClassList;
-import org.packagePrivateClasses.JavaMethod;
+import org.tree.JavaClass;
+import org.tree.JavaClassList;
+import org.tree.JavaMethod;
 
-public class MethodFinder extends MethodVisitor {
+class MethodFinder extends MethodVisitor {
 
+	JavaClass _currentClass;
 	JavaMethod _currentMethod;
 	JavaClassList _packagePrivateClasses;
 
 	ArrayList<JavaClass> _instantiatedPackagePrivateClasses = new ArrayList<JavaClass>();
 	
-	public MethodFinder(MethodVisitor mv, JavaMethod currentMethod, JavaClassList packagePrivateClasses) {
-		super(Opcodes.ASM6, mv);
+	public MethodFinder(JavaClass currentClass, JavaMethod currentMethod, JavaClassList packagePrivateClasses) {
+		super(Opcodes.ASM6);
 		
+		_currentClass = currentClass;
 		_currentMethod = currentMethod;
 		_packagePrivateClasses = packagePrivateClasses;
 	}
@@ -41,7 +43,7 @@ public class MethodFinder extends MethodVisitor {
 				JavaClass javaClass = _packagePrivateClasses.find(type);
 				
 				if(javaClass != null) {
-					javaClass.addMethod(_currentMethod);
+					_currentClass.addMethod(_currentMethod);
 				}
 				
 				break;
@@ -51,9 +53,5 @@ public class MethodFinder extends MethodVisitor {
 		}
 		
 		super.visitTypeInsn(opcode, type);
-	}
-	
-	public void addMethod() {
-		
 	}
 }

@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Map;
 
 import org.asm.JarClass;
-import org.asm.JarVisitor;
+import org.asm.JarFileVisitor;
 
-public class EscapeJarVisitor extends JarVisitor 
+public class EscapeJarVisitor extends JarFileVisitor 
 {
 	private File jarFile;
 	private Map<String, Integer> patternCount;

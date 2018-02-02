@@ -8,7 +8,6 @@ public class JarFinder
 	implements Iterable<File> {
 	
 	private ArrayList<File> jarFiles = new ArrayList<File>();
-	
 
 	public JarFinder(final File location) {
 		
@@ -33,7 +32,6 @@ public class JarFinder
         	}
 		}
 	}
-
 	
 	@Override
 	public Iterator<File> iterator() {

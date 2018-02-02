@@ -7,10 +7,10 @@ import org.objectweb.asm.Opcodes;
 
 class JarClassVisitor extends ClassVisitor
 {
-	private JarVisitor _visitor;
+	private JarFileVisitor _visitor;
 	private ClassReader _reader;
 	
-	public JarClassVisitor(JarVisitor visitor, ClassReader reader) {
+	public JarClassVisitor(JarFileVisitor visitor, ClassReader reader) {
 		super(Opcodes.ASM6);
 		
 		_visitor = visitor;

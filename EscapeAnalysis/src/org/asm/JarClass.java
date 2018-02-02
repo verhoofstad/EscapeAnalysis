@@ -46,6 +46,10 @@ public class JarClass {
 		return _interfaces;
 	}
 
+	public int access() {
+		return _access;
+	}
+	
 	
 	public Boolean isFinal() {
 		return (_access & Opcodes.ACC_FINAL) == Opcodes.ACC_FINAL;
