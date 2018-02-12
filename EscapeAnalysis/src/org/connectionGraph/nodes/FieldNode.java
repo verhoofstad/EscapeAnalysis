@@ -8,4 +8,8 @@ public abstract class FieldNode extends ReferenceNode
 	public FieldNode(String id) {
 		super(id);
 	}
+	
+	public FieldNode(String id, boolean escapeState) {
+		super(id, escapeState);
+	}
 }

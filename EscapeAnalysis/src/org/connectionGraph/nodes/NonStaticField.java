@@ -10,6 +10,10 @@ public class NonStaticField extends FieldNode {
 		super(id);
 	}
 	
+	public NonStaticField(String id, boolean escapeState) {
+		super(id, escapeState);
+	}
+	
 	@Override
 	public String toString() {
 		return "Non-static field (" + this.getId() + ")";

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -11,38 +12,32 @@ import java.util.Map;
  */
 public class ObjectNodeCollection implements Iterable<ObjectNode> {
 
-	private final ArrayList<ObjectNode> nodes;
+	private final List<ObjectNode> nodes;
 
 	public ObjectNodeCollection() {
-		nodes = new ArrayList<ObjectNode>();
+		this.nodes = new ArrayList<ObjectNode>();
 	}
 
 	public void add(ObjectNode node) {
-		nodes.add(node);
+		this.nodes.add(node);
 	}
 
 	public void addAll(ObjectNodeCollection other) {
-		nodes.addAll(other.nodes);
+		this.nodes.addAll(other.nodes);
 	}
 	
 	public void addAll(Collection<ObjectNode> other) {
 		for(ObjectNode node : other) {
-			nodes.add(node);
+			this.nodes.add(node);
 		}
 	}
-
-	/*
-	public void remove(ObjectNode node) {
-		nodes.remove(node);
-	}*/
 	
 	public int size() {
 		return this.nodes.size();
 	}
 	
-	
 	@Override
 	public Iterator<ObjectNode> iterator() {
-		return nodes.iterator();
+		return this.nodes.iterator();
 	}
 }

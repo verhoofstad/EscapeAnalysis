@@ -4,32 +4,31 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.asm.Type;
+import soot.RefType;
 
 /**
  * Represents an object.
  */
 public class ObjectNode extends Node {
 
-	private Type objectType;
+	private RefType objectType;
 
 	// Edges to both the static and non-static field nodes;
 	private Map<String, FieldNode> fieldNodes;
 	
-	public ObjectNode(String id, Type objectType) {
+	public ObjectNode(String id, RefType objectType) {
 		super(id);
 		
 		this.fieldNodes = new HashMap<String, FieldNode>();
 		this.objectType = objectType;
 	}
 	
-	
 	public Collection<FieldNode> getFieldNodes() 
 	{
 		return this.fieldNodes.values();
 	}
 	
-	public Type getObjectType() {
+	public RefType getObjectType() {
 		return this.objectType;
 	}
 
@@ -39,12 +38,15 @@ public class ObjectNode extends Node {
 	}
 	
 
-	public void prettyPrint() {
-		System.out.println(this.toString());
+	public void prettyPrint(int indent) {
+		
+		String indentStr = new String(new char[indent]).replace("\0", "   ");
+		
+		System.out.println(indentStr + this.toString() + " " + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
 		for(FieldNode fieldNode : this.fieldNodes.values()) {
-			System.out.println("   " + fieldNode.toString());
+			System.out.println(indentStr + "   " + fieldNode.toString() + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
 			
-			fieldNode.prettyPrint();
+			fieldNode.prettyPrint(indent + 2);
 		}
 	}
 	
@@ -60,14 +62,13 @@ public class ObjectNode extends Node {
 	}
 
 	@Override
-	public void setEscape(Boolean escapeState) {
+	public void setEscape(boolean escapeState) {
 		super.setEscape(escapeState);
 		
 		for(FieldNode fieldNode : this.fieldNodes.values()) {
 			fieldNode.setEscape(escapeState);
 		}
 	}
-
 	
 	@Override
 	public String toString() {

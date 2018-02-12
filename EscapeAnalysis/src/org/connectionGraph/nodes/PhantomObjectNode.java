@@ -1,9 +1,11 @@
 package org.connectionGraph.nodes;
 
-public class PhantomObjectNode extends Node {
+import java.util.UUID;
 
-	public PhantomObjectNode(String id) {
-		super(id);
+public class PhantomObjectNode extends ObjectNode {
+
+	public PhantomObjectNode() {
+		super(UUID.randomUUID().toString(), null);
 	}
 	
 	@Override

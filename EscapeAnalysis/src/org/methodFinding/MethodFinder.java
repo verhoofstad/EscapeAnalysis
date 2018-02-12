@@ -1,49 +1,39 @@
 package org.methodFinding;
 
-import java.util.ArrayList;
-
+import org.classHierarchy.tree.JavaClass;
+import org.classHierarchy.tree.JavaClassList;
+import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaMethodList;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.tree.JavaClass;
-import org.tree.JavaClassList;
-import org.tree.JavaMethod;
 
 class MethodFinder extends MethodVisitor {
 
-	JavaClass _currentClass;
-	JavaMethod _currentMethod;
-	JavaClassList _packagePrivateClasses;
-
-	ArrayList<JavaClass> _instantiatedPackagePrivateClasses = new ArrayList<JavaClass>();
-	
-	public MethodFinder(JavaClass currentClass, JavaMethod currentMethod, JavaClassList packagePrivateClasses) {
+	private JavaMethod currentMethod;
+	private JavaClassList classes;
+	private JavaMethodList foundMethods;
+		
+	public MethodFinder(JavaMethod currentMethod, JavaClassList classes, JavaMethodList foundMethods) {
 		super(Opcodes.ASM6);
 		
-		_currentClass = currentClass;
-		_currentMethod = currentMethod;
-		_packagePrivateClasses = packagePrivateClasses;
+		this.currentMethod = currentMethod;
+		this.classes = classes;
+		this.foundMethods = foundMethods;
 	}
-	
-	public ArrayList<JavaClass> instantiatedPackagePrivateClasses() {
-		return _instantiatedPackagePrivateClasses;
-	}
-	
+		
     /**
      *  Visits a type instruction. A type instruction is an instruction that takes the internal name of a class as parameter.
      */
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
 
-		//System.out.format("VisitTypeInsn: ");
-		
 		switch(opcode) {
 			case Opcodes.NEW:
-				//System.out.format("new %s()\n", type);
-				
-				JavaClass javaClass = _packagePrivateClasses.find(type);
+		
+				JavaClass javaClass = classes.find(type);
 				
 				if(javaClass != null) {
-					_currentClass.addMethod(_currentMethod);
+					this.foundMethods.add(this.currentMethod);
 				}
 				
 				break;

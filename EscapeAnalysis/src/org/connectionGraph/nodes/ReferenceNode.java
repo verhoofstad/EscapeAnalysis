@@ -36,6 +36,15 @@ public abstract class ReferenceNode extends Node {
 	}
 	
 
+	public void pointsTo(ObjectNode objectNode) {
+		this.pointsToNodes.put(objectNode.getId(), objectNode);
+	}
+	
+	public boolean pointsToNothing() {
+		return this.pointsTo().size() == 0;
+	}
+	
+	
 	public void addNode(Node node) {
 		
 		// Forget double dispatch for now...
@@ -51,13 +60,12 @@ public abstract class ReferenceNode extends Node {
 			
 				this.deferredNodes.put(node.getId(), (ReferenceNode)node); 
 			}
-			
 		}
 	}
 	
 	
 	@Override
-	public void setEscape(Boolean escapeState) {
+	public void setEscape(boolean escapeState) {
 		super.setEscape(escapeState);
 		
 		for(ReferenceNode referenceNode : this.deferredNodes.values()) {
@@ -90,13 +98,16 @@ public abstract class ReferenceNode extends Node {
 		}
 	}
 	
-	public void prettyPrint() {
-		System.out.println(this.toString());
+	public void prettyPrint(int indent) {
+		
+		String indentStr = new String(new char[indent]).replace("\0", "   ");
+
+		System.out.println(indentStr + this.toString() + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
 		for(ObjectNode pointsTo : pointsToNodes.values()) {
-			System.out.println("   " + pointsTo.toString());
+			System.out.println(indentStr + "   " + pointsTo.toString() + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
 		}
 		for(ReferenceNode deferred : deferredNodes.values()) {
-			System.out.println("   " + deferred.toString());
+			System.out.println(indentStr + "   " + deferred.toString() + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
 		}
 	}
 }

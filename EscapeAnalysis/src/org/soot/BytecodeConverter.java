@@ -1,14 +1,15 @@
 package org.soot;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.Dictionary;
 
-import org.asm.JarFileList;
-import org.tree.JavaClass;
-import org.tree.JavaClassList;
+import org.asm.JarFileSet;
+import org.classHierarchy.tree.JavaClass;
+import org.classHierarchy.tree.JavaClassList;
+import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaMethodList;
 
+import soot.Body;
+import soot.PhaseOptions;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -19,37 +20,85 @@ import soot.toolkits.graph.UnitGraph;
 public class BytecodeConverter {
 
 	
-	public void test(JavaClass classHierarchy, JarFileList jarFiles) {
+	public void test(JavaMethodList methods, JarFileSet jarFiles) {
 	
 		Options.v().set_soot_classpath(jarFiles.getClassPath());
 
+        Options.v().set_verbose(false);
+        Options.v().set_keep_line_number(true);
+        Options.v().set_app(true);
+        //Options.v().set_src_prec(Options.src_prec_class);
+        //Options.v().set_prepend_classpath(true);
+        //Options.v().set_whole_program(true);
+
+    	Options.v().set_process_dir(methods.jarFiles().toStringList());
+        
+        PhaseOptions.v().setPhaseOption("bb", "off");
+        //PhaseOptions.v().setPhaseOption("tag.ln", "on");
+        //PhaseOptions.v().setPhaseOption("jj.a", "on");
+        //PhaseOptions.v().setPhaseOption("jj.ule", "on");
+
 		Scene scene = Scene.v();
-
-
-		JavaClassList allClasses = classHierarchy.getClasses();
-
-		System.out.format("Classes in class list: %s\n", allClasses.size());
 		
-		for(JavaClass currentClass : allClasses) {
+		scene.loadNecessaryClasses();
+		
+		System.out.format("Classes in class list: %s\n", methods.getClasses().size());
+		
+		int methodCount = 0;
+		int activeBody = 0;
+		int noActiveBody = 0;
+		
+		for(JavaClass currentClass : methods.getClasses()) {
 			
-			if(currentClass.methodCount() > 0) {
+			System.out.format("Loading: %s from %s\n", currentClass.sootName(), currentClass.jarFile());
+			
+			SootClass sootClass = scene.loadClassAndSupport(currentClass.sootName());
+			// Make it an application class as it will be analyzed.
+			sootClass.setApplicationClass();
 
-				System.out.format("Loading: %s  -  %s\n", currentClass.name(), currentClass.sootName());
+			
+			System.out.format("Soot class %s loaded.\n", sootClass.getName());
+			System.out.format("Soot class has %s methods.\n", currentClass.declaredMethods().size());
+			
+			for(JavaMethod method : methods.getMethodsOfClass(currentClass)) {
 				
-				SootClass sootClass = scene.loadClassAndSupport(currentClass.sootName());
-				
-				//System.out.format("Has outer class: %s\n", sootClass.hasOuterClass() ? "yes" : "no");
-				
-				Collection<SootMethod> methods = sootClass.getMethods();
-				
-				for(SootMethod method : methods) {
+				SootMethod sootMethod = sootClass.getMethod(method.sootName(), method.sootParameters(), method.sootReturnType());
 
-					UnitGraph graph = new ExceptionalUnitGraph(method.getActiveBody());
+				if(sootMethod != null) {
 					
+					if(sootMethod.hasActiveBody()) {
+						
+						Body body = sootMethod.getActiveBody();
+						
+						activeBody++;
+					} else {
+						
+						Body body = sootMethod.retrieveActiveBody();
+						
+						UnitGraph graph = new ExceptionalUnitGraph(body);
+
+						System.out.format("Method: %s\n", method.sootName());
+						UnitGraphContainer visitor = new UnitGraphContainer(graph);
+
+						ConnectionGraphBuilder builder = new ConnectionGraphBuilder();
+						
+						visitor.accept(builder);
+						
+						
+						noActiveBody++;
+					}
 					
-					//System.out.format("Method: %s\n", method.getName());
+					methodCount++;
+				}
+				else {
+					System.out.println("Could not find method!!!");
 				}
 			}
 		}
+		
+		System.out.format("Methods processed: %s\n", methodCount);
+		System.out.format("Active body: %s\n", activeBody);
+		System.out.format("No active body: %s\n", noActiveBody);
+		System.out.println("Finished");
 	}
 }

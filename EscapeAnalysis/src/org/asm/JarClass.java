@@ -31,7 +31,6 @@ public class JarClass {
 		return _name;
 	}
 	
-
 	/**
 	 * Gets the internal of name of the super class. For interfaces, the super class is Object. May be null, but only for the Object class.
 	 */

@@ -7,14 +7,14 @@ public abstract class Node {
 
 	private final String id;
 	
-	private Boolean escapeState;
+	private boolean escapeState;
 	
 	public Node(String id) {
 		this.id = id;
 		this.escapeState = false;
 	}
 	
-	public Node(String id, Boolean escapeState) {
+	public Node(String id, boolean escapeState) {
 		this.id = id;
 		this.escapeState = escapeState;
 	}
@@ -22,17 +22,16 @@ public abstract class Node {
 	public String getId() {
 		return this.id;
 	}
-
 	
-	public Boolean getEscapeState() {
+	public boolean getEscapeState() {
 		return this.escapeState;
 	}
 	
-	public void setEscape(Boolean escapeState) {
+	public void setEscape(boolean escapeState) {
 		this.escapeState = escapeState;
 	}
 	
-	public void pushEscapeState() {
+	public final void pushEscapeState() {
 		if(this.getEscapeState()) {
 			this.setEscape(true);
 		}

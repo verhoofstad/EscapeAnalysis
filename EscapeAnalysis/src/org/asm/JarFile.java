@@ -10,6 +10,9 @@ import java.util.jar.JarInputStream;
 
 import org.objectweb.asm.ClassReader;
 
+/*
+ * Represents a JAR-file.
+ */
 public class JarFile {
 
 	private File jarFile;
