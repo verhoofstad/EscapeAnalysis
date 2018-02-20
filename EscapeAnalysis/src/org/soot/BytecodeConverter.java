@@ -4,9 +4,9 @@ import java.util.Dictionary;
 
 import org.asm.JarFileSet;
 import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassList;
+import org.classHierarchy.tree.JavaClassSet;
 import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodList;
+import org.classHierarchy.tree.JavaMethodSet;
 
 import soot.Body;
 import soot.PhaseOptions;
@@ -20,7 +20,7 @@ import soot.toolkits.graph.UnitGraph;
 public class BytecodeConverter {
 
 	
-	public void test(JavaMethodList methods, JarFileSet jarFiles) {
+	public void test(JavaMethodSet methods, JarFileSet jarFiles) {
 	
 		Options.v().set_soot_classpath(jarFiles.getClassPath());
 

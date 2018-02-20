@@ -17,8 +17,12 @@ public class JarFile {
 
 	private File jarFile;
 	
+	public JarFile(String jarFile) {
+		this.jarFile = new File(jarFile);
+	}
+	
 	public JarFile(File jarFile) throws FileNotFoundException {
-		if(!jarFile.exists()) throw new FileNotFoundException();
+		if(!jarFile.exists()) throw new FileNotFoundException("File " + jarFile.getAbsolutePath() + " not found.");
 		
 		this.jarFile = jarFile;
 	}

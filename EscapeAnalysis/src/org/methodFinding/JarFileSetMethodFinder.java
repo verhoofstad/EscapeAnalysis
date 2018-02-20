@@ -5,27 +5,28 @@ import java.util.List;
 
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
+import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassList;
+import org.classHierarchy.tree.JavaClassSet;
 import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodList;
+import org.classHierarchy.tree.JavaMethodSet;
 
 /*
  * Finds the methods in which one of the provided classes is instantiated.
  */
 public class JarFileSetMethodFinder extends JarFileSetVisitor
 {
-	private JavaClass classHierarchy;
-	private JavaClassList classes;
-	private JavaMethodList foundMethods = new JavaMethodList();
+	private ClassHierarchy classHierarchy;
+	private JavaClassSet classes;
+	private JavaMethodSet foundMethods = new JavaMethodSet();
 	
-	public JarFileSetMethodFinder(JavaClass classHierarchy, JavaClassList classes) {
+	public JarFileSetMethodFinder(ClassHierarchy classHierarchy, JavaClassSet classes) {
 		
 		this.classHierarchy = classHierarchy;
 		this.classes = classes;
 	}
 	
-	public JavaMethodList foundMethods() {
+	public JavaMethodSet foundMethods() {
 		return this.foundMethods;
 	}
 	

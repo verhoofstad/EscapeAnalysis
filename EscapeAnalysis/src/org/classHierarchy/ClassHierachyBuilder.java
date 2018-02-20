@@ -1,14 +1,16 @@
 package org.classHierarchy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.asm.JarClass;
 import org.asm.JarFile;
 import org.asm.JarFileSetVisitor;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaInterfaceList;
+import org.classHierarchy.tree.JavaInterfaceSet;
 import org.classHierarchy.tree.JavaMethod;
 
 /*
@@ -19,18 +21,18 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	private boolean includeInterfaces = true;
 	private boolean includeMethods = true;
 	private boolean resolveOverrides = true;
-	private boolean verbose = true;
+	private boolean verbose = false;
 	
 	private JarFile currentJarFile;
 	
-	private List<JavaTempClass> tempClasses = new ArrayList<JavaTempClass>();
-	private List<JavaTempClass> tempInterfaces = new ArrayList<JavaTempClass>();
+	private Map<String, JavaTempType> tempClasses = new HashMap<String, JavaTempType>();
+	private Map<String, JavaTempType> tempInterfaces = new HashMap<String, JavaTempType>();
 		
 	private JavaClass rootNode;
-	private JavaInterfaceList interfaces = new JavaInterfaceList();
+	private JavaInterfaceSet interfaces = new JavaInterfaceSet();
 	
-	public JavaClass rootNode() {
-		return this.rootNode;
+	public ClassHierarchy classHierarchy() {
+		return new ClassHierarchy(this.rootNode, this.interfaces);
 	}
 	
 	@Override
@@ -93,18 +95,18 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	}
 	
 	private void processJarClass(JarClass jarClass) {
-		JavaTempClass tempClass = new JavaTempClass(jarClass, this.currentJarFile);
+		JavaTempType tempClass = new JavaTempType(jarClass, this.currentJarFile);
 		processMethods(jarClass, tempClass);
-		this.tempClasses.add(tempClass);
+		this.tempClasses.put(tempClass.name(), tempClass);
 	}
 	
 	private void processJarInterface(JarClass jarClass) {
-		JavaTempClass tempInterface = new JavaTempClass(jarClass, this.currentJarFile);
+		JavaTempType tempInterface = new JavaTempType(jarClass, this.currentJarFile);
 		processMethods(jarClass, tempInterface);
-		this.tempInterfaces.add(tempInterface);
+		this.tempInterfaces.put(tempInterface.name(), tempInterface);
 	}
 	
-	private void processMethods(JarClass jarClass, JavaTempClass javaTempType) {
+	private void processMethods(JarClass jarClass, JavaTempType javaTempType) {
 		if(this.includeMethods) {
 			
 			MethodLoader methodLoader = new MethodLoader(javaTempType);
@@ -114,7 +116,7 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	
 	private JavaClass buildClassHierarchy() {
 				
-		List<JavaTempClass> rootClasses = findRootClasses();
+		List<JavaTempType> rootClasses = findRootClasses();
 		
 		if(rootClasses.size() == 1) {
 			return resolveTempClass(rootClasses.get(0), null);
@@ -123,24 +125,28 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		}
 	}
 	
-	private JavaClass resolveTempClass(JavaTempClass tempClass, JavaClass superClass) {
+	private JavaClass resolveTempClass(JavaTempType tempClass, JavaClass superClass) {
 
-		JavaInterfaceList implementedInterfaces = resolveImplementedInterfaces(tempClass);
+		JavaInterfaceSet implementedInterfaces = resolveImplementedInterfaces(tempClass);
 		JavaClass javaClass = tempClass.resolveToJavaClass(superClass, implementedInterfaces);
 				
 		// Find sub-classes
-		for(JavaTempClass tempSubClass : this.tempClasses) {
+		for(JavaTempType tempSubClass : this.tempClasses.values()) {
 			
 			if(tempSubClass.isSubClassOf(tempClass)) {
 				javaClass.addSubClass(resolveTempClass(tempSubClass, javaClass));
 			}
 		}
+		// Add the current class as sub-class of each implemented interface.
+		for(JavaInterface implementedInterface : implementedInterfaces) {
+			implementedInterface.addSubClass(javaClass);
+		}
 		return javaClass;
 	}
 	
-	private JavaInterfaceList resolveImplementedInterfaces(JavaTempClass tempClass) {
+	private JavaInterfaceSet resolveImplementedInterfaces(JavaTempType tempClass) {
 		
-		JavaInterfaceList implementedInterfaces = new JavaInterfaceList();
+		JavaInterfaceSet implementedInterfaces = new JavaInterfaceSet();
 		
 		if(this.includeInterfaces) {
 			
@@ -156,11 +162,11 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		return implementedInterfaces;
 	}
 	
-	private List<JavaTempClass> findRootClasses() {
+	private List<JavaTempType> findRootClasses() {
 		
-		List<JavaTempClass> rootClasses = new ArrayList<JavaTempClass>();
+		List<JavaTempType> rootClasses = new ArrayList<JavaTempType>();
 		
-		for(JavaTempClass tempClass : this.tempClasses) {
+		for(JavaTempType tempClass : this.tempClasses.values()) {
 			if(tempClass.superClass() == null) {
 				rootClasses.add(tempClass);
 			}
@@ -171,16 +177,16 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	
 	private void buildInterfaceHierarchy() {
 		
-		List<JavaTempClass> rootInterfaces = findRootInterfaces();
+		List<JavaTempType> rootInterfaces = findRootInterfaces();
 		
-		for(JavaTempClass tempInterface : rootInterfaces) {
+		for(JavaTempType tempInterface : rootInterfaces) {
 			
-			JavaInterface javaInterface = tempInterface.resolveToJavaInterface(new JavaInterfaceList());
+			JavaInterface javaInterface = tempInterface.resolveToJavaInterface(new JavaInterfaceSet());
 			
 			this.interfaces.add(javaInterface);
 			
 			// Find sub-interfaces
-			for(JavaTempClass tempSubInterface : this.tempInterfaces) {
+			for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
 				
 				if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
 					javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
@@ -189,12 +195,12 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		}
 	}
 	
-	private JavaInterface resolveTempInterface(JavaTempClass tempInterface) {
+	private JavaInterface resolveTempInterface(JavaTempType tempInterface) {
 		
 		// Resolve super-interfaces
-		JavaInterfaceList superInterfaces = new JavaInterfaceList();
+		JavaInterfaceSet superInterfaces = new JavaInterfaceSet();
 		
-		for(JavaTempClass tempSuperInterface : this.tempInterfaces) {
+		for(JavaTempType tempSuperInterface : this.tempInterfaces.values()) {
 	
 			if(tempInterface.isSubInterfaceOf(tempSuperInterface)) {
 
@@ -221,7 +227,7 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		this.interfaces.add(javaInterface);
 		
 		// Find sub-interfaces
-		for(JavaTempClass tempSubInterface : this.tempInterfaces) {
+		for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
 			
 			if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
 				javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
@@ -230,11 +236,11 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		return javaInterface;
 	}
 	
-	private List<JavaTempClass> findRootInterfaces() {
+	private List<JavaTempType> findRootInterfaces() {
 
-		List<JavaTempClass> rootInterfaces = new ArrayList<JavaTempClass>();
+		List<JavaTempType> rootInterfaces = new ArrayList<JavaTempType>();
 		
-		for(JavaTempClass tempInterface : this.tempInterfaces) {
+		for(JavaTempType tempInterface : this.tempInterfaces.values()) {
 			if(!tempInterface.hasSuperInterfaces()) {
 				rootInterfaces.add(tempInterface);
 			}
@@ -244,31 +250,30 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	
 	private void resolveOverrides(JavaClass javaClass) {
 		
-		if(javaClass.hasSuperClass()) {
-			for(JavaMethod method : javaClass.declaredMethods()) {
-				method.setOverrides(findBaseMethodFor(javaClass.superClass(), method));
-			}
+		for(JavaMethod method : javaClass.declaredMethods()) {
+			findOverridesFor(method, javaClass);
 		}
 		
+		// Traverse the remaining classes in the class hierarchy.
 		for(JavaClass subClass : javaClass.subClasses()) {
 			resolveOverrides(subClass);
 		}
 	}
 		
-	private JavaMethod findBaseMethodFor(JavaClass superClass, JavaMethod method) {
+	private void findOverridesFor(JavaMethod baseMethod, JavaClass javaClass) {
 		
-		for(JavaMethod baseMethod : superClass.declaredMethods()) {
-			if(baseMethod.signatureEquals(method)) {
-				return baseMethod;
+		for(JavaClass subClass : javaClass.subClasses()) {
+			
+			JavaMethod override = subClass.findMethod(baseMethod.name(), baseMethod.desc());
+			
+			if(override != null) {
+				baseMethod.overridenBy(override);
+			} else {
+				findOverridesFor(baseMethod, subClass);
 			}
 		}
-		if(superClass.hasSuperClass()) {
-			return findBaseMethodFor(superClass.superClass(), method);
-		} else {
-			return null;
-		}
 	}
-	
+		
 	private void println(String format, Object... args) {
 		if(this.verbose) {
 			System.out.format(format + "\n", args);

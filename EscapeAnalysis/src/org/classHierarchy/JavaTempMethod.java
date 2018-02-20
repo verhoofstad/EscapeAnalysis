@@ -18,8 +18,6 @@ class JavaTempMethod {
 	}
 	
 	public JavaMethod resolveToJavaMethod(JavaType containedIn) {
-		
 		return new JavaMethod(containedIn, this.access, this.name, this.desc, this.signature);
 	}
-	
 }

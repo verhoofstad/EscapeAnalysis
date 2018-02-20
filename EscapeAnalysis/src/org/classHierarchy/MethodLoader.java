@@ -1,15 +1,14 @@
 package org.classHierarchy;
 
-import org.classHierarchy.tree.JavaMethod;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 class MethodLoader extends ClassVisitor {
 
-	private JavaTempClass currentType;
+	private JavaTempType currentType;
 	
-	MethodLoader(JavaTempClass currentType){
+	MethodLoader(JavaTempType currentType){
 		super(Opcodes.ASM6);
 		
 		this.currentType = currentType;
@@ -21,5 +20,4 @@ class MethodLoader extends ClassVisitor {
 		this.currentType.addMethod(new JavaTempMethod(access, name, desc, signature));
 		return null;
 	}
-	
 }

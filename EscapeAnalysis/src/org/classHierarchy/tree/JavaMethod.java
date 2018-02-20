@@ -21,6 +21,7 @@ import soot.ShortType;
 
 public class JavaMethod {
 
+	private String id;
 	private AccessFlags accessFlags;
 	private String name;
 	private String desc;
@@ -28,11 +29,15 @@ public class JavaMethod {
 	
 	private Type methodType;
 		
-	private JavaMethod overrides;
-	
 	private JavaType containedIn;
+	private JavaMethodSet overridenBy;
+
+	// The method's applies-to set
+	private JavaTypeSet appliesTo;
 	
 	public JavaMethod(JavaType containedIn, int access, String name, String desc, String signature) {
+		
+		if(containedIn == null) {throw new Error("Argument null");}
 		
 		this.accessFlags = new AccessFlags(access);
 		this.name = name;
@@ -41,6 +46,23 @@ public class JavaMethod {
 	
 		this.containedIn = containedIn;
 		this.methodType = Type.getMethodType(desc);
+		
+		this.overridenBy = new JavaMethodSet();
+		
+		this.setId();
+		
+		// We only compute the applies-to set for non-abstract instance methods.
+		//if(!this.isAbstract() && !this.isStatic() && !this.isConstructor()) {
+			
+			this.appliesTo = new JavaTypeSet(this.containedIn().coneSet());
+		//}
+	}
+	
+	/*
+	 * Gets the fully qualified name that uniquely identifies this method.
+	 */
+	public String id() {
+		return this.id;
 	}
 	
 	public String name() {
@@ -59,12 +81,16 @@ public class JavaMethod {
 		return this.containedIn;
 	}
 	
-	public JavaMethod overrides() {
-		return this.overrides;
-	}
-	
 	public boolean isPublic() {
 		return this.accessFlags.isPublic();
+	}
+	
+	public boolean isProtected() {
+		return this.accessFlags.isProtected();
+	}
+	
+	public boolean isPrivate() {
+		return this.accessFlags.isPrivate();
 	}
 	
 	public boolean isAbstract() {
@@ -85,9 +111,17 @@ public class JavaMethod {
 	public JarFile jarFile() {
 		return this.containedIn.jarFile();
 	}
-
-	public void setOverrides(JavaMethod baseMethod) {
-		this.overrides = baseMethod;
+	
+	/*
+	 * Returns the method's applies-to set as defined for CHA.
+	 */
+	public JavaTypeSet appliesTo() {
+		return this.appliesTo;
+	}
+	
+	public void overridenBy(JavaMethod overridingMethod) {
+		this.overridenBy.add(overridingMethod);
+		this.appliesTo.difference(overridingMethod.containedIn().coneSet());
 	}
 	
 	@Override
@@ -111,10 +145,13 @@ public class JavaMethod {
 	}
 	
 	public boolean signatureEquals(String name, String desc, String signature) {
-		return this.name.equals(name)
-			&& this.desc.equals(desc)
+		return signatureEquals(name, desc)
 			&& ((this.signature != null && this.signature.equals(signature))
 				|| (this.signature == null && signature == null));
+	}
+
+	public boolean signatureEquals(String name, String desc) {
+		return this.name.equals(name) && this.desc.equals(desc);
 	}
 	
 	public String sootName() {
@@ -184,7 +221,25 @@ public class JavaMethod {
 		return String.format("%s/%s(%s)", this.containedIn.name(), this.name, String.join(",", arguments));
 	}
 	
-	private String argumentToString(org.objectweb.asm.Type argumentType) {
+	public static String toName(String owner, String name, String desc) {
+		List<String> arguments = new ArrayList<String>();
+		for(Type argumentType : Type.getMethodType(desc).getArgumentTypes()) {
+			arguments.add(argumentToString(argumentType));
+		}		
+		
+		return String.format("%s/%s(%s)", owner, name, String.join(",", arguments));
+	}
+	
+	private void setId() {
+		List<String> arguments = new ArrayList<String>();
+		for(Type argumentType : this.methodType.getArgumentTypes()) {
+			arguments.add(argumentToString(argumentType));
+		}		
+		this.id = String.format("%s/%s(%s):(%s)", this.containedIn.name(), this.name, 
+			String.join(",", arguments), argumentToString(this.methodType.getReturnType()));
+	}
+	
+	private static String argumentToString(org.objectweb.asm.Type argumentType) {
 		switch(argumentType.getSort()) {
 		case Type.BOOLEAN:
 		case Type.CHAR:
@@ -200,10 +255,12 @@ public class JavaMethod {
 				return argumentToString(argumentType.getElementType()) 
 						+ new String(new char[argumentType.getDimensions()]).replace("\0", "[]");
 			} catch(NullPointerException ex) {
-				System.out.format("Null pointer exception. Method: %s", this.name);
+				System.out.format("Null pointer exception.");
 			}
 		case Type.OBJECT:
 			return argumentType.getInternalName();
+		case Type.VOID:
+			return "V";
 		default:
 			throw new Error("Unexpected argument type for method.");
 		}

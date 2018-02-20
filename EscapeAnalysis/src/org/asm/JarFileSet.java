@@ -24,6 +24,13 @@ public class JarFileSet implements Iterable<JarFile> {
 		findJarFiles(new File(location));
 	}
 	
+	public JarFileSet(List<String> locations) {
+		
+		for(String location : locations) {
+			findJarFiles(new File(location));
+		}
+	}
+	
 	public JarFileSet(Set<JarFile> jarFiles) {
 		this.jarFiles.addAll(jarFiles);
 	}

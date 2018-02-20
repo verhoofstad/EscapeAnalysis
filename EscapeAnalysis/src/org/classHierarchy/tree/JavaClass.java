@@ -5,71 +5,40 @@ import java.util.Set;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
+import org.asm.jvm.AccessFlags;
 
 /**
  * Represents a Java class.
  */
-public class JavaClass extends JavaType {
+public final class JavaClass extends JavaType {
 	
 	private JavaClass superClass;
-	private JavaClassList subClasses;
 	
-	public JavaClass(String internalName, int access, JavaClass superClass, JavaInterfaceList implementedInterfaces, JarFile jarFile) 
+	public JavaClass(String internalName, AccessFlags accessFlags, JavaClass superClass, JavaInterfaceSet implementedInterfaces, JarFile jarFile) 
 	{
-		super(internalName, access, implementedInterfaces, jarFile);
+		super(internalName, accessFlags, implementedInterfaces, jarFile);
 		
 		this.superClass = superClass;
-		this.subClasses = new JavaClassList();
+	}
+	
+	/*
+	 * Gets the fully qualified name that uniquely identifies this class.
+	 */
+	@Override
+	public String id() {
+		return this.name();
 	}
 	
 	public JavaClass superClass() {
 		return this.superClass;
-	}
-	
-	public JavaClassList subClasses() {
-		return this.subClasses;
-	}
-	
-	public void addSubClass(JavaClass subClass) {
-		this.subClasses.add(subClass);
-	}
-		
-	public int classCount() {
-		
-		int size = 1;
-		
-		for(JavaClass subClass : this.subClasses) {
-			size += subClass.classCount();
-		}
-		return size;
-	}
-	
-	public int abstractMethodCount(boolean includingSubClasses) {
-		int abstractMethodCount = 0;
-		for(JavaMethod method : this.declaredMethods()) {
-			if(method.isAbstract()) {
-				abstractMethodCount++;
-			}
-		}
-		if(includingSubClasses) {
-			for(JavaClass subClass : this.subClasses) {
-				abstractMethodCount += subClass.abstractMethodCount(includingSubClasses);
-			}
-		}
-		return abstractMethodCount;
 	}
 		
 	public Boolean inheritsFrom(JavaClass javaClass) {
 		return this.superClass != null && this.superClass.equals(javaClass);
 	}
 	
-	public boolean hasPublicSubClass() {
-		for(JavaClass subClass : this.subClasses) {
-			if(subClass.isPublic() || subClass.hasPublicSubClass()) {
-				return true;
-			}
-		}
-		return false;
+	public boolean isFinal() {
+		return this.accessFlags().isFinal();
 	}
 	
 	public boolean isFinalPackagePrivate() {
@@ -80,77 +49,64 @@ public class JavaClass extends JavaType {
 		return this.superClass != null;
 	}
 	
+	@Override
+	protected void addToConeSet(JavaType subType) {
+		super.addToConeSet(subType);
+		
+		if(hasSuperClass()) {
+			this.superClass.addToConeSet(subType);
+		}
+	}
 
+	public JavaMethod getMethod(String name, String desc) {
+		JavaMethod method = findMethod(name, desc);
+		if(method != null) {
+			return method;
+		} else {
+			throw new Error("Cannot find method " + name + "() in class " + this.name()
+				+ " in JAR-file " + this.jarFile().getAbsolutePath());
+		}
+	}
 	
+	public JavaMethod findMethodUpwards(String name, String desc) {
+		JavaMethod method = findMethod(name, desc);
+		if(method != null) {
+			return method;
+		} else if(this.hasSuperClass()) {
+			return this.superClass.findMethodUpwards(name, desc);
+		} else {
+			return null;
+		}
+	}
+
+	public JavaMethod getMethodUpwards(String name, String desc) {
+		JavaMethod method = findMethodUpwards(name, desc);
+		if(method != null) {
+			return method;
+		} else {
+			throw new Error();
+		}
+	}
+	
+	public JavaMethodSet findMethodsDownwards(String name, String desc) {
+		
+		JavaMethodSet methods = new JavaMethodSet();
+		for(JavaClass subClass : this.subClasses()) {
+			JavaMethod method = subClass.findMethod(name, desc);
+			if(method != null) {
+				methods.add(method);
+			}
+			methods.addAll(subClass.findMethodsDownwards(name, desc));
+		}
+		return methods;
+	}
+
 	@Override
 	public String toString() {
-		if(this.superClass != null) {
+		if(this.hasSuperClass()) {
 			return this.name() + " extends " + this.superClass.name();
 		} else {
 			return this.name();
 		}
-	}
-		
-	public JavaClass findClass(String name) {
-		if(this.name().equals(name)) {
-			return this;
-		} else {
-			for(JavaClass subClass : this.subClasses) {
-				JavaClass javaClass = subClass.findClass(name);
-				if(javaClass != null) {
-					return javaClass;
-				}
-			}
-			return null;
-		}
-	}
-	
-	public JavaMethod findMethod(String name, String desc, String signature) {
-		for(JavaMethod method : this.declaredMethods()) {
-			if(method.signatureEquals(name, desc, signature)) { 
-				return method;
-			}
-		}
-		return null;
-	}
-
-	public JavaClassList getClasses() {
-		
-		JavaClassList classes = new JavaClassList();
-
-		classes.add(this);
-
-		for(JavaClass subClass : this.subClasses) {
-			classes.addAll(subClass.getClasses());
-		}
-		return classes;
-	}
-	
-	public JavaClassList getFinalPackagePrivateClasses() {
-		
-		JavaClassList finalPackagePrivateClasses = new JavaClassList();
-
-		if(isFinalPackagePrivate()) {
-			finalPackagePrivateClasses.add(this);
-		}
-		for(JavaClass subClass : this.subClasses) {
-			finalPackagePrivateClasses.addAll(subClass.getFinalPackagePrivateClasses());
-		}
-		return finalPackagePrivateClasses;
-	}
-	
-	public JarFileSet jarFiles() {
-		
-		Set<JarFile> jarFiles = new HashSet<JarFile>();
-		
-		jarFiles.add(this.jarFile());
-	
-		for(JavaClass subClass : this.subClasses) {
-			for(JarFile jarFile : subClass.jarFiles()) {
-				jarFiles.add(jarFile);
-			}
-		}
-		
-		return new JarFileSet(jarFiles);
 	}
 }

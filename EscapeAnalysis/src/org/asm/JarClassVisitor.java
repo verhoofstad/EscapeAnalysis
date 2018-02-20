@@ -17,35 +17,38 @@ class JarClassVisitor extends ClassVisitor
 		_reader = reader;
 	}
 
+	/*
+	 * Visits the header of the class.
+	 */
+	@Override
 	public void visit(int version, int access, String name,	String signature, String superName, String[] interfaces) {
 		
-		//System.out.format("Method: name: %s, signature %s, superName: %s\n", name, signature, superName);
 		AccessFlags accessFlags = new AccessFlags(access);
 
 		if(accessFlags.isEnum()) {
 			
 			if(accessFlags.isPublic()) {
-				_visitor.visitPublicEnum(new JarClass(name, superName, interfaces, access, _reader));
+				_visitor.visitPublicEnum(new JarClass(name, superName, interfaces, accessFlags, _reader));
 			} else {
-				_visitor.visitPackagePrivateEnum(new JarClass(name, superName, interfaces, access, _reader));
+				_visitor.visitPackagePrivateEnum(new JarClass(name, superName, interfaces, accessFlags, _reader));
 			}
 		}
 		
 		if(accessFlags.isInterface()) {
 			
 			if(accessFlags.isPublic()) {
-				_visitor.visitPublicInterface(new JarClass(name, superName, interfaces, access, _reader));
+				_visitor.visitPublicInterface(new JarClass(name, superName, interfaces, accessFlags, _reader));
 			} else {
-				_visitor.visitPackagePrivateInterface(new JarClass(name, superName, interfaces, access, _reader));
+				_visitor.visitPackagePrivateInterface(new JarClass(name, superName, interfaces, accessFlags, _reader));
 			}
 		}
 
 		if(!accessFlags.isEnum() && !accessFlags.isInterface()) {
 			
 			if(accessFlags.isPublic()) {
-				_visitor.visitPublicClass(new JarClass(name, superName, interfaces, access, _reader));
+				_visitor.visitPublicClass(new JarClass(name, superName, interfaces, accessFlags, _reader));
 			} else {
-				_visitor.visitPackagePrivateClass(new JarClass(name, superName, interfaces, access, _reader));
+				_visitor.visitPackagePrivateClass(new JarClass(name, superName, interfaces, accessFlags, _reader));
 			}
 		}
 	}

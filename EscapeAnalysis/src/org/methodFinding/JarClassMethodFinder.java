@@ -3,9 +3,9 @@ package org.methodFinding;
 import java.util.List;
 
 import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassList;
+import org.classHierarchy.tree.JavaClassSet;
 import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodList;
+import org.classHierarchy.tree.JavaMethodSet;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -13,10 +13,10 @@ import org.objectweb.asm.Opcodes;
 class JarClassMethodFinder extends ClassVisitor {
 
 	private JavaClass currentClass;
-	private JavaClassList classes;
-	private JavaMethodList foundMethods;
+	private JavaClassSet classes;
+	private JavaMethodSet foundMethods;
 		
-	public JarClassMethodFinder(JavaClass currentClass, JavaClassList classes, JavaMethodList foundMethods) {
+	public JarClassMethodFinder(JavaClass currentClass, JavaClassSet classes, JavaMethodSet foundMethods) {
 		super(Opcodes.ASM6);
 		
 		this.currentClass = currentClass;
@@ -27,7 +27,7 @@ class JarClassMethodFinder extends ClassVisitor {
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		
-		JavaMethod currentMethod = this.currentClass.findMethod(name, desc, signature);
+		JavaMethod currentMethod = this.currentClass.findMethod(name, desc);
 		
 		if(currentMethod != null) {
 			return new MethodFinder(currentMethod, this.classes, this.foundMethods);

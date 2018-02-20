@@ -7,24 +7,24 @@ import org.asm.JarClass;
 import org.asm.JarFile;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaInterfaceList;
+import org.classHierarchy.tree.JavaInterfaceSet;
 
 /*
- * Represents a Java class.
+ * Represents a Java class or interface.
  */
-class JavaTempClass {
+class JavaTempType {
 
 	private JarClass jarClass;
 	private JarFile jarFile;
 	private List<JavaTempMethod> methods;
 	
-	public JavaTempClass(JarClass jarClass, JarFile jarFile) 
+	public JavaTempType(JarClass jarClass, JarFile jarFile) 
 	{
 		this.jarClass = jarClass;
 		this.jarFile = jarFile;
 		this.methods = new ArrayList<JavaTempMethod>();
 	}
-
+	
 	public String name() {
 		return this.jarClass.name();
 	}
@@ -41,11 +41,11 @@ class JavaTempClass {
 		return this.jarFile;
 	}
 
-	public boolean isSubClassOf(JavaTempClass tempClass) {
+	public boolean isSubClassOf(JavaTempType tempClass) {
 		return tempClass.name().equals(this.superClass());
 	}
 	
-	public boolean isSubInterfaceOf(JavaTempClass tempInterface) {
+	public boolean isSubInterfaceOf(JavaTempType tempInterface) {
 		for(String superInterface : this.jarClass.interfaces()) {
 			if(tempInterface.name().equals(superInterface)) {
 				return true;
@@ -71,15 +71,15 @@ class JavaTempClass {
 		this.methods.add(method);
 	}
 	
-	public JavaClass resolveToJavaClass(JavaClass superClass, JavaInterfaceList superInterfaces) {
-		JavaClass javaClass =new JavaClass(this.jarClass.name(), this.jarClass.access(), superClass, superInterfaces, this.jarFile);
+	public JavaClass resolveToJavaClass(JavaClass superClass, JavaInterfaceSet superInterfaces) {
+		JavaClass javaClass = new JavaClass(this.jarClass.name(), this.jarClass.access(), superClass, superInterfaces, this.jarFile);
 		for(JavaTempMethod tempMethod : this.methods) {
 			javaClass.addMethod(tempMethod.resolveToJavaMethod(javaClass));
 		}
 		return javaClass; 
 	}
 	
-	public JavaInterface resolveToJavaInterface(JavaInterfaceList superInterfaces) {
+	public JavaInterface resolveToJavaInterface(JavaInterfaceSet superInterfaces) {
 		JavaInterface javaInterface = new JavaInterface(this.jarClass.name(), this.jarClass.access(), superInterfaces, this.jarFile);
 		for(JavaTempMethod tempMethod : this.methods) {
 			javaInterface.addMethod(tempMethod.resolveToJavaMethod(javaInterface));

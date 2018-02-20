@@ -1,25 +1,28 @@
 package org;
 
-public class OtherClass<T> {
+public class OtherClass {
 
 	public static int count = 5;
 	
-	public void someMethod() {
-	}
+
+	public void callMethods() {
 		
-	public void someMethod(int param1, String param2) {
+		
+		this.printNrOfArguments();
+		
+		this.printNrOfArguments(1);
+		
+		this.printNrOfArguments(1, 2, 3);
 		
 	}
 	
 	
-	
-	public void someMethod(T param) {
+	public void printNrOfArguments(int... args) {
+		
+		System.out.println(args.length);
 		
 	}
 	
-	public void differentArguments(int param1, Integer param2, byte param3, int[][] param4) {
-		
-	}
 	
 	@Override
 	public String toString() {
