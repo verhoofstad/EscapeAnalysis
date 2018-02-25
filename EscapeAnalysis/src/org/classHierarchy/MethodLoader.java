@@ -17,7 +17,7 @@ class MethodLoader extends ClassVisitor {
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		
-		this.currentType.addMethod(new JavaTempMethod(access, name, desc, signature));
+		this.currentType.addMethod(new JavaTempMethod(access, name, desc));
 		return null;
 	}
 }

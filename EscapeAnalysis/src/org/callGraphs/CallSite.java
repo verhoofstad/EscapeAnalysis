@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaMethodSet;
 
 /*
  * Represents a single method invocation from a source method to a set of possible targets.
@@ -12,7 +13,7 @@ import org.classHierarchy.tree.JavaMethod;
 public class CallSite {
 
 	private JavaMethod source;
-	private List<JavaMethod> targets = new ArrayList<JavaMethod>();
+	private JavaMethodSet targets = new JavaMethodSet();
 	private boolean isStatic;
 	
 	public CallSite(JavaMethod source, JavaMethod nonVirtualTarget) {
@@ -28,7 +29,7 @@ public class CallSite {
 		this.targets.add(nonVirtualTarget);
 	}
 	
-	public CallSite(JavaMethod source, List<JavaMethod> virtualTargets) {
+	public CallSite(JavaMethod source, JavaMethodSet virtualTargets) {
 		if(virtualTargets.size() < 1) {
 			throw new Error();
 		}
@@ -42,17 +43,17 @@ public class CallSite {
 		return this.source;
 	}
 	
-	public List<JavaMethod> targets() {
+	public JavaMethodSet targets() {
 		return this.targets;
 	}
 	
 	public boolean isConstructor( ) {
-		return this.targets.size() == 1 && this.targets.get(0).isConstructor();
+		return this.targets.size() == 1 && this.targets.getRandom().isConstructor();
 	}
 	
 	public JavaClass getInstantiatedClass() {
 		if(this.isConstructor()) {
-			return (JavaClass)this.targets.get(0).containedIn();
+			return (JavaClass)this.targets.getRandom().containedIn();
 		} else {
 			return null;
 		}
@@ -60,16 +61,7 @@ public class CallSite {
 	
 	public boolean isVirtual() {
 		
-		if(this.targets.isEmpty()) {
-			System.out.println("Is leeg");
-		}
-		
-		if(this.targets.get(0) == null) {
-			System.out.println("Is leeg 2");
-		}
-		
-		return !this.targets.get(0).isConstructor()
-			&& !this.targets.get(0).isStatic();
+		return !this.isStatic;
 	}
 	
 	public boolean isStatic() {

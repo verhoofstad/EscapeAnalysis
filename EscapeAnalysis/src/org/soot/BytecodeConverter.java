@@ -4,9 +4,9 @@ import java.util.Dictionary;
 
 import org.asm.JarFileSet;
 import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassSet;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.tree.JavaType;
 
 import soot.Body;
 import soot.PhaseOptions;
@@ -48,7 +48,7 @@ public class BytecodeConverter {
 		int activeBody = 0;
 		int noActiveBody = 0;
 		
-		for(JavaClass currentClass : methods.getClasses()) {
+		for(JavaType currentClass : methods.getClasses()) {
 			
 			System.out.format("Loading: %s from %s\n", currentClass.sootName(), currentClass.jarFile());
 			

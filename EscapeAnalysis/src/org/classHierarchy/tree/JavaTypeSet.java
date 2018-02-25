@@ -46,7 +46,7 @@ public class JavaTypeSet implements Iterable<JavaType> {
 	}
 
 	/*
-	 * Finds the Java type with the given id. Returns null if the class was not found.
+	 * Finds the Java type with the given id. Returns null if the type was not found.
 	 */
 	public JavaType find(String id) {
 		if(this.contains(id)) {
@@ -55,8 +55,20 @@ public class JavaTypeSet implements Iterable<JavaType> {
 		return null;
 	}
 	
+	public JavaTypeSet find(String[] identifiers) {
+		
+		JavaTypeSet types = new JavaTypeSet();
+		
+		for(String id : identifiers) {
+			if(this.contains(id)) {
+				types.add(this.types.get(id));
+			}
+		}
+		return types;
+	}
+	
 	/*
-	 * Finds the Java type with the given id. Throws an error if the class was not found.
+	 * Finds the Java type with the given id. Throws an error if the type was not found.
 	 */
 	public JavaType get(String id) {
 		if(this.contains(id)) {
@@ -72,6 +84,16 @@ public class JavaTypeSet implements Iterable<JavaType> {
 				this.remove(javaType.id());
 			}
 		}
+	}
+	
+	public boolean overlapsWith(JavaTypeSet typeSet) {
+		
+		for(String id : this.types.keySet()) {
+			if(typeSet.contains(id)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public int size() {

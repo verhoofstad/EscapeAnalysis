@@ -2,82 +2,96 @@ package org.counting;
 
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
+import org.dataSets.Library;
+import org.dataSets.LibraryResult;
 
 public class ClassCounter extends JarFileSetVisitor {
 	
-	private int publicClassCount = 0;
-	private int privatePackageClassCount = 0;
+	private LibraryResult result;
 	
-	private int publicInterfaceCount = 0;
-	private int packagePrivateInterfaceCount = 0;
+	public ClassCounter(Library library) {
+		this.result = new LibraryResult(library);
+	}
 	
-	private int concreteMethodCount = 0;
-	private int abstractMethodCount = 0;
-	private int interfaceMethodCount = 0;
+	public LibraryResult libraryResult() {
+		return this.result;
+	}
 	
 	public void visitPublicClass(JarClass jarClass) {
-		this.publicClassCount++;
+		this.result.all_classCount++;
+		this.result.all_classFileCount++;
+		this.result.all_publicClassCount++;
 		
 		countClassMethods(jarClass);
 	}
 	
 	public void visitPackagePrivateClass(JarClass jarClass) {
-		this.privatePackageClassCount++;
+		this.result.all_classCount++;
+		this.result.all_classFileCount++;
+		this.result.all_packageVisibleClassCount++;
+
 		countClassMethods(jarClass);
 	}
 	
 	public void visitPublicEnum(JarClass jarClass) {
-		this.publicClassCount++;
+		this.result.all_classCount++;
+		this.result.all_classFileCount++;
+		this.result.all_publicClassCount++;
+		
 		countClassMethods(jarClass);
 	}
 	
 	public void visitPackagePrivateEnum(JarClass jarClass) {
-		this.privatePackageClassCount++;
+		this.result.all_classCount++;
+		this.result.all_classFileCount++;
+		this.result.all_packageVisibleClassCount++;
+
 		countClassMethods(jarClass);
 	}
 	
 	public void visitPublicInterface(JarClass jarClass) {
-		this.publicInterfaceCount++;
+		this.result.all_interfaceCount++;
+		this.result.all_classFileCount++;
+		this.result.all_publicInterfaceCount++;
+		
 		countInterfaceMethods(jarClass);
 	}
 	
 	public void visitPackagePrivateInterface(JarClass jarClass) {
-		this.packagePrivateInterfaceCount++;
+		this.result.all_interfaceCount++;
+		this.result.all_classFileCount++;
+		this.result.all_packageVisibleInterfaceCount++;
+
 		countInterfaceMethods(jarClass);
 	}
 	
 	public void printTotals() {
-		System.out.format("Public class count:              %s\n", this.publicClassCount);
-		System.out.format("Package-private class count:     %s\n", this.privatePackageClassCount);
-		System.out.format("Total class count:               %s\n", this.publicClassCount + this.privatePackageClassCount);
+		System.out.format("Public class count:              %s\n", this.result.all_publicClassCount);
+		System.out.format("Package-private class count:     %s\n", this.result.all_packageVisibleClassCount);
+		System.out.format("Total class count:               %s\n", this.result.all_classCount);
 		System.out.println();
-		System.out.format("Public interface count:          %s\n", this.publicInterfaceCount);
-		System.out.format("Package-private interface count: %s\n", this.packagePrivateInterfaceCount);
-		System.out.format("Total interface count:           %s\n", this.publicInterfaceCount + this.packagePrivateInterfaceCount);
+		System.out.format("Public interface count:          %s\n", this.result.all_publicInterfaceCount);
+		System.out.format("Package-private interface count: %s\n", this.result.all_packageVisibleInterfaceCount);
+		System.out.format("Total interface count:           %s\n", this.result.all_interfaceCount);
 		System.out.println();
-		System.out.format("Concrete method count:           %s\n", this.concreteMethodCount);
-		System.out.format("Abstract method count:           %s\n", this.abstractMethodCount);
-		System.out.format("Interface method count:          %s\n", this.interfaceMethodCount);
-		System.out.format("Total method count:              %s\n", this.concreteMethodCount + this.abstractMethodCount + this.interfaceMethodCount);
+		System.out.format("Public method count:             %s\n", this.result.all_publicMethods);
+		System.out.format("Protected method count:          %s\n", this.result.all_protectedMethods);
+		System.out.format("Package-private method count:    %s\n", this.result.all_packagePrivateMethods);
+		System.out.format("Private method count:            %s\n", this.result.all_privateMethods);
+		System.out.format("Total method count:              %s\n", this.result.all_methodCount);
 	}
 	
 	private void countClassMethods(JarClass jarClass) {
 
-		MethodCounter methodCounter = new MethodCounter();
+		MethodCounter methodCounter = new MethodCounter(this.result);
 		
 		jarClass.accept(methodCounter);
-		
-		this.concreteMethodCount += methodCounter.concreteMethodCount();
-		this.abstractMethodCount += methodCounter.abstractMethodCount();
 	}
 
 	private void countInterfaceMethods(JarClass jarClass) {
 
-		MethodCounter methodCounter = new MethodCounter();
+		MethodCounter methodCounter = new MethodCounter(this.result);
 		
 		jarClass.accept(methodCounter);
-		
-		this.interfaceMethodCount += methodCounter.concreteMethodCount();
-		this.interfaceMethodCount += methodCounter.abstractMethodCount();
 	}
 }

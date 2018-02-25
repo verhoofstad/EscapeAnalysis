@@ -5,15 +5,15 @@ import org.asm.jvm.AccessFlags;
 
 public class JavaInterface extends JavaType {
 	
-	private JavaInterfaceSet subInterfaces;
+	private JavaTypeSet subInterfaces;
 
-	public JavaInterface(String internalName, AccessFlags accessFlags, JavaInterfaceSet superInterfaces, JarFile jarFile) {
+	public JavaInterface(String internalName, AccessFlags accessFlags, JavaTypeSet superInterfaces, JarFile jarFile) {
 		super(internalName, accessFlags, superInterfaces, jarFile);
 		
-		this.subInterfaces = new JavaInterfaceSet();
+		this.subInterfaces = new JavaTypeSet();
 	}
 	
-	public JavaInterfaceSet subInterfaces() {
+	public JavaTypeSet subInterfaces() {
 		return this.subInterfaces;
 	}
 	
@@ -22,22 +22,4 @@ public class JavaInterface extends JavaType {
 		
 		this.addToConeSet(subInterface);
 	}
-	
-	/*
-	public JavaMethod findNonAbstractMethodUpwards(String name, String desc) {
-		JavaMethod method = findMethod(name, desc);
-		if(method != null && !method.isAbstract()) {
-			return method;
-		} else {
-			for(JavaInterface superInterface : this.superInterfaces()) {
-				
-				method = superInterface.findNonAbstractMethodUpwards(name, desc);
-				
-				if(method != null) {
-					return method;
-				}
-			}
-			return null;
-		}
-	}*/
 }

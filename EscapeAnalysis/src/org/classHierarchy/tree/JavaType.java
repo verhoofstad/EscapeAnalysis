@@ -9,10 +9,11 @@ import org.asm.jvm.AccessFlags;
 public abstract class JavaType {
 
 	private String internalName;
+	private String packagePath;
 	private JarFile jarFile;
 	
-	private JavaClassSet subClasses;
-	private JavaInterfaceSet superInterfaces;
+	private JavaTypeSet subClasses;
+	private JavaTypeSet superInterfaces;
 	
 	private JavaTypeSet coneSet;
 	
@@ -20,16 +21,18 @@ public abstract class JavaType {
 	
 	private JavaMethodSet declaredMethods;
 	
-	protected JavaType(String internalName, AccessFlags accessFlags, JavaInterfaceSet superInterfaces, JarFile jarFile) 
+	protected JavaType(String internalName, AccessFlags accessFlags, JavaTypeSet superInterfaces, JarFile jarFile) 
 	{
 		this.internalName = internalName;
 		this.accessFlags = accessFlags;
 		this.superInterfaces = superInterfaces;
 		this.jarFile = jarFile;
 		
-		this.subClasses = new JavaClassSet();
+		this.subClasses = new JavaTypeSet();
 		this.declaredMethods = new JavaMethodSet();
 		this.coneSet = new JavaTypeSet(this);
+		
+		this.packagePath = internalName.substring(0, internalName.lastIndexOf("/"));
 	}
 	
 	/*
@@ -43,12 +46,24 @@ public abstract class JavaType {
 		return this.internalName;
 	}
 	
+	public String packagePath() {
+		return this.packagePath;
+	}
+	
 	public boolean isPublic() {
 		return this.accessFlags.isPublic();
 	}
 	
 	public boolean isPackagePrivate() {
 		return !isPublic();
+	}
+	
+	public boolean isFinal() {
+		return this.accessFlags().isFinal();
+	}
+	
+	public boolean isFinalPackagePrivate() {
+		return isPackagePrivate() && !hasPublicSubClass();
 	}
 	
 	public boolean isAbstract() {
@@ -66,7 +81,7 @@ public abstract class JavaType {
 		return this.jarFile;
 	}
 	
-	public JavaInterfaceSet superInterfaces() {
+	public JavaTypeSet superInterfaces() {
 		return this.superInterfaces;
 	}
 	
@@ -74,7 +89,7 @@ public abstract class JavaType {
 	 * Returns the sub classes of the current type. If the current type represents an interface,
 	 * it returns the classes that implement it.
 	 */
-	public JavaClassSet subClasses() {
+	public JavaTypeSet subClasses() {
 		return this.subClasses;
 	}
 	
@@ -118,13 +133,48 @@ public abstract class JavaType {
 		if(!this.coneSet.contains(subType.id())) {
 			this.coneSet.add(subType);
 		}
-		for(JavaInterface superInterface : this.superInterfaces) {
+		for(JavaType superInterface : this.superInterfaces) {
 			superInterface.addToConeSet(subType);
 		}
 	}
 	
+	public void addMethod(JavaMethod method) {
+		if(!containsMethod(method)) {
+			this.declaredMethods.add(method);
+			this.setOverride(method);
+		} else {
+			System.out.println("Multiple method loading.");
+		}
+	}
+	
+	protected void setOverride(JavaMethod overridingMethod) {
+		
+		for(JavaType superInterface : this.superInterfaces) {
+			
+			JavaMethod baseMethod = superInterface.findMethod(overridingMethod.name(), overridingMethod.desc());
+			
+			if(baseMethod != null) {
+				if(!baseMethod.overridenBy().contains(overridingMethod.id())) {
+					baseMethod.overridenBy(overridingMethod);
+				}
+			} else {
+				superInterface.setOverride(overridingMethod);
+			}
+		}
+	}
+	
+	/*
+	 * Resolve all the applies-to sets of the declared methods for CHA.
+	 */
+	public void resolveAppliesToSets() {
+		for(JavaMethod declaredMethod : this.declaredMethods) {
+			declaredMethod.resolveAppliestoSet();
+		}
+	}
+	
+	
 	public boolean hasPublicSubClass() {
-		for(JavaClass subClass : this.subClasses) {
+		for(JavaType subClass : this.subClasses) {
 			if(subClass.isPublic() || subClass.hasPublicSubClass()) {
 				return true;
 			}
@@ -132,14 +182,6 @@ public abstract class JavaType {
 		return false;
 	}
 
-	public void addMethod(JavaMethod method) {
-		if(!containsMethod(method)) {
-			this.declaredMethods.add(method);
-		} else {
-			System.out.println("Multiple method loading.");
-		}
-	}
-	
 	public int methodCount() {
 		return this.declaredMethods.size();
 	}
@@ -148,6 +190,36 @@ public abstract class JavaType {
 		for(JavaMethod method : this.declaredMethods) {
 			if(method.signatureEquals(name, desc)) { 
 				return method;
+			}
+		}
+		return null;
+	}
+	
+	public JavaMethod getMethod(String name, String desc) {
+		JavaMethod method = findMethod(name, desc);
+		if(method != null) {
+			return method;
+		} else {
+			throw new Error("Cannot find method " + name + "() in class " + this.name()
+				+ " in JAR-file " + this.jarFile().getAbsolutePath());
+		}
+	}
+	
+	public JavaMethod findStaticMethod(String name, String desc) {
+		
+		for(JavaMethod declaredMethod : this.declaredMethods()) {
+			
+			if(declaredMethod.signatureEquals(name, desc)
+				&& declaredMethod.isStatic()) {
+				return declaredMethod;
+			}
+		}
+		
+		for(JavaType superInterface : this.superInterfaces) {
+			
+			JavaMethod staticMethod = superInterface.findStaticMethod(name, desc);
+			if(staticMethod != null) {
+				return staticMethod;
 			}
 		}
 		return null;

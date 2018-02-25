@@ -7,7 +7,7 @@ import org.asm.JarClass;
 import org.asm.JarFile;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaInterfaceSet;
+import org.classHierarchy.tree.JavaTypeSet;
 
 /*
  * Represents a Java class or interface.
@@ -71,7 +71,7 @@ class JavaTempType {
 		this.methods.add(method);
 	}
 	
-	public JavaClass resolveToJavaClass(JavaClass superClass, JavaInterfaceSet superInterfaces) {
+	public JavaClass resolveToJavaClass(JavaClass superClass, JavaTypeSet superInterfaces) {
 		JavaClass javaClass = new JavaClass(this.jarClass.name(), this.jarClass.access(), superClass, superInterfaces, this.jarFile);
 		for(JavaTempMethod tempMethod : this.methods) {
 			javaClass.addMethod(tempMethod.resolveToJavaMethod(javaClass));
@@ -79,7 +79,7 @@ class JavaTempType {
 		return javaClass; 
 	}
 	
-	public JavaInterface resolveToJavaInterface(JavaInterfaceSet superInterfaces) {
+	public JavaInterface resolveToJavaInterface(JavaTypeSet superInterfaces) {
 		JavaInterface javaInterface = new JavaInterface(this.jarClass.name(), this.jarClass.access(), superInterfaces, this.jarFile);
 		for(JavaTempMethod tempMethod : this.methods) {
 			javaInterface.addMethod(tempMethod.resolveToJavaMethod(javaInterface));

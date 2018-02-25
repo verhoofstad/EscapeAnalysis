@@ -7,9 +7,10 @@ import org.callGraphs.CallGraph;
 import org.callGraphs.CallSite;
 import org.callGraphs.CallSiteSet;
 import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassSet;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.tree.JavaTypeSet;
 
 public class RapidTypeAnalysis {
 
@@ -17,22 +18,29 @@ public class RapidTypeAnalysis {
 	private CallGraph rtaGraph;
 	
 	private Worklist worklist;
-	private JavaClassSet liveClasses;
+	private JavaTypeSet liveClasses;
+	
+	private JavaTypeSet confinedClasses;
 	
 	public RapidTypeAnalysis(CallGraph chaGraph) {
 		
 		this.chaGraph = chaGraph;
 		this.rtaGraph = new CallGraph();
+		this.confinedClasses = new JavaTypeSet();
 	}
 	
 	public CallGraph callGraph() {
 		return this.rtaGraph;
 	}
 	
-	public void setLibraryAnalysis(JavaClassSet exportedClasses, JavaMethodSet exportedMethods) {
+	public void setLibraryAnalysis(JavaTypeSet exportedClasses, JavaMethodSet exportedMethods) {
 		
 		this.liveClasses = exportedClasses;
 		this.worklist = new Worklist(exportedMethods);
+	}
+	
+	public void setConfinedClasses(JavaTypeSet confinedClasses) {
+		this.confinedClasses = confinedClasses;
 	}
 	
 	public void analyse() {
@@ -53,19 +61,24 @@ public class RapidTypeAnalysis {
 				
 				if(callSite.isStatic()) {
 					
-					JavaMethod staticTarget = callSite.targets().get(0);
+					JavaMethod staticTarget = callSite.targets().getRandom();
 					
 					this.rtaGraph.addStaticCallSite(currentMethod, staticTarget);
 					this.worklist.add(staticTarget);
 				} else {
-					List<JavaMethod> rtaVirtualTargets = new ArrayList<JavaMethod>();
+					JavaMethodSet rtaVirtualTargets = new JavaMethodSet();
 					
 					for(JavaMethod virtualTarget : callSite.targets()) {
-						JavaClass virtualTargetClass = (JavaClass)virtualTarget.containedIn();
+						JavaType targetType = virtualTarget.containedIn();
 						
-						if(this.liveClasses.contains(virtualTargetClass.id())) {
-							rtaVirtualTargets.add(virtualTarget);
-							this.worklist.add(virtualTarget);
+						if(this.liveClasses.contains(targetType.id())) {
+							
+							if(!this.isCrossPackageMethodInvocation(callSite.source(), virtualTarget)
+								|| !this.confinedClasses.contains(targetType)) {
+							
+								rtaVirtualTargets.add(virtualTarget);
+								this.worklist.add(virtualTarget);
+							}
 						}
 					}
 					if(rtaVirtualTargets.size() > 0) {
@@ -75,4 +88,12 @@ public class RapidTypeAnalysis {
 			}
  		}
 	}
- }
+
+	private boolean isCrossPackageMethodInvocation(JavaMethod source, JavaMethod target) {
+		
+		JavaType sourceType = source.containedIn();
+		JavaType targetType = target.containedIn();
+		
+		return !sourceType.packagePath().equals(targetType.packagePath());
+	}
+}

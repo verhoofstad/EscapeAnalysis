@@ -1,19 +1,19 @@
 package org.methodFinding;
 
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassSet;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.tree.JavaTypeSet;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 class MethodFinder extends MethodVisitor {
 
 	private JavaMethod currentMethod;
-	private JavaClassSet classes;
+	private JavaTypeSet classes;
 	private JavaMethodSet foundMethods;
 		
-	public MethodFinder(JavaMethod currentMethod, JavaClassSet classes, JavaMethodSet foundMethods) {
+	public MethodFinder(JavaMethod currentMethod, JavaTypeSet classes, JavaMethodSet foundMethods) {
 		super(Opcodes.ASM6);
 		
 		this.currentMethod = currentMethod;
@@ -30,7 +30,7 @@ class MethodFinder extends MethodVisitor {
 		switch(opcode) {
 			case Opcodes.NEW:
 		
-				JavaClass javaClass = classes.find(type);
+				JavaType javaClass = classes.find(type);
 				
 				if(javaClass != null) {
 					this.foundMethods.add(this.currentMethod);

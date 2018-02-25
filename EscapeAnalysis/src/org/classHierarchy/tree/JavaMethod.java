@@ -35,27 +35,21 @@ public class JavaMethod {
 	// The method's applies-to set
 	private JavaTypeSet appliesTo;
 	
-	public JavaMethod(JavaType containedIn, int access, String name, String desc, String signature) {
+	public JavaMethod(JavaType containedIn, int access, String name, String desc) {
 		
 		if(containedIn == null) {throw new Error("Argument null");}
 		
 		this.accessFlags = new AccessFlags(access);
 		this.name = name;
 		this.desc = desc;
-		this.signature = signature;
+		this.signature = toSignature(name, desc);
 	
 		this.containedIn = containedIn;
 		this.methodType = Type.getMethodType(desc);
 		
 		this.overridenBy = new JavaMethodSet();
 		
-		this.setId();
-		
-		// We only compute the applies-to set for non-abstract instance methods.
-		//if(!this.isAbstract() && !this.isStatic() && !this.isConstructor()) {
-			
-			this.appliesTo = new JavaTypeSet(this.containedIn().coneSet());
-		//}
+		this.id = createId();
 	}
 	
 	/*
@@ -81,6 +75,10 @@ public class JavaMethod {
 		return this.containedIn;
 	}
 	
+	public JavaMethodSet overridenBy() {
+		return this.overridenBy;
+	}
+	
 	public boolean isPublic() {
 		return this.accessFlags.isPublic();
 	}
@@ -104,12 +102,25 @@ public class JavaMethod {
 	public boolean isConstructor() {
 		return this.name.equals("<init>");
 	}
-	
+		
 	/*
 	 * Gets the JAR-file this method was loaded from.
 	 */
 	public JarFile jarFile() {
 		return this.containedIn.jarFile();
+	}
+	
+	/*
+	 * Resolves the applies-to set for this method.
+	 */
+	void resolveAppliestoSet() {
+		
+		// Initialize the applies-to set with the cone set of the class or interface it's declared in.
+		this.appliesTo = new JavaTypeSet(this.containedIn().coneSet());
+
+		for(JavaMethod overridingMethod : this.overridenBy) {
+			this.appliesTo.difference(overridingMethod.containedIn().coneSet());
+		}
 	}
 	
 	/*
@@ -121,7 +132,6 @@ public class JavaMethod {
 	
 	public void overridenBy(JavaMethod overridingMethod) {
 		this.overridenBy.add(overridingMethod);
-		this.appliesTo.difference(overridingMethod.containedIn().coneSet());
 	}
 	
 	@Override
@@ -129,8 +139,7 @@ public class JavaMethod {
 		if(obj == null || !(obj instanceof JavaMethod)) {
 			return false;
 		} else {
-			return signatureEquals((JavaMethod)obj) 
-				&& this.containedIn.equals(((JavaMethod)obj).containedIn);
+			return this.id.equals(((JavaMethod)obj).id());
 		}
 	}
 	
@@ -141,13 +150,7 @@ public class JavaMethod {
 		
 		if(other == null) { return false; }
 		
-		return signatureEquals(other.name(), other.desc(), other.signature);
-	}
-	
-	public boolean signatureEquals(String name, String desc, String signature) {
-		return signatureEquals(name, desc)
-			&& ((this.signature != null && this.signature.equals(signature))
-				|| (this.signature == null && signature == null));
+		return this.signature.equals(other.signature());
 	}
 
 	public boolean signatureEquals(String name, String desc) {
@@ -221,6 +224,10 @@ public class JavaMethod {
 		return String.format("%s/%s(%s)", this.containedIn.name(), this.name, String.join(",", arguments));
 	}
 	
+	public static String toSignature(String name, String desc) {
+		return String.format("%s::%s", name, desc);
+	}
+	
 	public static String toName(String owner, String name, String desc) {
 		List<String> arguments = new ArrayList<String>();
 		for(Type argumentType : Type.getMethodType(desc).getArgumentTypes()) {
@@ -230,12 +237,12 @@ public class JavaMethod {
 		return String.format("%s/%s(%s)", owner, name, String.join(",", arguments));
 	}
 	
-	private void setId() {
+	private String createId() {
 		List<String> arguments = new ArrayList<String>();
 		for(Type argumentType : this.methodType.getArgumentTypes()) {
 			arguments.add(argumentToString(argumentType));
 		}		
-		this.id = String.format("%s/%s(%s):(%s)", this.containedIn.name(), this.name, 
+		return String.format("%s/%s(%s):(%s)", this.containedIn.name(), this.name, 
 			String.join(",", arguments), argumentToString(this.methodType.getReturnType()));
 	}
 	

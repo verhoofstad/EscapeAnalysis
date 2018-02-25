@@ -1,10 +1,6 @@
 package org.classHierarchy.tree;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.asm.JarFile;
-import org.asm.JarFileSet;
 import org.asm.jvm.AccessFlags;
 
 /**
@@ -14,19 +10,11 @@ public final class JavaClass extends JavaType {
 	
 	private JavaClass superClass;
 	
-	public JavaClass(String internalName, AccessFlags accessFlags, JavaClass superClass, JavaInterfaceSet implementedInterfaces, JarFile jarFile) 
+	public JavaClass(String internalName, AccessFlags accessFlags, JavaClass superClass, JavaTypeSet implementedInterfaces, JarFile jarFile) 
 	{
 		super(internalName, accessFlags, implementedInterfaces, jarFile);
 		
 		this.superClass = superClass;
-	}
-	
-	/*
-	 * Gets the fully qualified name that uniquely identifies this class.
-	 */
-	@Override
-	public String id() {
-		return this.name();
 	}
 	
 	public JavaClass superClass() {
@@ -37,14 +25,7 @@ public final class JavaClass extends JavaType {
 		return this.superClass != null && this.superClass.equals(javaClass);
 	}
 	
-	public boolean isFinal() {
-		return this.accessFlags().isFinal();
-	}
-	
-	public boolean isFinalPackagePrivate() {
-		return isPackagePrivate() && !hasPublicSubClass();
-	}
-	
+
 	public boolean hasSuperClass() {
 		return this.superClass != null;
 	}
@@ -58,15 +39,22 @@ public final class JavaClass extends JavaType {
 		}
 	}
 
-	public JavaMethod getMethod(String name, String desc) {
-		JavaMethod method = findMethod(name, desc);
-		if(method != null) {
-			return method;
-		} else {
-			throw new Error("Cannot find method " + name + "() in class " + this.name()
-				+ " in JAR-file " + this.jarFile().getAbsolutePath());
+	@Override
+	protected void setOverride(JavaMethod overridingMethod) {
+		super.setOverride(overridingMethod);
+		
+		if(this.hasSuperClass()) {
+
+			JavaMethod baseMethod = this.superClass.findMethod(overridingMethod.name(), overridingMethod.desc());
+			
+			if(baseMethod != null) {
+				baseMethod.overridenBy(overridingMethod);
+			} else {
+				this.superClass.setOverride(overridingMethod);
+			}
 		}
 	}
+
 	
 	public JavaMethod findMethodUpwards(String name, String desc) {
 		JavaMethod method = findMethod(name, desc);
@@ -87,18 +75,18 @@ public final class JavaClass extends JavaType {
 			throw new Error();
 		}
 	}
-	
-	public JavaMethodSet findMethodsDownwards(String name, String desc) {
+
+	@Override
+	public JavaMethod findStaticMethod(String name, String desc) {
 		
-		JavaMethodSet methods = new JavaMethodSet();
-		for(JavaClass subClass : this.subClasses()) {
-			JavaMethod method = subClass.findMethod(name, desc);
-			if(method != null) {
-				methods.add(method);
+		if(this.hasSuperClass()) {
+			JavaMethod staticMethod = this.superClass.findStaticMethod(name, desc);
+			if(staticMethod != null) {
+				return staticMethod;
 			}
-			methods.addAll(subClass.findMethodsDownwards(name, desc));
 		}
-		return methods;
+		
+		return super.findStaticMethod(name, desc);
 	}
 
 	@Override

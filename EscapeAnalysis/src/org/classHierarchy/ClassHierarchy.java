@@ -5,59 +5,50 @@ import java.util.Set;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaClassSet;
-import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaInterfaceSet;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.tree.JavaTypeSet;
 
 public class ClassHierarchy {
 
-	private JavaClass rootNode;
-	private JavaInterfaceSet interfaces;
+	private JavaType rootNode;
+	private JavaTypeSet interfaces;
+	private JavaTypeSet classes;
 	
-	private JavaClassSet classes = new JavaClassSet();
-	
-	public ClassHierarchy(JavaClass rootNode, JavaInterfaceSet interfaces) {
+	public ClassHierarchy(JavaType rootNode, JavaTypeSet classes, JavaTypeSet interfaces) {
 		
 		this.rootNode = rootNode;
+		this.classes = classes;
 		this.interfaces = interfaces;
-		
-		addClassesToMap(rootNode);
 	}
-	
-	private void addClassesToMap(JavaClass javaClass) {
 		
-		this.classes.add(javaClass);
-		
-		for(JavaClass subClass : javaClass.subClasses()) {
-			addClassesToMap(subClass);
-		}
-	}
-	
-	public JavaClass findClass(String internalName) {
+	public JavaType findClass(String internalName) {
 		return this.classes.find(internalName);
 	}
 
-	public JavaClass getClass(String internalName) {
+	public JavaType getClass(String internalName) {
 		return this.classes.get(internalName);
 	}
 	
-	public JavaInterface getInterface(String internalName) {
+	public JavaType getInterface(String internalName) {
 		return this.interfaces.get(internalName);
 	}
 	
-	public JavaClassSet getClasses() {
+	public JavaTypeSet getClasses() {
 		return this.classes;
+	}
+	
+	public JavaTypeSet getInterfaces() {
+		return this.interfaces;
 	}
 	
 	/*
 	 * Gets the public classes (exported classes for RTA).
 	 */
-	public JavaClassSet getPublicClasses() {
-		JavaClassSet publicClasses = new JavaClassSet();
-		for(JavaClass javaClass : this.classes) {
+	public JavaTypeSet getPublicClasses() {
+		JavaTypeSet publicClasses = new JavaTypeSet();
+		for(JavaType javaClass : this.classes) {
 			if(javaClass.isPublic()) {
 				publicClasses.add(javaClass);
 			}
@@ -65,9 +56,12 @@ public class ClassHierarchy {
 		return publicClasses;
 	}
 	
+	/*
+	 * Gets the exported methods for RTA.
+	 */
 	public JavaMethodSet getExportedMethods() {
 		JavaMethodSet exportedMethods = new JavaMethodSet();
-		for(JavaClass publicClass : this.getPublicClasses()) {
+		for(JavaType publicClass : this.getPublicClasses()) {
 
 			boolean isFinal = publicClass.isFinal();
 			for(JavaMethod method : publicClass.declaredMethods()) {
@@ -80,19 +74,9 @@ public class ClassHierarchy {
 		return exportedMethods;
 	}
 	
-	private JavaClassSet getDerivableClasses() {
-		JavaClassSet derivableClasses = new JavaClassSet();
-		for(JavaClass javaClass : this.classes) {
-			if(javaClass.isPublic() && !javaClass.isFinal()) {
-				derivableClasses.add(javaClass);
-			}
-		}
-		return derivableClasses;
-	}
-
-	public JavaClassSet getFinalPackagePrivateClasses() {
-		JavaClassSet finalPackagePrivateClasses = new JavaClassSet();
-		for(JavaClass javaClass : this.classes) {
+	public JavaTypeSet getFinalPackagePrivateClasses() {
+		JavaTypeSet finalPackagePrivateClasses = new JavaTypeSet();
+		for(JavaType javaClass : this.classes) {
 			if(javaClass.isFinalPackagePrivate()) {
 				finalPackagePrivateClasses.add(javaClass);
 			}
@@ -110,10 +94,10 @@ public class ClassHierarchy {
 		return new JarFileSet(jarFiles);
 	}
 	
-	private void getJarFiles(JavaClass javaClass, Set<JarFile> jarFiles) {
+	private void getJarFiles(JavaType javaClass, Set<JarFile> jarFiles) {
 		
 		jarFiles.add(javaClass.jarFile());
-		for(JavaClass subClass : javaClass.subClasses()) {
+		for(JavaType subClass : javaClass.subClasses()) {
 			getJarFiles(subClass, jarFiles);
 		}
 	}

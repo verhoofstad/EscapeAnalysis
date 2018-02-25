@@ -1,11 +1,10 @@
 package org.callGraphs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaMethodSet;
 
 public class CallGraph {
 
@@ -16,7 +15,7 @@ public class CallGraph {
 		this.addCallSite(new CallSite(source, target));
 	}
 	
-	public void addVirtualCallSite(JavaMethod source, List<JavaMethod> virtualTargets) {	
+	public void addVirtualCallSite(JavaMethod source, JavaMethodSet virtualTargets) {	
 		this.addCallSite(new CallSite(source, virtualTargets));
 	}
 	
@@ -51,29 +50,37 @@ public class CallGraph {
 		}
 		return nrOfEdges;
 	}
-
-	public int nrOfVirtualEdges() {
-		int nrOfEdges = 0;
+	
+	public int nrOfCallSites() {
+		int nrOfCallSites = 0;
 		for(CallSiteSet callSiteSet : this.callSites.values()) {
-			nrOfEdges += callSiteSet.nrOfVirtualEdges();
+			nrOfCallSites += callSiteSet.size();
 		}
-		return nrOfEdges;
+		return nrOfCallSites;
 	}
 
-	public int nrOfVirtualMonoEdges() {
-		int nrOfEdges = 0;
+	public int nrOfVirtualCallSites() {
+		int nrOfCallSites = 0;
 		for(CallSiteSet callSiteSet : this.callSites.values()) {
-			nrOfEdges += callSiteSet.nrOfVirtualMonoEdges();
+			nrOfCallSites += callSiteSet.nrOfVirtualCallSites();
 		}
-		return nrOfEdges;
+		return nrOfCallSites;
 	}
 
-	public int nrOfStaticEdges() {
-		int nrOfEdges = 0;
+	public int nrOfVirtualMonoCallSites() {
+		int nrOfCallSites = 0;
 		for(CallSiteSet callSiteSet : this.callSites.values()) {
-			nrOfEdges += callSiteSet.nrOfStaticEdges();
+			nrOfCallSites += callSiteSet.nrOfVirtualMonoCallSites();
 		}
-		return nrOfEdges;
+		return nrOfCallSites;
+	}
+
+	public int nrOfStaticCallSites() {
+		int nrOfCallSites = 0;
+		for(CallSiteSet callSiteSet : this.callSites.values()) {
+			nrOfCallSites += callSiteSet.nrOfStaticCallSites();
+		}
+		return nrOfCallSites;
 	}
 
 	public void printReport() {
@@ -81,8 +88,11 @@ public class CallGraph {
 		System.out.println("Call graph");
 		System.out.println("----------");
 		System.out.format("Total number of edges:       %s\n", nrOfEdges());
-		System.out.format("Number of virtual edges:     %s\n", nrOfVirtualEdges());
-		System.out.format("   of which are monomorphic: %s\n", nrOfVirtualMonoEdges());
-		System.out.format("Number of static edges:      %s\n", nrOfStaticEdges());
+		System.out.format("Total number of call sites:  %s\n", nrOfCallSites());
+		System.out.format(" - Virtual call sites:       %s\n", nrOfVirtualCallSites());
+		System.out.format(" - Monomorphic call sites:   %s\n", nrOfVirtualMonoCallSites());
+		System.out.format(" - Static call sites:        %s\n", nrOfStaticCallSites());
+		
+		
 	}
 }

@@ -1,6 +1,7 @@
 package org.dataSets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,6 +14,9 @@ public class DataSet implements Iterable<Library> {
 	
 	private List<Library> libraries = new ArrayList<Library>();
 	
+	private void addLibrary(Library library) {
+		this.libraries.add(library);
+	}
 	
 	private void addLibrary(int id, String organisation, String name, String revision, String cpFile, String[] libFiles) {
 		
@@ -42,6 +46,28 @@ public class DataSet implements Iterable<Library> {
 			});
 
 		return dataSet;
+	}
+	
+	
+	public static DataSet getCorrectSet() {
+		
+		DataSet completeSet = DataSet.getCompleteSet();
+		DataSet correctSet = new DataSet();
+
+		Integer[] libIds = {/*1,2,3,4,5,6,*/7,8,9,11,12,17,18,19,21,26,27,30,31,33,34,35,37,41,42,43,45,47,48,49,50,
+		    51,52,53,55,56,60,63,65,67,68,69,70,71,72,74,76,81,84,86,88,89,90,91,92,94,95,97};
+
+		Integer[] libIdsNew = {1,2,3,4,/*5,*/6,7,8,9,11,12,17,18,19,21,26,27,30,31,33,34,35,37,41,42,43,45,47,48,49,50,
+			    51,52,53,55,56,60,63,65,67,68,69,70,71,72,74,76,81,84,86,88,89,90,91,92,94,95,97};
+
+		List<Integer> correctLibraries = new ArrayList<Integer>(Arrays.asList(libIds));
+
+		for(Library library : completeSet) {
+			if(correctLibraries.contains(library.id())) {
+				correctSet.addLibrary(library);
+			}
+		}
+		return correctSet;
 	}
 	
 	public static DataSet getCompleteSet() {

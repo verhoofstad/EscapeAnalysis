@@ -10,17 +10,14 @@ import org.asm.JarFile;
 import org.asm.JarFileSetVisitor;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaInterfaceSet;
-import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.tree.JavaTypeSet;
 
 /*
  * Builds a class hierarchy.
  */
 public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	
-	private boolean includeInterfaces = true;
-	private boolean includeMethods = true;
-	private boolean resolveOverrides = true;
 	private boolean verbose = false;
 	
 	private JarFile currentJarFile;
@@ -28,11 +25,12 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	private Map<String, JavaTempType> tempClasses = new HashMap<String, JavaTempType>();
 	private Map<String, JavaTempType> tempInterfaces = new HashMap<String, JavaTempType>();
 		
-	private JavaClass rootNode;
-	private JavaInterfaceSet interfaces = new JavaInterfaceSet();
+	private JavaType rootNode;
+	private JavaTypeSet classes = new JavaTypeSet();
+	private JavaTypeSet interfaces = new JavaTypeSet();
 	
 	public ClassHierarchy classHierarchy() {
-		return new ClassHierarchy(this.rootNode, this.interfaces);
+		return new ClassHierarchy(this.rootNode, this.classes, this.interfaces);
 	}
 	
 	@Override
@@ -73,22 +71,26 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	@Override
 	public void visitEnd() {
 		
-		if(this.includeInterfaces) {
-			println("Building interface hierarchy...");
-			buildInterfaceHierarchy();
-			println("Total interface count: %s\n", this.interfaces.size());
+		println("Building interface hierarchy...");
+		buildInterfaceHierarchy();
+		println("Total interface count: %s\n", this.interfaces.size());
 
-			if(this.tempInterfaces.size() != this.interfaces.size()) {
-				throw new Error("Interface count mismatch.");
+		if(this.tempInterfaces.size() != this.interfaces.size()) {
+
+			for(String expected : this.tempInterfaces.keySet()) {
+				if(!this.interfaces.contains(expected)) {
+					System.out.println("Expected: " + expected);
+				}
 			}
+					
+			throw new Error("Interface count mismatch. Expected: " + this.tempInterfaces.size()
+				+ ", Actual: " + this.interfaces.size());
 		}
 		
 		this.rootNode = buildClassHierarchy();
 		
-		if(this.resolveOverrides) {
-			println("Resolving overrides...");
-			this.resolveOverrides(this.rootNode);
-		}
+		println("Resolving applies-to sets...");
+		this.resolveAppliesTo();
 		
 		this.tempClasses = null;
 		this.tempInterfaces = null;
@@ -107,14 +109,11 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	}
 	
 	private void processMethods(JarClass jarClass, JavaTempType javaTempType) {
-		if(this.includeMethods) {
-			
-			MethodLoader methodLoader = new MethodLoader(javaTempType);
-			jarClass.accept(methodLoader);
-		}
+		MethodLoader methodLoader = new MethodLoader(javaTempType);
+		jarClass.accept(methodLoader);
 	}
 	
-	private JavaClass buildClassHierarchy() {
+	private JavaType buildClassHierarchy() {
 				
 		List<JavaTempType> rootClasses = findRootClasses();
 		
@@ -127,7 +126,7 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	
 	private JavaClass resolveTempClass(JavaTempType tempClass, JavaClass superClass) {
 
-		JavaInterfaceSet implementedInterfaces = resolveImplementedInterfaces(tempClass);
+		JavaTypeSet implementedInterfaces = getImplementedInterfaces(tempClass);
 		JavaClass javaClass = tempClass.resolveToJavaClass(superClass, implementedInterfaces);
 				
 		// Find sub-classes
@@ -138,26 +137,23 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 			}
 		}
 		// Add the current class as sub-class of each implemented interface.
-		for(JavaInterface implementedInterface : implementedInterfaces) {
+		for(JavaType implementedInterface : implementedInterfaces) {
 			implementedInterface.addSubClass(javaClass);
 		}
+		// Add the class to the class set.
+		this.classes.add(javaClass);
 		return javaClass;
 	}
 	
-	private JavaInterfaceSet resolveImplementedInterfaces(JavaTempType tempClass) {
+	private JavaTypeSet getImplementedInterfaces(JavaTempType tempClass) {
 		
-		JavaInterfaceSet implementedInterfaces = new JavaInterfaceSet();
+		JavaTypeSet implementedInterfaces = this.interfaces.find(tempClass.superInterfaces());
 		
-		if(this.includeInterfaces) {
+		if(implementedInterfaces.size() != tempClass.superInterfaces().length) {
+			String error = String.format("Interfaces missing. Expected: %s, actual: %s\n", 
+				tempClass.superInterfaces().length, implementedInterfaces.size());
 			
-			implementedInterfaces = this.interfaces.find(tempClass.superInterfaces());
-			
-			if(implementedInterfaces.size() != tempClass.superInterfaces().length) {
-				String error = String.format("Interfaces missing. Expected: %s, actual: %s\n", 
-					tempClass.superInterfaces().length, implementedInterfaces.size());
-				
-				throw new Error(error + " " + tempClass.superInterfaces()[0]);
-			}
+			throw new Error(error + " " + tempClass.superInterfaces()[0]);
 		}
 		return implementedInterfaces;
 	}
@@ -181,15 +177,20 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		
 		for(JavaTempType tempInterface : rootInterfaces) {
 			
-			JavaInterface javaInterface = tempInterface.resolveToJavaInterface(new JavaInterfaceSet());
+			// It's possible the interface has already been resolved.
+			// (e.g. if it was also a super interface of a previous resolved class)
+			if(!this.interfaces.contains(tempInterface.name())) {
 			
-			this.interfaces.add(javaInterface);
-			
-			// Find sub-interfaces
-			for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
+				JavaInterface javaInterface = tempInterface.resolveToJavaInterface(new JavaTypeSet());
 				
-				if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
-					javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
+				this.interfaces.add(javaInterface);
+				
+				// Find sub-interfaces
+				for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
+					
+					if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
+						javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
+					}
 				}
 			}
 		}
@@ -198,13 +199,13 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	private JavaInterface resolveTempInterface(JavaTempType tempInterface) {
 		
 		// Resolve super-interfaces
-		JavaInterfaceSet superInterfaces = new JavaInterfaceSet();
+		JavaTypeSet superInterfaces = new JavaTypeSet();
 		
 		for(JavaTempType tempSuperInterface : this.tempInterfaces.values()) {
 	
 			if(tempInterface.isSubInterfaceOf(tempSuperInterface)) {
 
-				JavaInterface superInterface = this.interfaces.find(tempSuperInterface.name());
+				JavaType superInterface = this.interfaces.find(tempSuperInterface.name());
 				
 				if(superInterface != null) {
 					superInterfaces.add(superInterface);
@@ -219,18 +220,23 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 			String error = String.format("Interfaces missing 2. Expected: %s, actual: %s\n", 
 					tempInterface.superInterfaces().length, superInterfaces.size());
 				
-				throw new Error(error + " " + tempInterface.superInterfaces()[0]);			
+			throw new Error(error + " " + tempInterface.superInterfaces()[0]);			
 		}
 		
+		// Resolve current interface
+		JavaInterface javaInterface = (JavaInterface)this.interfaces.find(tempInterface.name());
 		
-		JavaInterface javaInterface = tempInterface.resolveToJavaInterface(superInterfaces);
-		this.interfaces.add(javaInterface);
+		if(javaInterface == null) {
 		
-		// Find sub-interfaces
-		for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
+			javaInterface = tempInterface.resolveToJavaInterface(superInterfaces);
+			this.interfaces.add(javaInterface);
 			
-			if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
-				javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
+			// Find sub-interfaces
+			for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
+				
+				if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
+					javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
+				}
 			}
 		}
 		return javaInterface;
@@ -248,29 +254,14 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		return rootInterfaces;		
 	}
 	
-	private void resolveOverrides(JavaClass javaClass) {
+	private void resolveAppliesTo() {
 		
-		for(JavaMethod method : javaClass.declaredMethods()) {
-			findOverridesFor(method, javaClass);
+		for(JavaType javaClass : this.classes) {
+			javaClass.resolveAppliesToSets();
 		}
 		
-		// Traverse the remaining classes in the class hierarchy.
-		for(JavaClass subClass : javaClass.subClasses()) {
-			resolveOverrides(subClass);
-		}
-	}
-		
-	private void findOverridesFor(JavaMethod baseMethod, JavaClass javaClass) {
-		
-		for(JavaClass subClass : javaClass.subClasses()) {
-			
-			JavaMethod override = subClass.findMethod(baseMethod.name(), baseMethod.desc());
-			
-			if(override != null) {
-				baseMethod.overridenBy(override);
-			} else {
-				findOverridesFor(baseMethod, subClass);
-			}
+		for(JavaType javaInterface : this.interfaces) {
+			javaInterface.resolveAppliesToSets();
 		}
 	}
 		

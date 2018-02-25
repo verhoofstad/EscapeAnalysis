@@ -50,8 +50,8 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 		return this.methods.values().iterator().next();
 	}
 	
-	public JavaClassSet getClasses() {
-		JavaClassSet classes = new JavaClassSet();
+	public JavaTypeSet getClasses() {
+		JavaTypeSet classes = new JavaTypeSet();
 		
 		for(JavaMethod method : this.methods.values()) {
 			if(method.containedIn() instanceof JavaClass) {
@@ -61,11 +61,11 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 		return classes;
 	}
 	
-	public JavaMethodSet getMethodsOfClass(JavaClass javaClass) {
+	public JavaMethodSet getMethodsOfClass(JavaType currentClass) {
 		JavaMethodSet methods = new JavaMethodSet();
 		
 		for(JavaMethod method : this.methods.values()) {
-			if(method.containedIn().equals(javaClass)) {
+			if(method.containedIn().equals(currentClass)) {
 				methods.add(method);
 			}
 		}

@@ -10,6 +10,7 @@ import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
 import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -18,11 +19,13 @@ import org.objectweb.asm.Opcodes;
 public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 
 	private ClassHierarchy classHierarchy;
+	private AppliesToSets appliesToSets;
 	private CallGraph callGraph;
 	
 	public ClassHierarchyAnalysis(ClassHierarchy classHierarchy) {
 		this.classHierarchy = classHierarchy;
 		this.callGraph = new CallGraph();
+		this.appliesToSets = new AppliesToSets(this.classHierarchy);
 	}
 	
 	public CallGraph callGraph() {
@@ -51,10 +54,10 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 	
 	private void visitClass(JarClass jarClass) {
 		
-		JavaClass currentClass = this.classHierarchy.findClass(jarClass.name());
+		JavaType currentClass = this.classHierarchy.findClass(jarClass.name());
 		
 		if(currentClass != null) {
-			CHAClassVisitor classVisitor = new CHAClassVisitor(currentClass, this.classHierarchy, this.callGraph);
+			CHAClassVisitor classVisitor = new CHAClassVisitor(currentClass, this.classHierarchy, this.appliesToSets, this.callGraph);
 			
 			jarClass.accept(classVisitor);
 		} else {
@@ -65,15 +68,17 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 	
 	class CHAClassVisitor extends ClassVisitor
 	{
-		private JavaClass currentClass;
+		private JavaType currentClass;
 		private ClassHierarchy classHierarchy;
+		private AppliesToSets appliesToSets;
 		private CallGraph callGraph;
 		
-		CHAClassVisitor(JavaClass currentClass, ClassHierarchy classHierarchy, CallGraph callGraph){
+		CHAClassVisitor(JavaType currentClass, ClassHierarchy classHierarchy, AppliesToSets appliesToSets, CallGraph callGraph){
 			super(Opcodes.ASM6);
 			
 			this.currentClass = currentClass;
 			this.classHierarchy = classHierarchy;
+			this.appliesToSets = appliesToSets;
 			this.callGraph = callGraph;
 		}
 		
@@ -82,7 +87,7 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 
 			JavaMethod currentMethod = this.currentClass.getMethod(name, desc);
 			
-			return new CHAMethodVisitor(currentMethod, this.classHierarchy, this.callGraph);
+			return new CHAMethodVisitor(currentMethod, this.classHierarchy, this.appliesToSets, this.callGraph);
 		}
 	}
 	
@@ -90,13 +95,17 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 	{
 		private JavaMethod currentMethod;
 		private ClassHierarchy classHierarchy;
+		private AppliesToSets appliesToSets;
 		private CallGraph callGraph;
 		
-	    public CHAMethodVisitor(JavaMethod currentMethod, ClassHierarchy classHierarchy, CallGraph callGraph) {
+		
+	    public CHAMethodVisitor(JavaMethod currentMethod, ClassHierarchy classHierarchy, 
+	    		AppliesToSets appliesToSets, CallGraph callGraph) {
 			super(Opcodes.ASM6);
 			
 			this.currentMethod = currentMethod;
 			this.classHierarchy = classHierarchy;
+			this.appliesToSets = appliesToSets;
 			this.callGraph = callGraph;
 		}
 		
@@ -111,47 +120,33 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 
 			if(opcode == Opcodes.INVOKESPECIAL) {
 				
-				// Invocation of constructors, private methods, super() calls,
+				// Invocation of constructors, private methods, super() calls.
 				
 				if(!itf) {
-					JavaClass targetClass = this.classHierarchy.getClass(owner);
-					JavaMethod target = targetClass.findMethodUpwards(name, desc);
+					JavaType declaredType = this.classHierarchy.getClass(owner);
 					
-					if(target != null) {
-						this.callGraph.addStaticCallSite(this.currentMethod, target);
+					if(name.equals("<init>")) {
+						visitInvokeConstructor(declaredType, name, desc);
 					} else {
-						System.out.format("Cannot find special method on class: %s\n", JavaMethod.toName(owner, name, desc));
+						visitInvokeVirtual(declaredType, name, desc);
 					}
 				} else {
 					
-					JavaInterface targetInterface = this.classHierarchy.getInterface(owner);
-					JavaMethod target = targetInterface.findNonAbstractMethodUpwards(name, desc);
+					JavaType declaredType = this.classHierarchy.getInterface(owner);
 					
-					if(target != null) {
-						this.callGraph.addStaticCallSite(this.currentMethod, target);
-					} else {
-						System.out.format("Cannot find special method on interface: %s\n", JavaMethod.toName(owner, name, desc));
-					}
+					visitInvokeVirtual(declaredType, name, desc);
 				}
 			} else if(opcode == Opcodes.INVOKESTATIC) {
 				
 				if(!itf) {
-					JavaClass targetClass = this.classHierarchy.getClass(owner);
-					// Note that the static method can also reside in one of the super classes.
-					JavaMethod target = targetClass.getMethodUpwards(name, desc);
-					
-					this.callGraph.addStaticCallSite(this.currentMethod, target);
+					JavaType declaredType = this.classHierarchy.getClass(owner);
+				
+					visitInvokeStatic(declaredType, name, desc);
 				} else {
 
-					JavaInterface targetInterface = this.classHierarchy.getInterface(owner);
-					// Note that the static method can also reside in one of the super interfaces.
-					JavaMethod target = targetInterface.findNonAbstractMethodUpwards(name, desc);
-					
-					if(target != null) {
-						this.callGraph.addStaticCallSite(this.currentMethod, target);
-					} else {
-						System.out.format("Cannot find static method on interface: %s\n", JavaMethod.toName(owner, name, desc));
-					}
+					JavaType declaredType = this.classHierarchy.getInterface(owner);
+
+					visitInvokeStatic(declaredType, name, desc);
 				}
 				
 			} else if(opcode == Opcodes.INVOKEVIRTUAL) {
@@ -161,41 +156,14 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 					//System.out.format("Call on array type. Owner: %s, name: %s, desc: %s\n", owner, name, desc);
 					return;
 				}
-				
-				JavaClass declaredType = this.classHierarchy.getClass(owner);
+								
+				JavaType declaredType = this.classHierarchy.getClass(owner);
 
-				List<JavaMethod> virtualTargets = new ArrayList<JavaMethod>();
-
-				JavaMethod virtualTarget1 = declaredType.findMethodUpwards(name, desc);
-				
-				// If the declared type is an abstract class and the invoked method is defined
-				// in an implemented interface, the class may not have a concrete implementation for 
-				// that method.
-				if(virtualTarget1 != null) {
-					virtualTargets.add(virtualTarget1);
-				} else {
-					if(!declaredType.isAbstract()) {
-						printWarning("Cannot find virtual method " + JavaMethod.toName(owner, name, desc));
-					}
-				}
-
-				for(JavaMethod virtualTarget : declaredType.findMethodsDownwards(name, desc)) {
-					virtualTargets.add(virtualTarget);
-				}
-				
-				if(virtualTargets.size() > 0) {
-					this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
-				} else {
-					if(!declaredType.isAbstract()) {
-						printWarning("No virtual targets found for " + JavaMethod.toName(owner, name, desc));
-					}
-				}
-				
-				if(itf) { throw new Error("Class expected"); }
+				visitInvokeVirtual(declaredType, name, desc);
 				
 			} else if(opcode == Opcodes.INVOKEINTERFACE) {
 				
-				JavaInterface declaredType = this.classHierarchy.getInterface(owner);
+				JavaType declaredType = this.classHierarchy.getInterface(owner);
 				
 				visitInvokeVirtual(declaredType, name, desc);
 				
@@ -208,17 +176,34 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 		
 		private void visitInvokeVirtual(JavaType declaredType, String name, String desc) {
 			
+			if(declaredType.id().equals("java/lang/invoke/MethodHandle")) {
+				return;
+			}
+			
+			// If the declared type is an abstract class and the invoked method is defined
+			// in an implemented interface, the class may not have a concrete implementation for 
+			// that method.
+			JavaMethodSet virtualTargets = appliesToSets.appliesTo(declaredType.coneSet(), name, desc);
+			
+			if(!virtualTargets.isEmpty()) {
+				this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
+			}
 		}
 		
 		private void visitInvokeStatic(JavaType declaredType, String name, String desc) {
 			
+			// Note that the static method can also reside in one of the super classes.
+			JavaMethod staticTarget = declaredType.findStaticMethod(name, desc);
 			
-			
+			this.callGraph.addStaticCallSite(this.currentMethod, staticTarget);
 		}
 		
 		
-		private void printWarning(String warning) {
-			System.out.format("Warning: %s\n   in %s\n", warning, this.currentMethod.id());
+		private void visitInvokeConstructor(JavaType declaredType, String name, String desc) {
+			
+			JavaMethod constructor = declaredType.findMethod(name, desc);
+			
+			this.callGraph.addStaticCallSite(this.currentMethod, constructor);
 		}
 	}
 }
