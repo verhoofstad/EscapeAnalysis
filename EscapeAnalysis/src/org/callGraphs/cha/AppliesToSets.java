@@ -9,7 +9,7 @@ import org.classHierarchy.tree.JavaTypeSet;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 
-public class AppliesToSets {
+class AppliesToSets {
 
 	Map<String, JavaMethodSet> appliesToSet;
 	

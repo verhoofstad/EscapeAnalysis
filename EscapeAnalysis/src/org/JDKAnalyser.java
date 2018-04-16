@@ -32,18 +32,18 @@ public class JDKAnalyser {
 		System.out.print("Building class hierarchy...");
 		ClassHierachyBuilder builder = new ClassHierachyBuilder();
 		jdkFiles.accept(builder);
-		ClassHierarchy javaObject = builder.classHierarchy();
+		ClassHierarchy classHierarchy = builder.classHierarchy();
 		System.out.println("Ok");
 		
-		this.jdkPackagePrivateClasses = javaObject.getFinalPackagePrivateClasses();
+		this.jdkPackagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
 
 		System.out.print("Find the methods in which package-private classes are instantiated...");
-		JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(javaObject, this.jdkPackagePrivateClasses);
+		JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(classHierarchy, this.jdkPackagePrivateClasses);
 		jdkFiles.accept(methodFinder);
 		System.out.println("Ok");
 		System.out.format("Total of %s methods found.\n", methodFinder.foundMethods().size());
 		
-		EscapeAnalysis escapeAnalysis = new EscapeAnalysis(javaObject.getClasses());
+		EscapeAnalysis escapeAnalysis = new EscapeAnalysis(classHierarchy.getClasses());
 		
 		escapeAnalysis.analyse(methodFinder.foundMethods(), jdkFiles);
 		

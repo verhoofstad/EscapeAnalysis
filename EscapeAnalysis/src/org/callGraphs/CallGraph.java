@@ -100,7 +100,5 @@ public class CallGraph {
 		System.out.format(" - Virtual call sites:       %s\n", nrOfVirtualCallSites());
 		System.out.format(" - Monomorphic call sites:   %s\n", nrOfVirtualMonoCallSites());
 		System.out.format(" - Static call sites:        %s\n", nrOfStaticCallSites());
-		
-		
 	}
 }

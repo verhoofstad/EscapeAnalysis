@@ -30,7 +30,7 @@ class JarClassMethodFinder extends ClassVisitor {
 		if(currentMethod != null) {
 			return new MethodFinder(currentMethod, this.classes, this.foundMethods);
 		} else {
-			System.out.println("Method not found!!");
+			System.out.println("Error: Method not found!!");
 			return null;
 		}
 	}

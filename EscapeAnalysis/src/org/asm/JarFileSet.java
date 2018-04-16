@@ -92,7 +92,7 @@ public class JarFileSet implements Iterable<JarFile> {
 	    }
 	}
 	
-	public String getClassPath() {
+	public String getSootClassPath() {
 		
 		StringBuilder classPath = new StringBuilder();
 		
@@ -102,14 +102,7 @@ public class JarFileSet implements Iterable<JarFile> {
 		return classPath.toString();
 	}
 	
-	public List<JarFile> toList() {
-		List<JarFile> jarFiles = new ArrayList<JarFile>();
-		jarFiles.addAll(this.jarFiles);
-		
-		return jarFiles;
-	}
-	
-	public List<String> toStringList() {
+	public List<String> toSootStringList() {
 		List<String> jarFiles = new ArrayList<String>();
 		for(JarFile jarFile : this.jarFiles) {
 			jarFiles.add(jarFile.getAbsolutePath());

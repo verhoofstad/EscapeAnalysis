@@ -54,7 +54,6 @@ public class CallSite {
 	}
 	
 	public boolean isVirtual() {
-		
 		return !this.isStatic;
 	}
 	

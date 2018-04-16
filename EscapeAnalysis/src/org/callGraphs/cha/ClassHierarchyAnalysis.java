@@ -189,7 +189,7 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 		
 		private void visitInvokeConstructor(JavaType declaredType, String name, String desc) {
 			
-			JavaMethod constructor = declaredType.findMethod(name, desc);
+			JavaMethod constructor = declaredType.getMethod(name, desc);
 			
 			this.callGraph.addStaticCallSite(this.currentMethod, constructor);
 		}

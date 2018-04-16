@@ -45,17 +45,11 @@ public class JarClass {
 		return this.interfaces;
 	}
 
-	public AccessFlags access() {
+	/**
+	 * Gets the access flags for this type.
+	 */
+	public AccessFlags accessFlags() {
 		return this.accessFlags;
-	}
-	
-	
-	public boolean isFinal() {
-		return this.accessFlags.isFinal();
-	}
-	
-	public boolean isInterface() {
-		return this.accessFlags.isInterface();
 	}
 	
 	public void accept(ClassVisitor visitor) {

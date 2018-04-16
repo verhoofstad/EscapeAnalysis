@@ -3,7 +3,7 @@ package org.classHierarchy.tree;
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
 
-/*
+/**
  * Represents a Java class or interface.
  */
 public abstract class JavaType {
@@ -59,7 +59,7 @@ public abstract class JavaType {
 	}
 	
 	public boolean isFinal() {
-		return this.accessFlags().isFinal();
+		return this.accessFlags.isFinal();
 	}
 	
 	public boolean isFinalPackagePrivate() {
@@ -75,19 +75,11 @@ public abstract class JavaType {
 			|| this.hasPublicSubClass();
 	}
 	
-	protected AccessFlags accessFlags() {
-		return this.accessFlags;
-	}
-	
 	/*
 	 * Gets the JAR-file this type was loaded from.
 	 */
 	public JarFile jarFile() {
 		return this.jarFile;
-	}
-	
-	public JavaTypeSet superInterfaces() {
-		return this.superInterfaces;
 	}
 	
 	/*
@@ -102,7 +94,7 @@ public abstract class JavaType {
 	 * Returns the cone set of the current type.
 	 * If the current type is a class, it returns the current instance and all direct and indirect sub classes.
 	 * If the current type is an interface, it returns the current instance, all direct and indirect sub interfaces
-	 * and all classes implementing these interfaces.
+	 * and all classes implementing those interfaces.
 	 */
 	public JavaTypeSet coneSet() {
 		return this.coneSet;
@@ -148,7 +140,7 @@ public abstract class JavaType {
 			this.declaredMethods.add(method);
 			this.setOverride(method);
 		} else {
-			System.out.println("Multiple method loading.");
+			throw new Error("Multiple method loading.");
 		}
 	}
 	
@@ -156,7 +148,7 @@ public abstract class JavaType {
 		
 		for(JavaType superInterface : this.superInterfaces) {
 			
-			JavaMethod baseMethod = superInterface.findMethod(overridingMethod.name(), overridingMethod.desc());
+			JavaMethod baseMethod = superInterface.findMethod(overridingMethod.signature());
 			
 			if(baseMethod != null) {
 				if(!baseMethod.overridenBy().contains(overridingMethod.id())) {
@@ -168,7 +160,7 @@ public abstract class JavaType {
 		}
 	}
 	
-	/*
+	/**
 	 * Resolve all the applies-to sets of the declared methods for CHA.
 	 */
 	public void resolveAppliesToSets() {
@@ -187,8 +179,13 @@ public abstract class JavaType {
 		return false;
 	}
 
-	public int methodCount() {
-		return this.declaredMethods.size();
+	public JavaMethod findMethod(String signature) {
+		for(JavaMethod method : this.declaredMethods) {
+			if(method.signature().equals(signature)) { 
+				return method;
+			}
+		}
+		return null;
 	}
 	
 	public JavaMethod findMethod(String name, String desc) {

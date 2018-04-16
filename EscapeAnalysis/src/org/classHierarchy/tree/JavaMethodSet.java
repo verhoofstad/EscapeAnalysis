@@ -51,18 +51,14 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 	}
 	
 	public JavaTypeSet getClasses() {
-		JavaTypeSet classes = new JavaTypeSet();
+		Set<JavaType> classes = new HashSet<JavaType>();
 		
 		for(JavaMethod method : this.methods.values()) {
 			if(method.containedIn() instanceof JavaClass) {
-				// Multiple methods may reside in the same class,
-				// so check first if the class has not already been added.
-				if(!classes.contains(method.containedIn())) {
-					classes.add((JavaClass)method.containedIn());
-				}
+				classes.add((JavaClass)method.containedIn());
 			}
 		}
-		return classes;
+		return new JavaTypeSet(classes);
 	}
 	
 	public JavaMethodSet getMethodsOfClass(JavaType currentClass) {
@@ -81,7 +77,6 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 	}
 	
 	public JarFileSet jarFiles() {
-		
 		Set<JarFile> jarFiles = new HashSet<JarFile>();
 		
 		for(JavaMethod method : this.methods.values()) {

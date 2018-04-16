@@ -3,6 +3,10 @@ package org.classHierarchy.tree;
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
 
+/**
+ * Represents a Java interface.
+ *
+ */
 public class JavaInterface extends JavaType {
 	
 	private JavaTypeSet subInterfaces;
@@ -11,10 +15,6 @@ public class JavaInterface extends JavaType {
 		super(internalName, accessFlags, superInterfaces, jarFile);
 		
 		this.subInterfaces = new JavaTypeSet();
-	}
-	
-	public JavaTypeSet subInterfaces() {
-		return this.subInterfaces;
 	}
 	
 	public void addSubInterface(JavaInterface subInterface) {

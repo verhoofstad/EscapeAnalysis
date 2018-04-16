@@ -21,11 +21,6 @@ public final class JavaClass extends JavaType {
 		return this.superClass;
 	}
 		
-	public Boolean inheritsFrom(JavaClass javaClass) {
-		return this.superClass != null && this.superClass.equals(javaClass);
-	}
-	
-
 	public boolean hasSuperClass() {
 		return this.superClass != null;
 	}
@@ -45,7 +40,7 @@ public final class JavaClass extends JavaType {
 		
 		if(this.hasSuperClass()) {
 
-			JavaMethod baseMethod = this.superClass.findMethod(overridingMethod.name(), overridingMethod.desc());
+			JavaMethod baseMethod = this.superClass.findMethod(overridingMethod.signature());
 			
 			if(baseMethod != null) {
 				baseMethod.overridenBy(overridingMethod);
@@ -55,27 +50,9 @@ public final class JavaClass extends JavaType {
 		}
 	}
 
-	
-	public JavaMethod findMethodUpwards(String name, String desc) {
-		JavaMethod method = findMethod(name, desc);
-		if(method != null) {
-			return method;
-		} else if(this.hasSuperClass()) {
-			return this.superClass.findMethodUpwards(name, desc);
-		} else {
-			return null;
-		}
-	}
-
-	public JavaMethod getMethodUpwards(String name, String desc) {
-		JavaMethod method = findMethodUpwards(name, desc);
-		if(method != null) {
-			return method;
-		} else {
-			throw new Error();
-		}
-	}
-
+	/*
+	 * Finds the static method that matches the given signature.
+	 */
 	@Override
 	public JavaMethod findStaticMethod(String name, String desc) {
 		
@@ -85,13 +62,12 @@ public final class JavaClass extends JavaType {
 				return staticMethod;
 			}
 		}
-		
 		return super.findStaticMethod(name, desc);
 	}
 	
 	/*
 	 * 
-	 * A class is instantiable if the class has a non-private constructor or has a factory method 
+	 * A class is instantiatable if the class has a non-private constructor or has a factory method 
 	 * that potentially creates and returns instances of the class. 
 	 * A factory method is every static method with a return type that is a supertype (reflexive) of the class type
 	 * and which calls a private constructor.

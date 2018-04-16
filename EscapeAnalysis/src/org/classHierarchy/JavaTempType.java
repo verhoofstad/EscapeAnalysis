@@ -72,7 +72,7 @@ class JavaTempType {
 	}
 	
 	public JavaClass resolveToJavaClass(JavaClass superClass, JavaTypeSet superInterfaces) {
-		JavaClass javaClass = new JavaClass(this.jarClass.name(), this.jarClass.access(), superClass, superInterfaces, this.jarFile);
+		JavaClass javaClass = new JavaClass(this.jarClass.name(), this.jarClass.accessFlags(), superClass, superInterfaces, this.jarFile);
 		for(JavaTempMethod tempMethod : this.methods) {
 			javaClass.addMethod(tempMethod.resolveToJavaMethod(javaClass));
 		}
@@ -80,7 +80,7 @@ class JavaTempType {
 	}
 	
 	public JavaInterface resolveToJavaInterface(JavaTypeSet superInterfaces) {
-		JavaInterface javaInterface = new JavaInterface(this.jarClass.name(), this.jarClass.access(), superInterfaces, this.jarFile);
+		JavaInterface javaInterface = new JavaInterface(this.jarClass.name(), this.jarClass.accessFlags(), superInterfaces, this.jarFile);
 		for(JavaTempMethod tempMethod : this.methods) {
 			javaInterface.addMethod(tempMethod.resolveToJavaMethod(javaInterface));
 		}

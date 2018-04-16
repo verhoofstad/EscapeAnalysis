@@ -114,32 +114,37 @@ public class JavaMethod {
 		return this.containedIn.jarFile();
 	}
 	
-	/*
+	/**
 	 * Resolves the applies-to set for this method.
+	 * This method can be called when the entire class hierarchy is constructed.
 	 */
 	void resolveAppliestoSet() {
 		
 		// Initialize the applies-to set with the cone set of the class or interface it's declared in.
 		this.appliesTo = new JavaTypeSet(this.containedIn().coneSet());
 		
+		// Subtract the applies-to set with the cone sets of the methods that directly override this method.
 		for(JavaMethod overridingMethod : this.overridenBy) {
 			this.appliesTo.difference(overridingMethod.containedIn().coneSet());
 		}
 	}
 	
-	/*
+	/**
 	 * Returns the method's applies-to set as defined for CHA.
 	 */
 	public JavaTypeSet appliesTo() {
 		return this.appliesTo;
 	}
 	
+	/**
+	 * Adds a method that directly overrides this method.
+	 */
 	public void overridenBy(JavaMethod overridingMethod) {
 		this.overridenBy.add(overridingMethod);
 	}
 	
 	
-	/*
+	/**
 	 * 
 	 */
 	public boolean isClientCallable() {
@@ -221,15 +226,15 @@ public class JavaMethod {
 			try {
 				return ArrayType.v(toSootType(asmType.getElementType()), asmType.getDimensions());
 			} catch(NullPointerException ex) {
-				System.out.format("Null pointer exception. Method: %s", this.name);
+				System.out.format("Error: Null pointer exception. Method: %s", this.name);
 			}
 		case Type.OBJECT:
 			return RefType.v(asmType.getClassName());
 		case Type.METHOD:
-			System.out.println("Unexpected type. [method]");
+			System.out.println("Error: Unexpected type. [method]");
 			return null;
 		}
-		System.out.format("Nothing found: %s\n", asmType.getSort());
+		System.out.format("Error: Nothing found: %s\n", asmType.getSort());
 		return null;
 	}
 	

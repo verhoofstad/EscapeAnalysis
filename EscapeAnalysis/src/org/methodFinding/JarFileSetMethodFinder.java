@@ -51,7 +51,7 @@ public class JarFileSetMethodFinder extends JarFileSetVisitor
 			
 			jarClass.accept(methodFinder);
 		} else {			
-			System.out.format("Class %s was not found.\n", jarClass.name());
+			System.out.format("Error: Class %s was not found.\n", jarClass.name());
 		}
 	}
 }

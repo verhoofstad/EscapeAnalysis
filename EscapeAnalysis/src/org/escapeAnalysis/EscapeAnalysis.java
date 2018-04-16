@@ -41,7 +41,7 @@ public class EscapeAnalysis {
 	
 	soot.G.reset();
 		
-		Options.v().set_soot_classpath(jarFiles.getClassPath());
+		Options.v().set_soot_classpath(jarFiles.getSootClassPath());
 
 		Options.v().set_whole_program(true);
         Options.v().set_verbose(false);
@@ -51,7 +51,7 @@ public class EscapeAnalysis {
         //Options.v().set_prepend_classpath(true);
         //Options.v().set_whole_program(true);
 
-    	Options.v().set_process_dir(methods.jarFiles().toStringList());
+    	Options.v().set_process_dir(methods.jarFiles().toSootStringList());
 
         
         PhaseOptions.v().setPhaseOption("bb", "off");
@@ -63,9 +63,9 @@ public class EscapeAnalysis {
 	
 		//scene.setSootClassPath(jarFiles.getClassPath());		
 		
-		System.out.println("Soot-class-path: " + jarFiles.getClassPath());
+		System.out.println("Soot-class-path: " + jarFiles.getSootClassPath());
 		System.out.println("Soot-class-path: " +  scene.getSootClassPath());
-    	System.out.println("Soot process-dir: " +  methods.jarFiles().toStringList());		
+    	System.out.println("Soot process-dir: " +  methods.jarFiles().toSootStringList());		
 		scene.loadNecessaryClasses(); // Triggers Soot exception
 		
 		println("Classes in class list: %s", methods.getClasses().size());

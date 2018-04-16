@@ -8,12 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.asm.JarFileSet;
-import org.classHierarchy.tree.JavaTypeSet;
 import org.dataSets.DataSet;
 import org.dataSets.Library;
 import org.dataSets.LibraryResult;
 import org.dataSets.LibraryResultSet;
-import org.escapeAnalysis.EscapeAnalysis;
 import org.validation.LibraryValidator;
 
 public class Main {
