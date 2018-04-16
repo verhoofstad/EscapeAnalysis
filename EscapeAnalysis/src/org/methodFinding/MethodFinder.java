@@ -12,6 +12,7 @@ class MethodFinder extends MethodVisitor {
 	private JavaMethod currentMethod;
 	private JavaTypeSet classes;
 	private JavaMethodSet foundMethods;
+	private boolean methodAdded = false;
 		
 	public MethodFinder(JavaMethod currentMethod, JavaTypeSet classes, JavaMethodSet foundMethods) {
 		super(Opcodes.ASM6);
@@ -32,8 +33,9 @@ class MethodFinder extends MethodVisitor {
 		
 				JavaType javaClass = classes.find(type);
 				
-				if(javaClass != null) {
+				if(javaClass != null && !this.methodAdded) {
 					this.foundMethods.add(this.currentMethod);
+					this.methodAdded = true;
 				}
 				
 				break;

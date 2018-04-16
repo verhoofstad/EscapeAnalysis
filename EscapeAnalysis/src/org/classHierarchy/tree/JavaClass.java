@@ -88,6 +88,24 @@ public final class JavaClass extends JavaType {
 		
 		return super.findStaticMethod(name, desc);
 	}
+	
+	/*
+	 * 
+	 * A class is instantiable if the class has a non-private constructor or has a factory method 
+	 * that potentially creates and returns instances of the class. 
+	 * A factory method is every static method with a return type that is a supertype (reflexive) of the class type
+	 * and which calls a private constructor.
+	 */
+	public boolean isInstantiable() {
+		
+		for(JavaMethod method : this.declaredMethods()) {
+			if(method.isConstructor() && !method.isPrivate()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public String toString() {

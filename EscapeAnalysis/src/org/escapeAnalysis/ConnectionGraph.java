@@ -1,11 +1,12 @@
-package org.soot;
+package org.escapeAnalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.connectionGraph.nodes.*;
+import org.escapeAnalysis.connectionGraph.*;
 
 import soot.RefType;
 
@@ -14,17 +15,17 @@ import soot.RefType;
  */
 public class ConnectionGraph {
 
-	private ObjectNodeCollection objectNodes;
+	private ObjectNodeSet objectNodes;
 	private Map<String, ReferenceVariable> referenceVariables;
 	private List<PhantomObjectNode> phantomObjectNodes;
 	
 	public ConnectionGraph() {
-		this.objectNodes = new ObjectNodeCollection();
+		this.objectNodes = new ObjectNodeSet();
 		this.referenceVariables = new HashMap<String, ReferenceVariable>();
 		this.phantomObjectNodes = new ArrayList<PhantomObjectNode>();
 	}
 	
-	public ObjectNodeCollection getObjects() {
+	public ObjectNodeSet getObjects() {
 		
 		return this.objectNodes;
 	}
@@ -33,14 +34,14 @@ public class ConnectionGraph {
 	 * Adds a local variable for 'this' with its escape state set to ESCAPE.
 	 */
 	public void addThisVariable(String name) {
-		this.referenceVariables.put(name, new ReferenceVariable(name, true));
+		this.referenceVariables.put(name, new ReferenceVariable(name, EscapeState.ESCAPE));
 	}
 	
 	/*
 	 * Adds a local variable for a parameter with its escape state set to ESCAPE.
 	 */
 	public void addParameterVariable(String name) {
-		this.referenceVariables.put(name, new ReferenceVariable(name, true));
+		this.referenceVariables.put(name, new ReferenceVariable(name, EscapeState.ESCAPE));
 	}
 	
 	public void addObjectNode(ObjectNode node) {
@@ -52,9 +53,9 @@ public class ConnectionGraph {
 	}
 	
 	
-	public ObjectNodeCollection getObjectsOfType(RefType objectType) {
+	public ObjectNodeSet getObjectsOfType(RefType objectType) {
 
-		ObjectNodeCollection objectNodes = new ObjectNodeCollection();
+		ObjectNodeSet objectNodes = new ObjectNodeSet();
 		
 		for(ObjectNode node : this.objectNodes) 
 		{
@@ -105,15 +106,36 @@ public class ConnectionGraph {
 	}
 	
 	
-	public void pushEscapeState() {
-		for(ReferenceNode referenceNode : this.referenceVariables.values()) 
-		{
-			referenceNode.pushEscapeState();
-		}
+	public void resolveEscapeState() {
+		
 		for(ObjectNode objectNode : this.objectNodes) 
 		{
-			objectNode.pushEscapeState();
+			if(objectNode.getEscapeState() == EscapeState.ESCAPE) {
+				
+				for(FieldNode field : objectNode.getFieldNodes()) {
+					
+					field.setEscape(EscapeState.ESCAPE);
+					ObjectNodeSet objects = field.pointsTo();
+					
+					for(ObjectNode referedObject : objects) {
+						referedObject.setEscape(EscapeState.ESCAPE);
+					}
+				}
+			}
 		}
+		
+
+		for(ReferenceNode referenceNode : this.referenceVariables.values()) 
+		{
+			if(referenceNode.getEscapeState() == EscapeState.ESCAPE) {
+					
+				ObjectNodeSet objects = referenceNode.pointsTo();
+				
+				for(ObjectNode referedObject : objects) {
+					referedObject.setEscape(EscapeState.ESCAPE);
+				}
+			}			
+		}		
 	}
 
 	

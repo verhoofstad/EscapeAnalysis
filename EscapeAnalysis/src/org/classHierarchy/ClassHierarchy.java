@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
+import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
@@ -22,7 +23,18 @@ public class ClassHierarchy {
 		this.classes = classes;
 		this.interfaces = interfaces;
 	}
-		
+	
+	public JavaType findType(String internalName) 
+	{
+		if(this.classes.contains(internalName)) {
+			return this.classes.get(internalName);
+		} else if(this.interfaces.contains(internalName)) {
+			return this.interfaces.get(internalName);
+		} else {
+			return null;
+		}
+	}
+	
 	public JavaType findClass(String internalName) {
 		return this.classes.find(internalName);
 	}
@@ -74,6 +86,62 @@ public class ClassHierarchy {
 		return exportedMethods;
 	}
 	
+	/*
+	 * Gets the entry points.
+	 */
+	public JavaMethodSet getLibCHAcpaEntryPoints(JarFile cpFile) {
+		
+		JavaMethodSet entryPoints = new JavaMethodSet();
+		
+		for(JavaType javaClass : this.classes) {
+			
+			if(javaClass.jarFile().equals(cpFile)) {
+				
+				for(JavaMethod declaredMethod : javaClass.declaredMethods()) {
+
+					if(isEntryPoint((JavaClass)javaClass, declaredMethod)) {
+						entryPoints.add(declaredMethod);
+					}
+				}
+			}
+		}
+
+		for(JavaType javaInterface : this.interfaces) {
+			
+			if(javaInterface.jarFile().equals(cpFile)) {
+				
+				for(JavaMethod declaredMethod : javaInterface.declaredMethods()) {
+
+					if(!declaredMethod.isAbstract()
+						&& declaredMethod.isClientCallable()) {
+						entryPoints.add(declaredMethod);
+					}
+				}
+			}
+		}
+		
+		return entryPoints;
+	}
+	
+	/*
+	 * 1 def isEntryPoint(declType,method):Boolean =
+2 maybeCalledByTheJVM(method) || 
+3 (method.isSaticInitializer && declType.isAccessible) ||
+ 4 (method.isClientCallable &&
+5 ( method.isStatic || declType.isInstantiable))
+	 */
+	private boolean isEntryPoint(JavaClass declType, JavaMethod method) {
+		
+		return maybeCalledByTheJVM(method) ||
+			(method.isStaticInitializer() && declType.isAccessible()) ||
+			(method.isClientCallable() &&
+				(method.isStatic() || declType.isInstantiable()));
+	}
+	
+	private boolean maybeCalledByTheJVM(JavaMethod method) {
+		return method.name().equals("finalize");
+	}
+
 	public JavaTypeSet getFinalPackagePrivateClasses() {
 		JavaTypeSet finalPackagePrivateClasses = new JavaTypeSet();
 		for(JavaType javaClass : this.classes) {

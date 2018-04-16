@@ -1,4 +1,4 @@
-package org.connectionGraph.nodes;
+package org.escapeAnalysis.connectionGraph;
 
 /**
  * Represents a 
@@ -6,15 +6,15 @@ package org.connectionGraph.nodes;
 public class ReferenceVariable extends ReferenceNode {
 
 	public ReferenceVariable(String id) {
-		this(id, false);
+		this(id, EscapeState.UNRESOLVED);
 	}
 
-	public ReferenceVariable(String id, Boolean escapeState) {
+	public ReferenceVariable(String id, EscapeState escapeState) {
 		super(id, escapeState);
 	}
 	
 	@Override
 	public String toString() {
-		return "Reference variable (" + this.getId() + ")";
+		return "Reference variable (" + this.id() + ")";
 	}
 }

@@ -1,10 +1,14 @@
-package org.soot;
+package org.escapeAnalysis;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import soot.ArrayType;
 import soot.Local;
+import soot.PrimType;
 import soot.RefLikeType;
+import soot.RefType;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.Stmt;
@@ -12,12 +16,15 @@ import soot.jimple.internal.JAssignStmt;
 import soot.jimple.*;
 import soot.toolkits.graph.UnitGraph;
 
+/*
+ * Traverses a Soot unit graph and calls the appropriate methods of a provided escape statement visitor.
+ */
 public class UnitGraphContainer {
 
 	private UnitGraph graph;
 	private List<Unit> visitedUnits = new ArrayList<Unit>();
 	
-	private Boolean verbose = false;
+	private boolean verbose = false;
 	
 	public UnitGraphContainer(UnitGraph graph) {
 		
@@ -27,7 +34,7 @@ public class UnitGraphContainer {
 	
 	public void accept(EscapeStatementVisitor visitor) {
 
-		printGraph(graph.getHeads());
+		//printGraph(graph.getHeads());
 		
 		this.visitedUnits = new ArrayList<Unit>();
 
@@ -68,19 +75,10 @@ public class UnitGraphContainer {
     private void acceptUnit(Unit unit, EscapeStatementVisitor visitor) {
         Stmt stmt = (Stmt) unit;
 
-        // ********************
-        // BIG PATTERN MATCHING
-        // ********************
-        // I throw much "match failure" Errors to ease debugging...
-        // => we could optimize the pattern matching a little bit
-        
-        //G.v().out.println(" | |- exec "+stmt);
-        
         ///////////
         // Calls //
         ///////////
         if (stmt.containsInvokeExpr()) {
-            //inter.analyseCall(inValue, stmt, outValue);
         	acceptMethodInvoke(stmt, visitor);
         }
         
@@ -108,14 +106,18 @@ public class UnitGraphContainer {
                 else if (rightOp instanceof Local) {
                     Local right = (Local) rightOp;
                     
+                    println("%s = %s (v = v)", left.getName(), right.getName());
                     visitor.visitAssignment(left.getName(), right.getName());
-                    //System.out.format("%s = %s\n", left.getName(), right.getName());
                 }
 
                 // v = v[i]
                 else if (rightOp instanceof ArrayRef) {
                     Local right = (Local) ((ArrayRef) rightOp).getBase();
-                    //outValue.g.assignFieldToLocal(stmt, right, "[]", left);
+
+                    // We handle arrays in Java like regular objects, that is, we do not
+                    // distinguish between different elements of an array. [Choi et. al. 2003]
+                    println("%s = %s[] (v = v[i])", left.getName(), right.getName());
+                    visitor.visitAssignment(left.getName(), right.getName());
                 }
 
                 // v = v.f
@@ -123,16 +125,33 @@ public class UnitGraphContainer {
                     Local right = (Local) ((InstanceFieldRef) rightOp).getBase();
                     String field = ((InstanceFieldRef) rightOp).getField().getName();
 
+                    println("%s = %s.%s (v = v.f)", left.getName(), right.getName(), field);
                     visitor.visitAssignment(left.getName(), right.getName(), field);
-                    //System.out.format("%s = %s.%s\n", left.getName(), right.getName(), field);
                 }
 
                 // v = C.f
                 else if (rightOp instanceof StaticFieldRef) {
-                    //outValue.g.localIsUnknown(left);
+                	Type right = ((StaticFieldRef) rightOp).getType();
+                	String field = ((StaticFieldRef) rightOp).getField().getName();
                 	
-                	
-                	//System.out.format("%s = %s.%s\n", left.getName(), right.getName(), field);
+                	if(right instanceof RefType) {
+                		
+                		RefType rightRefType = (RefType)right;
+
+                    	println("%s = %s.%s (v = C.f)", left.getName(), rightRefType.getClassName(), field);
+                    	visitor.visitAssignment(left.getName(), rightRefType, field);
+                		
+                	} else if(right instanceof ArrayType) {
+                		
+                		Type rightArrayElementType =  ((ArrayType)right).getArrayElementType();
+                		
+                		if(rightArrayElementType instanceof RefType) {
+                        	println("%s = %s[].%s (v = C[].f)", left.getName(), ((RefType)rightArrayElementType).getClassName(), field);
+                        	visitor.visitAssignment(left.getName(), (RefType)rightArrayElementType, field);
+                		}
+                	} else {
+                		throw new Error("Unhandled type. " + right);
+                	}
                 }
 
                 // v = cst
@@ -145,7 +164,31 @@ public class UnitGraphContainer {
                 	
                 	if(rightOp instanceof NewExpr) {
                 		NewExpr newExpr = (NewExpr)rightOp;
+                		
+                		println("%s = new %s() (v = new T())", left.getName(), newExpr.getBaseType().getClassName());
                 		visitor.visitNew(newExpr.getBaseType(), left.getName());
+                	}
+                	else if(rightOp instanceof NewArrayExpr) {
+                		NewArrayExpr newExpr = (NewArrayExpr)rightOp;
+                		
+                		if(newExpr.getBaseType() instanceof RefType) {
+                			RefType baseType = (RefType)newExpr.getBaseType(); 
+                			
+                    		println("%s = new %s[] (v =  T[])", left.getName(), baseType.getClassName());
+                    		visitor.visitNew(baseType, left.getName());
+                		}
+                	}
+                	else if(rightOp instanceof NewMultiArrayExpr) {
+                		ArrayType arrayType = ((NewMultiArrayExpr)rightOp).getBaseType();
+                	
+                		if(arrayType.baseType instanceof RefType) {
+                			RefType baseType = (RefType)arrayType.baseType; 
+                			int dimensions = arrayType.numDimensions;
+                			
+                    		println("%s = new %s%s (v =  T[])", left.getName(), baseType.getClassName()
+                    			, new String(new char[dimensions]).replace("\0", "[]"));
+                    		visitor.visitNew(baseType, left.getName());
+                		}
                 	}
                 }
                 
@@ -166,16 +209,24 @@ public class UnitGraphContainer {
                 // v[i] = v
                 if (rightOp instanceof Local) {
                     Local right = (Local) rightOp;
+                    
                     if (right.getType() instanceof RefLikeType) {
-                        //outValue.g.assignLocalToField(right, left, "[]");
-                    } else {
-                        //outValue.g.mutateField(left, "[]");
+                        
+                    	println("%s[] = %s (v[i] = v)", left.getName(), right.getName());
+                        visitor.visitAssignment(left.getName(), right.getName());
+                    } 
+                    else if(right.getType() instanceof PrimType) {
+                    	// Ignore
+                    }
+                    else {
+                        throw new Error("Unhandled right hand. " + right.getType().getClass().getName());
                     }
                 }
                 
                 // v[i] = cst
                 else if (rightOp instanceof Constant) {
-                    //outValue.g.mutateField(left, "[]");
+                    println("%s[] = (const)", left.getName());
+                    visitor.visitClearLocal(left.getName());
                 } else {
                     throw new Error("AssignStmt match failure (rightOp)" + stmt);
                 }
@@ -189,19 +240,19 @@ public class UnitGraphContainer {
                 // v.f = v
                 if (rightOp instanceof Local) {
                     Local right = (Local) rightOp;
+                    
                     // ignore primitive types
                     if (right.getType() instanceof RefLikeType) {
                     	
+                    	println("%s.%s = %s (v.f = v)", left.getName(), field, right.getName());
                     	visitor.visitNonStaticFieldAssignment(left.getName(), field, right.getName());
-                        //outValue.g.assignLocalToField(right, left, field);
-                    } else {
-                        //outValue.g.mutateField(left, field);
-                    }
+                    } 
                 }
 
                 // v.f = cst
                 else if (rightOp instanceof Constant) {
-                    //outValue.g.mutateField(left, field);
+                	
+                	visitor.visitClearField(left.getName(), field);
                 } else {
                     throw new Error("AssignStmt match failure (rightOp) " + stmt);
                 }
@@ -209,24 +260,40 @@ public class UnitGraphContainer {
             
             // C.f = ...
             else if (leftOp instanceof StaticFieldRef) {
+            	
+            	Type left = ((StaticFieldRef) leftOp).getType();
                 String field = ((StaticFieldRef) leftOp).getField().getName();
 
-                // C.f = v
-                if (rightOp instanceof Local) {
-                    Local right = (Local) rightOp;
-                    if (right.getType() instanceof RefLikeType) {
-                        //outValue.g.assignLocalToStaticField(right, field);
-                    } else {
-                        //outValue.g.mutateStaticField(field);
-                    }
-                }
+            	if(left instanceof RefType) {
 
-                // C.f = cst
-                else if (rightOp instanceof Constant) {
-                    //outValue.g.mutateStaticField(field);
-                } else {
-                    throw new Error("AssignStmt match failure (rightOp) " + stmt);
-                }
+                    // C.f = v
+                    if (rightOp instanceof Local) {
+                        Local right = (Local) rightOp;
+                        if (right.getType() instanceof RefLikeType) {
+
+                        	println("%s.%s = %s (C.f = v)", ((RefType)left).getClassName(), field, right.getName());
+                        	visitor.visitStaticFieldAssignment((RefType)left, field, right.getName());
+                        } else {
+                            //outValue.g.mutateStaticField(field);
+                        	throw new Error("Unhandled right hand." + right);
+                        }
+                    }
+
+                    // C.f = cst
+                    else if (rightOp instanceof Constant) {
+                        //outValue.g.mutateStaticField(field);
+                    } else {
+                        throw new Error("AssignStmt match failure (rightOp) " + stmt);
+                    }
+
+            	} else if(left instanceof ArrayType) {
+            		
+            	} else if(left instanceof PrimType){
+            		// Ignore
+            	} else {
+            		throw new Error("Unhandled left type. " + left.getClass().getName());
+            	}
+                
             } else {
                 throw new Error("AssignStmt match failure (leftOp) " + stmt);
             }
@@ -245,6 +312,7 @@ public class UnitGraphContainer {
                 ParameterRef p = (ParameterRef) rightOp;
                 // ignore primitive types
                 if (p.getType() instanceof RefLikeType) {
+                	println("param: %s", left.getName());
                 	visitor.visitParameter(left.getName());
                 }
             } else if (rightOp instanceof CaughtExceptionRef) {
@@ -263,7 +331,10 @@ public class UnitGraphContainer {
 
             if (op instanceof Local) {
                 Local v = (Local) op;
-                //outValue.g.localEscapes(v);
+
+                // A throw statement is handled in the same manner as a return statement. 
+                println("throw %s", v.getName());
+                visitor.visitReturn(v.getName());
             } else if (op instanceof Constant) {
                 // do nothing...
             } else {
@@ -282,6 +353,7 @@ public class UnitGraphContainer {
             if (v instanceof Local) {
                 // ignore primitive types
                 if (v.getType() instanceof RefLikeType) {
+                	println("return %s", ((Local) v).getName());
                     visitor.visitReturn(((Local) v).getName());
                 }
             } else if (v instanceof Constant) {
@@ -289,7 +361,6 @@ public class UnitGraphContainer {
             } else {
                 throw new Error("ReturnStmt match failure " + stmt);
             }
-
         }
 
         //////////
@@ -310,34 +381,17 @@ public class UnitGraphContainer {
     
     public void acceptMethodInvoke(Stmt stmt, EscapeStatementVisitor visitor) {
 
-    	System.out.format("   Call: %s\n", stmt.toString());
+    	//System.out.format("   Call: %s\n", stmt.toString());
 
     	// m()
     	if(stmt instanceof InvokeStmt) {
-
-    		 InvokeStmt invoke = ((InvokeStmt)stmt);
-
-    		 List<Value> args = invoke.getInvokeExpr().getArgs();
-    		 List<String> refArguments = new ArrayList<String>();
-    		 
-    		 for(Value arg : args) {
-    			 
-    			 System.out.format("   Arg: %s (%s)\n", arg.toString(), arg.getClass().getName());
-    			 
-    			 if(arg instanceof Local) {
-	                // ignore primitive types
-	                if (arg.getType() instanceof RefLikeType) {
-	                	refArguments.add(((Local) arg).getName());
-	                }    				 
-    			 }
-    		 }
-    		 visitor.visitMethodInvoke(refArguments);
+    		HandleMethodInvoke(((InvokeStmt) stmt).getInvokeExpr(), visitor);
     	}
         /////////////
         // AssignStmt
         /////////////
     	else if(stmt instanceof JAssignStmt) {
-    		
+    		    		
             Value leftOp = ((AssignStmt) stmt).getLeftOp();
             Value rightOp = ((AssignStmt) stmt).getRightOp();
 
@@ -351,10 +405,7 @@ public class UnitGraphContainer {
 	            }
 	
 	            // ignore primitive types
-	            if (!(left.getType() instanceof RefLikeType)) {
-				}
-	            
-	            else {
+	            if ((left.getType() instanceof RefLikeType)) {
 	    			visitor.visitClearLocal(((Local) leftOp).getName());
 	            }
             }            
@@ -363,14 +414,56 @@ public class UnitGraphContainer {
                 Local left = (Local) ((InstanceFieldRef) leftOp).getBase();
                 String field = ((InstanceFieldRef) leftOp).getField().getName();
 
+                visitor.visitClearField(left.getName(), field);
+            }
+            else {
+            	throw new Error("Unhandled leftOp in JAssignStmt " + leftOp.getClass().getName());
             }
             
     		if(rightOp instanceof InvokeStmt) {
-    			acceptMethodInvoke((InvokeStmt)rightOp, visitor);
+    			HandleMethodInvoke(((InvokeStmt)rightOp).getInvokeExpr(), visitor);
+    		} else if(rightOp instanceof StaticInvokeExpr) {
+    			HandleMethodInvoke((InvokeExpr)rightOp, visitor);
+    		} else if (rightOp instanceof VirtualInvokeExpr) {
+    			HandleMethodInvoke((InvokeExpr)rightOp, visitor);
+    		} else if(rightOp instanceof InterfaceInvokeExpr) {
+    			HandleMethodInvoke((InvokeExpr)rightOp, visitor);
+    		} else if(rightOp instanceof DynamicInvokeExpr) {
+    			// Ignore dynamic invoke
+    		} else if(rightOp instanceof SpecialInvokeExpr) {
+    			HandleMethodInvoke((InvokeExpr)rightOp, visitor);
+    		} else {
+            	throw new Error("Unhandled rightOp in JAssignStmt " + rightOp.getClass().getName());
     		}
     		
         } else {
             throw new Error("Stmt match faliure " + stmt);
         }
+    }
+    
+    
+    private void HandleMethodInvoke(InvokeExpr invokeExpr, EscapeStatementVisitor visitor) {
+ 
+		 List<Value> args = invokeExpr.getArgs();
+		 List<String> refArguments = new ArrayList<String>();
+		 
+		 for(Value arg : args) {
+			 
+			 //println("   Arg: %s (%s)\n", arg.toString(), arg.getClass().getName());
+			 
+			 if(arg instanceof Local) {
+				 // ignore primitive types
+				 if (arg.getType() instanceof RefLikeType) {
+					 refArguments.add(((Local) arg).getName());
+				 }    				 
+			 }
+		 }
+		 visitor.visitMethodInvoke(refArguments);    	
+    }
+    
+    private void println(String format, Object... args) {
+    	if(this.verbose) {
+    		System.out.format(format + "\n", args);
+    	}
     }
 }

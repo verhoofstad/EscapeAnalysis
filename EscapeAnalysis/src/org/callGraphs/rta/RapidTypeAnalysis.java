@@ -1,8 +1,5 @@
 package org.callGraphs.rta;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.callGraphs.CallGraph;
 import org.callGraphs.CallSite;
 import org.callGraphs.CallSiteSet;
@@ -12,6 +9,9 @@ import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
 
+/*
+ * Performs Rapid Type Analysis over a previously computed CHA call graph.
+ */
 public class RapidTypeAnalysis {
 
 	private CallGraph chaGraph;
@@ -21,6 +21,8 @@ public class RapidTypeAnalysis {
 	private JavaTypeSet liveClasses;
 	
 	private JavaTypeSet confinedClasses;
+	
+	private boolean verbose = false;
 	
 	public RapidTypeAnalysis(CallGraph chaGraph) {
 		
@@ -37,6 +39,9 @@ public class RapidTypeAnalysis {
 		
 		this.liveClasses = exportedClasses;
 		this.worklist = new Worklist(exportedMethods);
+
+		println("Initializing RTA for library analysis with %s exported classes (live) and %s exported methods (worklist).",
+			exportedClasses.size(), exportedMethods.size());
 	}
 	
 	public void setConfinedClasses(JavaTypeSet confinedClasses) {
@@ -45,13 +50,21 @@ public class RapidTypeAnalysis {
 	
 	public void analyse() {
 		
+		int i = 0;
+		
 		while(!this.worklist.isEmpty()) {
+			
+			if(i % 100 == 0) {
+				println("Worklist size: %s (processed: %s)", this.worklist.size(), this.worklist.processed());
+			}
+			i++;
 			
 			JavaMethod currentMethod = this.worklist.removeItem();
 			
-			CallSiteSet callSites = this.chaGraph.getCallSite(currentMethod);
+			CallSiteSet callSites = this.chaGraph.getCallSites(currentMethod);
 			
 			for(CallSite callSite : callSites) {
+				// Find all instantiated classes in this method.
 				if(callSite.isConstructor()) {
 					JavaClass instantiatedClass = callSite.getInstantiatedClass();
 					if(!this.liveClasses.contains(instantiatedClass.id())) {
@@ -95,5 +108,11 @@ public class RapidTypeAnalysis {
 		JavaType targetType = target.containedIn();
 		
 		return !sourceType.packagePath().equals(targetType.packagePath());
+	}
+	
+	private void println(String format, Object... args) {
+		if(this.verbose) {
+			System.out.format(format + "\n", args);
+		}
 	}
 }

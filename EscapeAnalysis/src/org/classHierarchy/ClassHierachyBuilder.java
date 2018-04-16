@@ -20,6 +20,8 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 	
 	private boolean verbose = false;
 	
+	private boolean valid = true;
+	
 	private JarFile currentJarFile;
 	
 	private Map<String, JavaTempType> tempClasses = new HashMap<String, JavaTempType>();
@@ -73,7 +75,7 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		
 		println("Building interface hierarchy...");
 		buildInterfaceHierarchy();
-		println("Total interface count: %s\n", this.interfaces.size());
+		//println("Total interface count: %s\n", this.interfaces.size());
 
 		if(this.tempInterfaces.size() != this.interfaces.size()) {
 
@@ -82,11 +84,12 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 					System.out.println("Expected: " + expected);
 				}
 			}
-					
-			throw new Error("Interface count mismatch. Expected: " + this.tempInterfaces.size()
-				+ ", Actual: " + this.interfaces.size());
+			this.valid = false;		
+			//throw new Error("Interface count mismatch. Expected: " + this.tempInterfaces.size()
+			//	+ ", Actual: " + this.interfaces.size());
 		}
 		
+		println("Building class hierarchy...");
 		this.rootNode = buildClassHierarchy();
 		
 		println("Resolving applies-to sets...");
@@ -94,6 +97,10 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		
 		this.tempClasses = null;
 		this.tempInterfaces = null;
+		
+		if(!this.valid) {
+			System.out.println("Class Hierarchy contains errors!");
+		}
 	}
 	
 	private void processJarClass(JarClass jarClass) {
@@ -150,10 +157,17 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 		JavaTypeSet implementedInterfaces = this.interfaces.find(tempClass.superInterfaces());
 		
 		if(implementedInterfaces.size() != tempClass.superInterfaces().length) {
-			String error = String.format("Interfaces missing. Expected: %s, actual: %s\n", 
+			String error = String.format("Interfaces missing (1). Expected: %s, actual: %s\n", 
 				tempClass.superInterfaces().length, implementedInterfaces.size());
 			
-			throw new Error(error + " " + tempClass.superInterfaces()[0]);
+			for(String expected : tempClass.superInterfaces()) {
+				if(!implementedInterfaces.contains(expected)) {
+					System.out.println("Expected: " + expected);
+				}
+			}
+			this.valid = false;		
+
+			//throw new Error(error + " " + tempClass.superInterfaces()[0]);
 		}
 		return implementedInterfaces;
 	}
@@ -187,7 +201,7 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 				
 				// Find sub-interfaces
 				for(JavaTempType tempSubInterface : this.tempInterfaces.values()) {
-					
+										
 					if(tempSubInterface.isSubInterfaceOf(tempInterface)) {
 						javaInterface.addSubInterface(resolveTempInterface(tempSubInterface));
 					}
@@ -217,10 +231,17 @@ public class ClassHierachyBuilder extends JarFileSetVisitor  {
 
 		if(superInterfaces.size() != tempInterface.superInterfaces().length) {
 					
-			String error = String.format("Interfaces missing 2. Expected: %s, actual: %s\n", 
+			String error = String.format("Interfaces missing (2). Expected: %s, actual: %s\n", 
 					tempInterface.superInterfaces().length, superInterfaces.size());
-				
-			throw new Error(error + " " + tempInterface.superInterfaces()[0]);			
+			
+			for(String expected : tempInterface.superInterfaces()) {
+				if(!superInterfaces.contains(expected)) {
+					System.out.println("Expected: " + expected);
+				}
+			}
+			this.valid = false;		
+	
+			//throw new Error(error + " " + tempInterface.superInterfaces()[0]);			
 		}
 		
 		// Resolve current interface

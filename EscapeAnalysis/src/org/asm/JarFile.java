@@ -52,6 +52,13 @@ public class JarFile {
         fis.close();		
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null || !(obj instanceof JarFile)) { return false; }
+		
+		return this.getAbsolutePath().equals(((JarFile)obj).getAbsolutePath());
+	}
+	
     /**
      * Returns an ASM ClassReader based on an input stream. 
      */

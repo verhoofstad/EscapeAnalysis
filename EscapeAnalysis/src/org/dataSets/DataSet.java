@@ -31,9 +31,22 @@ public class DataSet implements Iterable<Library> {
 		this.libraries.add(new Library(id, organisation, name, revision, cpJarFile, new JarFileSet(libJarFiles)));
 	}
 	
+	public Library get(int id) {
+		for(Library library : this.libraries) {
+			if(library.id() == id) {
+				return library;
+			}
+		}
+		throw new Error("Library not found.");
+	}
+	
 	@Override
 	public Iterator<Library> iterator() {
 		return this.libraries.iterator();
+	}
+	
+	public int size() {
+		return this.libraries.size();
 	}
 	
 	public static DataSet getDevelopmentSet() {
@@ -48,19 +61,19 @@ public class DataSet implements Iterable<Library> {
 		return dataSet;
 	}
 	
-	
+	/*
+	 * Returns a data set containing those libraries for which a complete and valid class hierarchy
+	 * can be build (i.e. which do not have a missing dependency).
+	 */
 	public static DataSet getCorrectSet() {
 		
 		DataSet completeSet = DataSet.getCompleteSet();
 		DataSet correctSet = new DataSet();
 
-		Integer[] libIds = {/*1,2,3,4,5,6,*/7,8,9,11,12,17,18,19,21,26,27,30,31,33,34,35,37,41,42,43,45,47,48,49,50,
-		    51,52,53,55,56,60,63,65,67,68,69,70,71,72,74,76,81,84,86,88,89,90,91,92,94,95,97};
-
-		Integer[] libIdsNew = {1,2,3,4,/*5,*/6,7,8,9,11,12,17,18,19,21,26,27,30,31,33,34,35,37,41,42,43,45,47,48,49,50,
-			    51,52,53,55,56,60,63,65,67,68,69,70,71,72,74,76,81,84,86,88,89,90,91,92,94,95,97};
-
-		List<Integer> correctLibraries = new ArrayList<Integer>(Arrays.asList(libIds));
+		//Integer[] correctIds = {1,2,3,4,5,6,8,11,17,18,19,21,26,27,30,33,35,37,41,47,48,49,50,51,52,60,71,72,86,88,91,95,97};
+		Integer[] correctIds = {51,52,60,71,72,86,88,91,95,97};
+		
+		List<Integer> correctLibraries = new ArrayList<Integer>(Arrays.asList(correctIds));
 
 		for(Library library : completeSet) {
 			if(correctLibraries.contains(library.id())) {
@@ -68,6 +81,16 @@ public class DataSet implements Iterable<Library> {
 			}
 		}
 		return correctSet;
+	}
+	
+	public static DataSet getFixedSet() {
+		
+		DataSet completeSet = DataSet.getCompleteSet();
+		DataSet fixedSet = new DataSet();
+		
+		fixedSet.addLibrary(completeSet.get(10));
+		
+		return fixedSet;
 	}
 	
 	public static DataSet getCompleteSet() {
@@ -79,7 +102,11 @@ public class DataSet implements Iterable<Library> {
 			new String[] {
 				"JavaJDK\\java-8-openjdk-amd64\\jre\\lib", 
 				"Libraries\\org.scala-lang\\scala-library\\jars\\scala-library-2.10.4.jar", 
-				"Libraries\\org.scala-lang\\scala-reflect\\jars\\scala-reflect-2.10.4.jar"
+				"Libraries\\org.scala-lang\\scala-reflect\\jars\\scala-reflect-2.10.4.jar",
+				// Added
+				"Libraries\\org.scala-lang\\jline\\jars\\jline-2.10.4.jar",
+				"Libraries\\org.apache.ant\\ant\\jars\\ant-1.9.6.jar",
+				"Libraries\\org.apache.ant\\ant-launcher\\jars\\ant-launcher-1.9.6.jar"
 			});
 		dataSet.addLibrary(1, "org.scala-lang", "scala-library", "2.10.4", 
 			"Libraries\\org.scala-lang\\scala-library\\jars\\scala-library-2.10.4.jar", 
@@ -100,12 +127,20 @@ public class DataSet implements Iterable<Library> {
 		dataSet.addLibrary(4, "org.slf4j", "slf4j-api", "1.7.12", 
 			"Libraries\\org.slf4j\\slf4j-api\\jars\\slf4j-api-1.7.12.jar", 
 			new String[] {
-    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib"
+    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
+    			// Added
+    			"Libraries\\org.slf4j\\slf4j-log4j12\\jars\\slf4j-log4j12-1.7.12.jar", 
+                "Libraries\\log4j/log4j\\bundles\\log4j-1.2.17.jar", 
+                "Libraries\\javax.mail\\mail\\jars\\mail-1.4.7.jar",
+                "Libraries\\geronimo-jms_1.1_spec-1.1.1.jar"
 			});
 		dataSet.addLibrary(5, "log4j", "log4j", "1.2.17", 
 			"Libraries\\log4j\\log4j\\bundles\\log4j-1.2.17.jar", 
 			new String[] {
-    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib"
+    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
+    			// Added
+    			"Libraries\\javax.mail\\mail\\jars\\mail-1.4.7.jar", 
+    			"Libraries\\geronimo-jms_1.1_spec-1.1.1.jar"
 			});
 		dataSet.addLibrary(6, "com.google.guava", "guava", "19.0-rc2", 
 			"Libraries\\com.google.guava\\guava\\bundles\\guava-19.0-rc2.jar", 
@@ -115,7 +150,13 @@ public class DataSet implements Iterable<Library> {
 		dataSet.addLibrary(7, "ch.qos.logback", "logback-classic", "1.1.3", 
 			"Libraries\\ch.qos.logback\\logback-classic\\jars\\logback-classic-1.1.3.jar", 
 			new String[] {
-    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib"
+    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
+    			// Added
+    			"Libraries\\ch.qos.logback\\logback-core\\jars\\logback-core-1.1.3.jar",
+    			"Libraries\\javax.mail\\mail\\jars\\mail-1.4.7.jar",
+    			"Libraries\\javax.servlet\\javax.servlet-api\\jars\\javax.servlet-api-3.1.0.jar",
+    			"Libraries\\org.codehaus.groovy\\groovy-all\\jars\\groovy-all-2.4.5.jar",
+    			"Libraries\\org.slf4j\\slf4j-api\\jars\\slf4j-api-1.7.12.jar"
 			});
     	dataSet.addLibrary(8, "commons-io", "commons-io", "2.4", 
     		"Libraries\\commons-io\\commons-io\\jars\\commons-io-2.4.jar", 
@@ -127,17 +168,22 @@ public class DataSet implements Iterable<Library> {
     		new String[] {
     			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
     			"Libraries\\org.slf4j\\slf4j-api\\jars\\slf4j-api-1.7.12.jar",
-    			"Libraries\\log4j\\log4j\\bundles\\log4j-1.2.17.jar"
+    			"Libraries\\log4j\\log4j\\bundles\\log4j-1.2.17.jar",
+    			// Added
+     			"Libraries\\javax.mail\\mail\\jars\\mail-1.4.7.jar",
     		});
     	dataSet.addLibrary(10, "org.mockito", "mockito-all", "1.10.19", 
     		"Libraries\\org.mockito\\mockito-all\\jars\\mockito-all-1.10.19.jar", 
     		new String[] {
-    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib"
+    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
+    			// Added
+    			"Libraries\\junit\\junit\\jars\\junit-4.12.jar",
     		});
     	dataSet.addLibrary(11, "org.apache.commons", "commons-lang3", "3.4", 
     		"Libraries\\org.apache.commons\\commons-lang3\\jars\\commons-lang3-3.4.jar",
     		new String[] {
-    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib"
+    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
+    			// Added
     		});
     	dataSet.addLibrary(12, "commons-logging", "commons-logging", "1.2", 
     		"Libraries\\commons-logging\\commons-logging\\jars\\commons-logging-1.2.jar", 

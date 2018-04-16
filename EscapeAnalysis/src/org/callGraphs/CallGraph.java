@@ -29,11 +29,11 @@ public class CallGraph {
 	}
 	
 	/*
-	 * Gets the call site information for a given method.
+	 * Gets all call sites for a given method.
 	 * 
 	 * A method can have zero or more call sites.
 	 */
-	public CallSiteSet getCallSite(JavaMethod javaMethod) {
+	public CallSiteSet getCallSites(JavaMethod javaMethod) {
 	
 		if(this.callSites.containsKey(javaMethod.id())) {
 			return this.callSites.get(javaMethod.id());
@@ -71,6 +71,14 @@ public class CallGraph {
 		int nrOfCallSites = 0;
 		for(CallSiteSet callSiteSet : this.callSites.values()) {
 			nrOfCallSites += callSiteSet.nrOfVirtualMonoCallSites();
+		}
+		return nrOfCallSites;
+	}
+	
+	public int nrOfVirtualEmptyCallSites() {
+		int nrOfCallSites = 0;
+		for(CallSiteSet callSiteSet : this.callSites.values()) {
+			nrOfCallSites += callSiteSet.nrOfVirtualEmptyCallSites();
 		}
 		return nrOfCallSites;
 	}

@@ -1,4 +1,4 @@
-package org.connectionGraph.nodes;
+package org.escapeAnalysis.connectionGraph;
 
 /**
  * Represents a static field (i.e. a global variable).
@@ -11,6 +11,6 @@ public class StaticField extends FieldNode {
 
 	@Override
 	public String toString() {
-		return "Static field (" + this.getId() + ")";
+		return "Static field (" + this.id() + ")";
 	}
 }

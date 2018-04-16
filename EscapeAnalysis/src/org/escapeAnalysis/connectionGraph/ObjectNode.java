@@ -1,4 +1,4 @@
-package org.connectionGraph.nodes;
+package org.escapeAnalysis.connectionGraph;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class ObjectNode extends Node {
 
 	public void addNode(FieldNode node) 
 	{
-		this.fieldNodes.put(node.getId(), node);
+		this.fieldNodes.put(node.id(), node);
 	}
 	
 
@@ -42,9 +42,9 @@ public class ObjectNode extends Node {
 		
 		String indentStr = new String(new char[indent]).replace("\0", "   ");
 		
-		System.out.println(indentStr + this.toString() + " " + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
+		System.out.println(indentStr + this.toString() + " " + this.getEscapeState().toString());
 		for(FieldNode fieldNode : this.fieldNodes.values()) {
-			System.out.println(indentStr + "   " + fieldNode.toString() + (this.getEscapeState() ? "[escape]" : "[noEscape]"));
+			System.out.println(indentStr + "   " + fieldNode.toString() + this.getEscapeState().toString());
 			
 			fieldNode.prettyPrint(indent + 2);
 		}
@@ -62,7 +62,7 @@ public class ObjectNode extends Node {
 	}
 
 	@Override
-	public void setEscape(boolean escapeState) {
+	public void setEscape(EscapeState escapeState) {
 		super.setEscape(escapeState);
 		
 		for(FieldNode fieldNode : this.fieldNodes.values()) {
@@ -72,6 +72,6 @@ public class ObjectNode extends Node {
 	
 	@Override
 	public String toString() {
-		return "Object (" + this.getId() + ")";
+		return "Object (" + this.id() + ")";
 	}
 }

@@ -41,25 +41,35 @@ public class CallSiteSet implements Iterable<CallSite> {
 	}
 
 	public int nrOfVirtualCallSites() {
-		int nrOfEdges = 0;
+		int nrOfCallSites = 0;
 		for(CallSite callSite : this.callSites) {
 			if(callSite.isVirtual()) {
-				nrOfEdges += 1;
+				nrOfCallSites += 1;
 			}
 		}
-		return nrOfEdges;
+		return nrOfCallSites;
+	}
+
+	public int nrOfVirtualEmptyCallSites() {
+		int nrOfCallSites = 0;
+		for(CallSite callSite : this.callSites) {
+			if(callSite.isVirtual() && callSite.hasNoTargets()) {
+				nrOfCallSites += 1;
+			}
+		}
+		return nrOfCallSites;
 	}
 
 	public int nrOfVirtualMonoCallSites() {
-		int nrOfEdges = 0;
+		int nrOfCallSites = 0;
 		for(CallSite callSite : this.callSites) {
 			if(callSite.isVirtual() && callSite.isMonomorphic()) {
-				nrOfEdges += 1;
+				nrOfCallSites += 1;
 			}
 		}
-		return nrOfEdges;
+		return nrOfCallSites;
 	}
-
+	
 	public int nrOfStaticCallSites() {
 		int nrOfEdges = 0;
 		for(CallSite callSite : this.callSites) {

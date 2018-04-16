@@ -1,4 +1,4 @@
-package org.connectionGraph.nodes;
+package org.escapeAnalysis.connectionGraph;
 
 import java.util.UUID;
 
@@ -10,6 +10,6 @@ public class PhantomObjectNode extends ObjectNode {
 	
 	@Override
 	public String toString() {
-		return "Phantom object (" + this.getId() + ")";
+		return "Phantom object (" + this.id() + ")";
 	}
 }

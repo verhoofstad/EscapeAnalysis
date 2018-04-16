@@ -1,8 +1,5 @@
 package org.callGraphs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
@@ -30,9 +27,6 @@ public class CallSite {
 	}
 	
 	public CallSite(JavaMethod source, JavaMethodSet virtualTargets) {
-		if(virtualTargets.size() < 1) {
-			throw new Error();
-		}
 		
 		this.isStatic = false;
 		this.source = source;
@@ -70,6 +64,10 @@ public class CallSite {
 	
 	public boolean isMonomorphic() {
 		return this.targets.size() == 1;
+	}
+	
+	public boolean hasNoTargets() {
+		return this.targets.isEmpty();
 	}
 	
 	int nrOfEdges() {

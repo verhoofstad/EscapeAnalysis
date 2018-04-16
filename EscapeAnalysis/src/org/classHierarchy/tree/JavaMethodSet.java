@@ -55,7 +55,11 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 		
 		for(JavaMethod method : this.methods.values()) {
 			if(method.containedIn() instanceof JavaClass) {
-				classes.add((JavaClass)method.containedIn());
+				// Multiple methods may reside in the same class,
+				// so check first if the class has not already been added.
+				if(!classes.contains(method.containedIn())) {
+					classes.add((JavaClass)method.containedIn());
+				}
 			}
 		}
 		return classes;

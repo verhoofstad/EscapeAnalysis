@@ -70,6 +70,11 @@ public abstract class JavaType {
 		return this.accessFlags.isAbstract();
 	}
 	
+	public boolean isAccessible() {
+		return this.isPublic()
+			|| this.hasPublicSubClass();
+	}
+	
 	protected AccessFlags accessFlags() {
 		return this.accessFlags;
 	}

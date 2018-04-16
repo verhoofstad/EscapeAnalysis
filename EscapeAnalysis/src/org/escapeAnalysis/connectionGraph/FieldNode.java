@@ -1,4 +1,4 @@
-package org.connectionGraph.nodes;
+package org.escapeAnalysis.connectionGraph;
 
 /*
  * Represents a static or non-static field node.
@@ -9,7 +9,7 @@ public abstract class FieldNode extends ReferenceNode
 		super(id);
 	}
 	
-	public FieldNode(String id, boolean escapeState) {
+	public FieldNode(String id, EscapeState escapeState) {
 		super(id, escapeState);
 	}
 }

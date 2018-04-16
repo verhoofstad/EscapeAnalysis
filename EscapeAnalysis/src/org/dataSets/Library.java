@@ -57,4 +57,8 @@ public class Library {
 		}
 		return new JarFileSet(allFiles);
 	}
+	
+	public void addLibFile(JarFile libFile) {
+		this.libFiles.add(libFile);
+	}
 }

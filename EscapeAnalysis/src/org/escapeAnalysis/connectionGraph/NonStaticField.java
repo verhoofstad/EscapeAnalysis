@@ -1,4 +1,4 @@
-package org.connectionGraph.nodes;
+package org.escapeAnalysis.connectionGraph;
 
 
 /**
@@ -10,12 +10,12 @@ public class NonStaticField extends FieldNode {
 		super(id);
 	}
 	
-	public NonStaticField(String id, boolean escapeState) {
+	public NonStaticField(String id, EscapeState escapeState) {
 		super(id, escapeState);
 	}
 	
 	@Override
 	public String toString() {
-		return "Non-static field (" + this.getId() + ")";
+		return "Non-static field (" + this.id() + ")";
 	}
 }

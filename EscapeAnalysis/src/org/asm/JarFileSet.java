@@ -43,6 +43,10 @@ public class JarFileSet implements Iterable<JarFile> {
 		}
 	}
 	
+	public void add(JarFile jarFile) {
+		this.jarFiles.add(jarFile);
+	}
+	
 	public int size() {
 		return this.jarFiles.size();
 	}

@@ -1,14 +1,9 @@
 package org.callGraphs.cha;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
 import org.callGraphs.CallGraph;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaInterface;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
@@ -61,7 +56,7 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 			
 			jarClass.accept(classVisitor);
 		} else {
-			throw new Error();
+			throw new Error("Could not find class " + jarClass.name());
 		}
 	}
 	
@@ -122,30 +117,21 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 				
 				// Invocation of constructors, private methods, super() calls.
 				
-				if(!itf) {
-					JavaType declaredType = this.classHierarchy.getClass(owner);
-					
+				JavaType declaredType = this.classHierarchy.findType(owner);
+				
+				if(declaredType != null) {
 					if(name.equals("<init>")) {
 						visitInvokeConstructor(declaredType, name, desc);
 					} else {
 						visitInvokeVirtual(declaredType, name, desc);
-					}
-				} else {
-					
-					JavaType declaredType = this.classHierarchy.getInterface(owner);
-					
-					visitInvokeVirtual(declaredType, name, desc);
+					}					
 				}
+				
 			} else if(opcode == Opcodes.INVOKESTATIC) {
 				
-				if(!itf) {
-					JavaType declaredType = this.classHierarchy.getClass(owner);
+				JavaType declaredType = this.classHierarchy.findType(owner);
 				
-					visitInvokeStatic(declaredType, name, desc);
-				} else {
-
-					JavaType declaredType = this.classHierarchy.getInterface(owner);
-
+				if(declaredType != null) {
 					visitInvokeStatic(declaredType, name, desc);
 				}
 				
@@ -157,15 +143,19 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 					return;
 				}
 								
-				JavaType declaredType = this.classHierarchy.getClass(owner);
-
-				visitInvokeVirtual(declaredType, name, desc);
+				JavaType declaredType = this.classHierarchy.findType(owner);
+				
+				if(declaredType != null) {
+					visitInvokeVirtual(declaredType, name, desc);
+				}
 				
 			} else if(opcode == Opcodes.INVOKEINTERFACE) {
 				
-				JavaType declaredType = this.classHierarchy.getInterface(owner);
+				JavaType declaredType = this.classHierarchy.findType(owner);
 				
-				visitInvokeVirtual(declaredType, name, desc);
+				if(declaredType != null) {
+					visitInvokeVirtual(declaredType, name, desc);
+				}
 				
 			} else {
 				throw new Error("Invalid opcode.");
@@ -185,9 +175,7 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 			// that method.
 			JavaMethodSet virtualTargets = appliesToSets.appliesTo(declaredType.coneSet(), name, desc);
 			
-			if(!virtualTargets.isEmpty()) {
-				this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
-			}
+			this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
 		}
 		
 		private void visitInvokeStatic(JavaType declaredType, String name, String desc) {

@@ -102,6 +102,10 @@ public class JavaMethod {
 	public boolean isConstructor() {
 		return this.name.equals("<init>");
 	}
+	
+	public boolean isStaticInitializer() {
+		return this.name.equals("<clinit>");
+	}
 		
 	/*
 	 * Gets the JAR-file this method was loaded from.
@@ -117,7 +121,7 @@ public class JavaMethod {
 		
 		// Initialize the applies-to set with the cone set of the class or interface it's declared in.
 		this.appliesTo = new JavaTypeSet(this.containedIn().coneSet());
-
+		
 		for(JavaMethod overridingMethod : this.overridenBy) {
 			this.appliesTo.difference(overridingMethod.containedIn().coneSet());
 		}
@@ -132,6 +136,24 @@ public class JavaMethod {
 	
 	public void overridenBy(JavaMethod overridingMethod) {
 		this.overridenBy.add(overridingMethod);
+	}
+	
+	
+	/*
+	 * 
+	 */
+	public boolean isClientCallable() {
+		
+		boolean hasPublicSubClassThatInheritsMethod = false;
+		for(JavaType subType : this.appliesTo) {
+			if(subType instanceof JavaClass && subType.isPublic()) {
+				hasPublicSubClassThatInheritsMethod = true;
+				break;
+			}
+		}
+		
+		return (this.isPublic() || this.isProtected()) &&
+			(this.containedIn.isPublic() || hasPublicSubClassThatInheritsMethod);
 	}
 	
 	@Override

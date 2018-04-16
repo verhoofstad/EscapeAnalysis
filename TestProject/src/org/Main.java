@@ -9,6 +9,10 @@ public class Main {
 		
 		printIt(ta);
 		
+		Integer[][][] test = new Integer[3][3][3];
+		
+		
+		
 		System.out.println(ta.text);
 	}
 	
