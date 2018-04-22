@@ -16,72 +16,70 @@ import org.validation.LibraryValidator;
 
 public class Main {
 
-	public static void main(String[] args) {
-	
-		//DataSet dataSet = DataSet.getFixedSet();
-		DataSet dataSet = DataSet.getCorrectSet();
-		
-		//validateJDK();
-		//validateLibraries(dataSet);
-		
-		analyseLibraries(dataSet);
-	}
-	
-	
-	private static void analyseLibraries(DataSet dataSet) {
+    public static void main(String[] args) {
 
-		// Because the JDK is a dependency of every other library,
-		// we analyze it one time separately so we can re-use the results.
-		JDKAnalyser jdkAnalyser = new JDKAnalyser("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib");
-		jdkAnalyser.analyseJDK();
-		
-		LibraryResultSet libResults = readResultFile();
-		
-		for(Library library : dataSet) {
-			LibraryResult result = libResults.find(library);
-			LibraryAnalyser analyser = new LibraryAnalyser(library, result);
-			analyser.setJDKResults(jdkAnalyser.jdkPackagePrivateClasses(), jdkAnalyser.jdkConfinedClasses());
-			
-			analyser.analyse();
-		}
-		System.out.println("Finished");
-	}
-	
-	private static void validateJDK() {
-		
-		LibraryValidator validator = new LibraryValidator();
-		JarFileSet jdkFiles = new JarFileSet("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib");
+        // DataSet dataSet = DataSet.getFixedSet();
+        DataSet dataSet = DataSet.getCorrectSet();
 
-		jdkFiles.accept(validator);
-	}
-	
-	private static void validateLibraries(DataSet dataSet) {
-		
-		List<String> validLibraries = new ArrayList<String>();
-		
-		for(Library library : dataSet) {
-			
-			LibraryValidator validator = new LibraryValidator();
-			JarFileSet jarFiles = library.jarFiles();
-			
-			System.out.format("PROCESSING: %s with %s | %s | %s\n", library.id(), library.organisation(), library.name(), library.revision());
-			System.out.println();
-			System.out.format("CPFILE: %s\n", library.cpFile().getAbsolutePath());
-			System.out.format("JAR FILES: %s\n", library.jarFiles().size());
-			System.out.println();
-			
-			jarFiles.accept(validator);
-			if(validator.isValid()) {
-				validLibraries.add("" + library.id());
-			}
-		}
-		System.out.format("Finished. %s out of %s libraries are complete.\n", validLibraries.size(), dataSet.size());
-		System.out.format("Identifiers: %s\n\n", String.join(",", validLibraries));
-	}
-	
-	
-	
-	public static LibraryResultSet readResultFile() {
+        // validateJDK();
+        // validateLibraries(dataSet);
+
+        analyseLibraries(dataSet);
+    }
+
+    private static void analyseLibraries(DataSet dataSet) {
+
+        // Because the JDK is a dependency of every other library,
+        // we analyze it one time separately so we can re-use the results.
+        JDKAnalyser jdkAnalyser = new JDKAnalyser("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib");
+        jdkAnalyser.analyseJDK();
+
+        LibraryResultSet libResults = readResultFile();
+
+        for (Library library : dataSet) {
+            LibraryResult result = libResults.find(library);
+            LibraryAnalyser analyser = new LibraryAnalyser(library, result);
+            analyser.setJDKResults(jdkAnalyser.jdkPackagePrivateClasses(), jdkAnalyser.jdkConfinedClasses());
+
+            analyser.analyse();
+        }
+        System.out.println("Finished");
+    }
+
+    private static void validateJDK() {
+
+        LibraryValidator validator = new LibraryValidator();
+        JarFileSet jdkFiles = new JarFileSet("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib");
+
+        jdkFiles.accept(validator);
+    }
+
+    private static void validateLibraries(DataSet dataSet) {
+
+        List<String> validLibraries = new ArrayList<String>();
+
+        for (Library library : dataSet) {
+
+            LibraryValidator validator = new LibraryValidator();
+            JarFileSet jarFiles = library.jarFiles();
+
+            System.out.format("PROCESSING: %s with %s | %s | %s\n", library.id(), library.organisation(),
+                    library.name(), library.revision());
+            System.out.println();
+            System.out.format("CPFILE: %s\n", library.cpFile().getAbsolutePath());
+            System.out.format("JAR FILES: %s\n", library.jarFiles().size());
+            System.out.println();
+
+            jarFiles.accept(validator);
+            if (validator.isValid()) {
+                validLibraries.add("" + library.id());
+            }
+        }
+        System.out.format("Finished. %s out of %s libraries are complete.\n", validLibraries.size(), dataSet.size());
+        System.out.format("Identifiers: %s\n\n", String.join(",", validLibraries));
+    }
+
+    public static LibraryResultSet readResultFile() {
 
         String csvFile = "C:\\CallGraphData\\results.txt";
         BufferedReader br = null;
@@ -89,7 +87,7 @@ public class Main {
         String cvsSplitBy = "\t";
 
         LibraryResultSet libResults = new LibraryResultSet();
-        
+
         try {
 
             br = new BufferedReader(new FileReader(csvFile));
@@ -97,13 +95,12 @@ public class Main {
 
                 // use comma as separator
                 String[] results = line.split(cvsSplitBy);
-                
-                if(!results[0].equals("organisation")) {
+
+                if (!results[0].equals("organisation")) {
                     libResults.add(new LibraryResult(results));
                 }
             }
 
-            
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -116,7 +113,7 @@ public class Main {
                     e.printStackTrace();
                 }
             }
-        }		
+        }
         return libResults;
-	}
+    }
 }

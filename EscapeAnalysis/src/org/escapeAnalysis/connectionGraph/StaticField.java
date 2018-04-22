@@ -5,12 +5,12 @@ package org.escapeAnalysis.connectionGraph;
  */
 public class StaticField extends FieldNode {
 
-	public StaticField(String id) {
-		super(id);
-	}
+    public StaticField(String id) {
+        super(id);
+    }
 
-	@Override
-	public String toString() {
-		return "Static field (" + this.id() + ")";
-	}
+    @Override
+    public String toString() {
+        return "Static field (" + this.id() + ")";
+    }
 }

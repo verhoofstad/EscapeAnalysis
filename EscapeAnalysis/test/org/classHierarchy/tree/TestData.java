@@ -6,13 +6,14 @@ import org.objectweb.asm.Opcodes;
 
 public class TestData {
 
-	/**
-	 * Returns an instance of JavaClass that represents the java.lang.Object type.
-	 */
-	public static JavaClass javaObject() {
-		
-		int access = Opcodes.ACC_PUBLIC;
-		
-		return new JavaClass("/java/lang/Object", new AccessFlags(access), null, new JavaTypeSet(), new JarFile("rt.jar"));
-	}
+    /**
+     * Returns an instance of JavaClass that represents the java.lang.Object type.
+     */
+    public static JavaClass javaObject() {
+
+        int access = Opcodes.ACC_PUBLIC;
+
+        return new JavaClass("/java/lang/Object", new AccessFlags(access), null, new JavaTypeSet(),
+                new JarFile("rt.jar"));
+    }
 }
