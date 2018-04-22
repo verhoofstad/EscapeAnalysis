@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/*
+/**
  * Represents a set of JAR-files.
  */
 public class JarFileSet implements Iterable<JarFile> {

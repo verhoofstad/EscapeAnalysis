@@ -49,15 +49,11 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 	
 	private void visitClass(JarClass jarClass) {
 		
-		JavaType currentClass = this.classHierarchy.findClass(jarClass.name());
+		JavaType currentClass = this.classHierarchy.getClass(jarClass.name());
 		
-		if(currentClass != null) {
-			CHAClassVisitor classVisitor = new CHAClassVisitor(currentClass, this.classHierarchy, this.appliesToSets, this.callGraph);
-			
-			jarClass.accept(classVisitor);
-		} else {
-			throw new Error("Could not find class " + jarClass.name());
-		}
+		CHAClassVisitor classVisitor = new CHAClassVisitor(currentClass, this.classHierarchy, this.appliesToSets, this.callGraph);
+		
+		jarClass.accept(classVisitor);
 	}
 	
 	
@@ -113,54 +109,30 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 		@Override
 		public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
 
-			if(opcode == Opcodes.INVOKESPECIAL) {
-				
-				// Invocation of constructors, private methods, super() calls.
-				
-				JavaType declaredType = this.classHierarchy.findType(owner);
-				
-				if(declaredType != null) {
-					if(name.equals("<init>")) {
-						visitInvokeConstructor(declaredType, name, desc);
-					} else {
-						visitInvokeVirtual(declaredType, name, desc);
-					}					
-				}
-				
-			} else if(opcode == Opcodes.INVOKESTATIC) {
-				
-				JavaType declaredType = this.classHierarchy.findType(owner);
-				
-				if(declaredType != null) {
-					visitInvokeStatic(declaredType, name, desc);
-				}
-				
-			} else if(opcode == Opcodes.INVOKEVIRTUAL) {
-				
-				if(owner.startsWith("[")) {
-					// Ignore array types for now...
-					//System.out.format("Call on array type. Owner: %s, name: %s, desc: %s\n", owner, name, desc);
-					return;
-				}
-								
-				JavaType declaredType = this.classHierarchy.findType(owner);
-				
-				if(declaredType != null) {
-					visitInvokeVirtual(declaredType, name, desc);
-				}
-				
-			} else if(opcode == Opcodes.INVOKEINTERFACE) {
-				
-				JavaType declaredType = this.classHierarchy.findType(owner);
-				
-				if(declaredType != null) {
-					visitInvokeVirtual(declaredType, name, desc);
-				}
-				
-			} else {
-				throw new Error("Invalid opcode.");
-			}
+			// Ignore array types.
+			if(owner.startsWith("[")) { return; }
 			
+			JavaType declaredType = this.classHierarchy.getType(owner);
+			
+			switch(opcode) {
+			case Opcodes.INVOKESPECIAL:
+				// Invocation of constructors, private methods, super() calls.
+				if(name.equals("<init>")) {
+					visitInvokeConstructor(declaredType, name, desc);
+				} else {
+					visitInvokeVirtual(declaredType, name, desc);
+				}					
+				break;
+			case Opcodes.INVOKESTATIC:
+				visitInvokeStatic(declaredType, name, desc);
+				break;
+			case Opcodes.INVOKEVIRTUAL:
+			case Opcodes.INVOKEINTERFACE:
+				visitInvokeVirtual(declaredType, name, desc);
+				break;
+			default:
+				throw new Error("Unexpected opcode.");
+			}			
 			super.visitMethodInsn(opcode, owner, name, desc, itf);
 		}
 		

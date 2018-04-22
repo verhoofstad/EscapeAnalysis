@@ -1,6 +1,7 @@
 package org.classHierarchy.tree;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -45,7 +46,7 @@ public class JavaTypeSet implements Iterable<JavaType> {
 		this.types.remove(id);
 	}
 
-	/*
+	/**
 	 * Finds the Java type with the given id. Returns null if the type was not found.
 	 */
 	public JavaType find(String id) {
@@ -67,9 +68,6 @@ public class JavaTypeSet implements Iterable<JavaType> {
 		return types;
 	}
 	
-	/*
-	 * Finds the Java type with the given id. Throws an error if the type was not found.
-	 */
 	public JavaType get(String id) {
 		if(this.contains(id)) {
 			return this.types.get(id);
@@ -86,6 +84,34 @@ public class JavaTypeSet implements Iterable<JavaType> {
 		}
 	}
 	
+	/**
+	 * Determines whether this set is a subset of a given set.
+	 */
+	public boolean isSubSetOfOrEqualTo(JavaTypeSet other) {
+		
+		for(JavaType javaType : this.types.values()) {
+			if(!other.contains(javaType)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Determines whether this set is a disjoint of a given set (i.e. have no elements in common).
+	 */
+	public boolean isDisjointOf(JavaTypeSet other) {
+		for(JavaType javaType : this.types.values()) {
+			if(other.contains(javaType)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Determines whether this set has at least one element in common with a given set.
+	 */
 	public boolean overlapsWith(JavaTypeSet typeSet) {
 		
 		for(String id : this.types.keySet()) {
@@ -96,11 +122,13 @@ public class JavaTypeSet implements Iterable<JavaType> {
 		return false;
 	}
 	
+	/**
+	 * Returns the number of elements in this set.
+	 */
 	public int size() {
 		return this.types.size();
 	}
 	
-	@Override
 	public Iterator<JavaType> iterator() {
 		return this.types.values().iterator();
 	}

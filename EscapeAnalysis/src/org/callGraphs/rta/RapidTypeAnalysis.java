@@ -8,6 +8,7 @@ import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.tree.JavaTypeSet;
 
 /*
  * Performs Rapid Type Analysis over a previously computed CHA call graph.

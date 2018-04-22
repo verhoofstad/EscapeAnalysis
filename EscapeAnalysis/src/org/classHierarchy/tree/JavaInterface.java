@@ -5,7 +5,6 @@ import org.asm.jvm.AccessFlags;
 
 /**
  * Represents a Java interface.
- *
  */
 public class JavaInterface extends JavaType {
 	

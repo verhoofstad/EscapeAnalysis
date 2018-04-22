@@ -1,11 +1,6 @@
 package org.classHierarchy;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.asm.JarFile;
-import org.asm.JarFileSet;
-import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
@@ -24,6 +19,10 @@ public class ClassHierarchy {
 		this.interfaces = interfaces;
 	}
 	
+	public JavaType rootNode() {
+		return this.rootNode;
+	}
+	
 	public JavaType findType(String internalName) 
 	{
 		if(this.classes.contains(internalName)) {
@@ -38,13 +37,17 @@ public class ClassHierarchy {
 	public JavaType findClass(String internalName) {
 		return this.classes.find(internalName);
 	}
-
+	
 	public JavaType getClass(String internalName) {
 		return this.classes.get(internalName);
 	}
 	
-	public JavaType getInterface(String internalName) {
-		return this.interfaces.get(internalName);
+	public JavaType getType(String internalName) {
+		if(this.containsType(internalName)) {
+			return this.findType(internalName);
+		} else {
+			throw new Error("Could not find type " + internalName);
+		}
 	}
 	
 	public JavaTypeSet getClasses() {
@@ -55,7 +58,11 @@ public class ClassHierarchy {
 		return this.interfaces;
 	}
 	
-	/*
+	public boolean containsType(String internalName) {
+		return this.classes.contains(internalName) || this.interfaces.contains(internalName);
+	}
+	
+	/**
 	 * Gets the public classes (exported classes for RTA).
 	 */
 	public JavaTypeSet getPublicClasses() {
@@ -68,17 +75,18 @@ public class ClassHierarchy {
 		return publicClasses;
 	}
 	
-	/*
+	/**
 	 * Gets the exported methods for RTA.
+	 * @see 
 	 */
 	public JavaMethodSet getExportedMethods() {
 		JavaMethodSet exportedMethods = new JavaMethodSet();
 		for(JavaType publicClass : this.getPublicClasses()) {
 
-			boolean isFinal = publicClass.isFinal();
+			boolean isNonFinal = !publicClass.isFinal();
 			for(JavaMethod method : publicClass.declaredMethods()) {
 				
-				if(method.isPublic() || (method.isProtected() && isFinal)) {
+				if(method.isPublic() || (method.isProtected() && isNonFinal)) {
 					exportedMethods.add(method);
 				}
 			}
@@ -86,62 +94,28 @@ public class ClassHierarchy {
 		return exportedMethods;
 	}
 	
-	/*
-	 * Gets the entry points.
+	
+	/**
+	 * Gets the exported methods for RTA which are contained in a given library (JAR-file).
 	 */
-	public JavaMethodSet getLibCHAcpaEntryPoints(JarFile cpFile) {
-		
-		JavaMethodSet entryPoints = new JavaMethodSet();
-		
-		for(JavaType javaClass : this.classes) {
-			
-			if(javaClass.jarFile().equals(cpFile)) {
-				
-				for(JavaMethod declaredMethod : javaClass.declaredMethods()) {
+	public JavaMethodSet getExportedMethods(JarFile jarFile) {
+		JavaMethodSet exportedMethods = new JavaMethodSet();
+		for(JavaType publicClass : this.getPublicClasses()) {
 
-					if(isEntryPoint((JavaClass)javaClass, declaredMethod)) {
-						entryPoints.add(declaredMethod);
+			if(publicClass.jarFile().getAbsolutePath().equals(jarFile.getAbsolutePath())) {
+			
+				boolean isNonFinal = !publicClass.isFinal();
+				for(JavaMethod method : publicClass.declaredMethods()) {
+					
+					if(method.isPublic() || (method.isProtected() && isNonFinal)) {
+						exportedMethods.add(method);
 					}
 				}
 			}
 		}
-
-		for(JavaType javaInterface : this.interfaces) {
-			
-			if(javaInterface.jarFile().equals(cpFile)) {
-				
-				for(JavaMethod declaredMethod : javaInterface.declaredMethods()) {
-
-					if(!declaredMethod.isAbstract()
-						&& declaredMethod.isClientCallable()) {
-						entryPoints.add(declaredMethod);
-					}
-				}
-			}
-		}
-		
-		return entryPoints;
+		return exportedMethods;
 	}
 	
-	/*
-	 * 1 def isEntryPoint(declType,method):Boolean =
-2 maybeCalledByTheJVM(method) || 
-3 (method.isSaticInitializer && declType.isAccessible) ||
- 4 (method.isClientCallable &&
-5 ( method.isStatic || declType.isInstantiable))
-	 */
-	private boolean isEntryPoint(JavaClass declType, JavaMethod method) {
-		
-		return maybeCalledByTheJVM(method) ||
-			(method.isStaticInitializer() && declType.isAccessible()) ||
-			(method.isClientCallable() &&
-				(method.isStatic() || declType.isInstantiable()));
-	}
-	
-	private boolean maybeCalledByTheJVM(JavaMethod method) {
-		return method.name().equals("finalize");
-	}
-
 	public JavaTypeSet getFinalPackagePrivateClasses() {
 		JavaTypeSet finalPackagePrivateClasses = new JavaTypeSet();
 		for(JavaType javaClass : this.classes) {
@@ -154,19 +128,5 @@ public class ClassHierarchy {
 	
 	public int classCount() {
 		return this.classes.size();
-	}
-	
-	public JarFileSet jarFiles() {
-		Set<JarFile> jarFiles = new HashSet<JarFile>();
-		getJarFiles(this.rootNode, jarFiles);
-		return new JarFileSet(jarFiles);
-	}
-	
-	private void getJarFiles(JavaType javaClass, Set<JarFile> jarFiles) {
-		
-		jarFiles.add(javaClass.jarFile());
-		for(JavaType subClass : javaClass.subClasses()) {
-			getJarFiles(subClass, jarFiles);
-		}
 	}
 }

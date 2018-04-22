@@ -9,8 +9,13 @@ import org.classHierarchy.tree.JavaTypeSet;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 
+/**
+ * Represents a set of all the applies-to sets in a class hierarchy.
+ *
+ */
 class AppliesToSets {
 
+	// Contains all the methods grouped by their signature.
 	Map<String, JavaMethodSet> appliesToSet;
 	
 	public AppliesToSets(ClassHierarchy classHierarchy) {

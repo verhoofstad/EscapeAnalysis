@@ -6,7 +6,6 @@ import org.callGraphs.cha.ClassHierarchyAnalysis;
 import org.callGraphs.rta.RapidTypeAnalysis;
 import org.classHierarchy.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaTypeSet;
 import org.counting.ClassCounter;
@@ -22,7 +21,7 @@ public class LibraryAnalyser {
 	
 	private boolean buildHierarchies = true;
 	private boolean buildGraphs = true;
-	private boolean includeEscapeAnalysis = true;
+	private boolean includeEscapeAnalysis = false;
 	
 	private JavaTypeSet jdkPackagePrivateClasses;
 	private JavaTypeSet jdkConfinedClasses;
@@ -57,42 +56,28 @@ public class LibraryAnalyser {
 			System.out.print("Building class hierarchy...");
 			ClassHierachyBuilder builder = new ClassHierachyBuilder();
 			jarFiles.accept(builder);
-			ClassHierarchy javaObject = builder.classHierarchy();
+			ClassHierarchy classHierarchy = builder.classHierarchy();
 			System.out.println("Ok");
 			
-			JavaTypeSet packagePrivateClasses = javaObject.getFinalPackagePrivateClasses();
+			JavaTypeSet packagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
 			
-			JavaMethodSet exportedMethods = javaObject.getExportedMethods();
+			JavaMethodSet entryPoints = classHierarchy.getExportedMethods(this.library.cpFile());
 	
-			System.out.format("Class hierarchy contains %s classes.\n", javaObject.classCount());
+			System.out.format("Class hierarchy contains %s classes.\n", classHierarchy.classCount());
 			System.out.format("There are %s final package-private classes.\n", packagePrivateClasses.size());
-			System.out.format("Number of RTA entry points: %s\n", exportedMethods.size());
-			
-			int exportedLibMethods = 0;
-			for(JavaMethod exportedMethod : exportedMethods) {
-				if(exportedMethod.jarFile().equals(this.library.cpFile())) {
-					exportedLibMethods++;
-				}
-			}
-			System.out.format("Number of RTA entry points (library): %s\n", exportedLibMethods);
-			JavaMethodSet entryPoints = javaObject.getLibCHAcpaEntryPoints(library.cpFile());
-			
-			System.out.format("Number of entry points (library): %s\n", entryPoints.size());
-			
-			//System.out.format("Number of LibCHAcpa entry points: %s\n", this.result.cpa_entryPoints);
+			System.out.format("Number of RTA entry points: %s\n", entryPoints.size());
 			
 			if(this.buildGraphs) {
 	
 				System.out.print("Performing Class Hierarchy Analysis...");
-				ClassHierarchyAnalysis cha = new ClassHierarchyAnalysis(javaObject);
+				ClassHierarchyAnalysis cha = new ClassHierarchyAnalysis(classHierarchy);
 				jarFiles.accept(cha);
 				CallGraph chaGraph = cha.callGraph();
 				System.out.println("Ok");
-				System.out.format("CHA Graph has %s edges in %s call sites.\n", chaGraph.nrOfEdges(), chaGraph.nrOfCallSites());
 				
 				System.out.print("Performing Rapid Type Analysis...");
 				RapidTypeAnalysis rta = new RapidTypeAnalysis(chaGraph);
-				rta.setLibraryAnalysis(javaObject.getPublicClasses(), entryPoints);
+				rta.setLibraryAnalysis(classHierarchy.getPublicClasses(), entryPoints);
 				rta.analyse();
 				CallGraph rtaGraph = rta.callGraph();
 				System.out.println("Ok");
@@ -105,74 +90,71 @@ public class LibraryAnalyser {
 					// we do not need to analyze them again.
 					packagePrivateClasses.difference(this.jdkPackagePrivateClasses);
 					
-					System.out.print("Find the methods in which package-private classes are instantiated...");
-					JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(javaObject, packagePrivateClasses);
-					jarFiles.accept(methodFinder);
-					System.out.println("Ok");
-					System.out.format("Total of %s methods found.\n", methodFinder.foundMethods().size());
+					JavaTypeSet confinedClasses = new JavaTypeSet(); 
 					
-					EscapeAnalysis escapeAnalysis = new EscapeAnalysis(javaObject.getClasses());
+					if(packagePrivateClasses.size() > 0) {
 					
-					try {
-						escapeAnalysis.analyse(methodFinder.foundMethods(), jarFiles);
-						
-						JavaTypeSet confinedClasses = new JavaTypeSet(packagePrivateClasses);
-						confinedClasses.difference(escapeAnalysis.escapingClasses());
-						
-						System.out.format("Final package-private classes count: %s\n", packagePrivateClasses.size());
-						System.out.format("Escaping classes count:              %s\n", escapeAnalysis.escapingClasses().size());
-						System.out.format("Confined classes count:              %s\n", confinedClasses.size());
-						System.out.format("JDK confined classes count:          %s\n", this.jdkConfinedClasses.size());
-
-						confinedClasses.addAll(this.jdkConfinedClasses);
-						System.out.format("Total confined classes count:        %s\n", confinedClasses.size());
-
-						System.out.print("Performing Rapid Type Analysis with Escape Analysis...");
-						RapidTypeAnalysis rtaEA = new RapidTypeAnalysis(chaGraph);
-						rtaEA.setLibraryAnalysis(javaObject.getPublicClasses(), entryPoints);
-						rtaEA.setConfinedClasses(confinedClasses);
-						rtaEA.analyse();
-						rtaGraphEA = rtaEA.callGraph();
+						System.out.print("Find the methods in which package-private classes are instantiated...");
+						JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(classHierarchy, packagePrivateClasses);
+						jarFiles.accept(methodFinder);
 						System.out.println("Ok");
+						System.out.format("Total of %s methods found.\n", methodFinder.foundMethods().size());
 						
-					} catch(Exception ex) {
-						System.out.println("Soot exception occured!");
-						System.out.format("Message: %s\n", ex.getMessage());
+						if(methodFinder.foundMethods().size() > 0) {
+						
+							EscapeAnalysis escapeAnalysis = new EscapeAnalysis(classHierarchy.getClasses());
+							
+							try {
+								escapeAnalysis.analyse(methodFinder.foundMethods(), jarFiles);
+								
+								confinedClasses.addAll(packagePrivateClasses);
+								confinedClasses.difference(escapeAnalysis.escapingClasses());
+								
+								System.out.format("Final package-private classes count: %s\n", packagePrivateClasses.size());
+								System.out.format("Escaping classes count:              %s\n", escapeAnalysis.escapingClasses().size());
+								System.out.format("Confined classes count:              %s\n", confinedClasses.size());
+								System.out.format("JDK confined classes count:          %s\n", this.jdkConfinedClasses.size());
+		
+								confinedClasses.addAll(this.jdkConfinedClasses);
+								System.out.format("Total confined classes count:        %s\n", confinedClasses.size());
+		
+							} catch(Exception ex) {
+								System.out.println("Soot exception occured!");
+								System.out.format("Message: %s\n", ex.getMessage());
+							}
+						} else {
+							System.out.println("No methods found which instantiate a package-private class.");
+							confinedClasses.addAll(this.jdkConfinedClasses);
+						}
+					} else {
+						System.out.println("Library has no package-private classes.");
+						confinedClasses.addAll(this.jdkConfinedClasses);
 					}
+
+					System.out.print("Performing Rapid Type Analysis with Escape Analysis...");
+					RapidTypeAnalysis rtaEA = new RapidTypeAnalysis(chaGraph);
+					rtaEA.setLibraryAnalysis(classHierarchy.getPublicClasses(), entryPoints);
+					rtaEA.setConfinedClasses(confinedClasses);
+					rtaEA.analyse();
+					rtaGraphEA = rtaEA.callGraph();
+					System.out.println("Ok");				
 				}
 
 				System.out.print("Performing Rapid Type Analysis with Escape Analysis... (best-case)");
 				RapidTypeAnalysis rtaEAMax = new RapidTypeAnalysis(chaGraph);
-				rtaEAMax.setLibraryAnalysis(javaObject.getPublicClasses(), entryPoints);
-				rtaEAMax.setConfinedClasses(javaObject.getFinalPackagePrivateClasses());
+				rtaEAMax.setLibraryAnalysis(classHierarchy.getPublicClasses(), entryPoints);
+				rtaEAMax.setConfinedClasses(classHierarchy.getFinalPackagePrivateClasses());
 				rtaEAMax.analyse();
 				CallGraph rtaGraphEAMax = rtaEAMax.callGraph();
 				System.out.println("Ok");
 				
-				System.out.println("--------------------------------------------------------------------------------------------------------");
-				System.out.format("                                 | %9s | %9s | %10s | %10s | %9s | %9s |\n", 
-					"CHA", "RTA", "RTA EA", "RTA EA max", "LibCPA", "LibCPA CBS");
-				System.out.println("--------------------------------------------------------------------------------------------------------");
-				
-				System.out.format("Total number edges               | %9s | %9s | %10s | %10s | %9s | %9s |\n",
-					chaGraph.nrOfEdges(), rtaGraph.nrOfEdges(), rtaGraphEA.nrOfEdges(), rtaGraphEAMax.nrOfEdges(), this.result.cpa_callEdgesCount, this.result.cpa_callBySignatureEdgesCount);
-				System.out.format("Total number of call sites       | %9s | %9s | %10s | %10s |\n",
-					chaGraph.nrOfCallSites(), rtaGraph.nrOfCallSites(), rtaGraphEA.nrOfCallSites(), rtaGraphEAMax.nrOfCallSites());
-				System.out.format(" - Virtual call sites            | %9s | %9s | %10s | %10s |\n",
-					chaGraph.nrOfVirtualCallSites(), rtaGraph.nrOfVirtualCallSites(), rtaGraphEA.nrOfVirtualCallSites(), rtaGraphEAMax.nrOfVirtualCallSites());
-				System.out.format("     (of which are monomorphic)  | %9s | %9s | %10s | %10s |\n",
-					chaGraph.nrOfVirtualMonoCallSites(), rtaGraph.nrOfVirtualMonoCallSites(), rtaGraphEA.nrOfVirtualMonoCallSites(), rtaGraphEAMax.nrOfVirtualMonoCallSites());
-				System.out.format("     (of which are empty)        | %9s | %9s | %10s | %10s |\n",
-						chaGraph.nrOfVirtualEmptyCallSites(), rtaGraph.nrOfVirtualEmptyCallSites(), rtaGraphEA.nrOfVirtualEmptyCallSites(), rtaGraphEAMax.nrOfVirtualEmptyCallSites());
-				System.out.format(" - Static call sites             | %9s | %9s | %10s | %10s |\n",
-					chaGraph.nrOfStaticCallSites(), rtaGraph.nrOfStaticCallSites(), rtaGraphEA.nrOfStaticCallSites(), rtaGraphEAMax.nrOfStaticCallSites());
-				System.out.println("------------------------------------------------------------------------------------");
+				printGraphTotals(chaGraph, rtaGraph, rtaGraphEA, rtaGraphEAMax);
 			}
 		}
 		System.out.println();
 	}
 	
-	public void printTotals(LibraryResult result) {
+	private void printTotals(LibraryResult result) {
 		System.out.format("Public class count:              %9s\n", result.all_publicClassCount);
 		System.out.format("Package-private class count:     %9s\n", result.all_packageVisibleClassCount);
 		System.out.format("Total class count:               %9s\n", result.all_classCount);
@@ -187,6 +169,29 @@ public class LibraryAnalyser {
 		System.out.format("Private method count:            %9s\n", result.all_privateMethods);
 		System.out.format("Total method count:              %9s\n", result.all_methodCount);
 		System.out.println();
+	}
+	
+	private void printGraphTotals(CallGraph chaGraph, CallGraph rtaGraph, CallGraph rtaGraphEA, CallGraph rtaGraphEAMax) {
+		
+		System.out.println("--------------------------------------------------------------------------------------------------------");
+		System.out.format("                                 | %9s | %9s | %10s | %10s | %9s | %9s |\n", 
+			"CHA", "RTA", "RTA EA", "RTA EA max", "LibCPA", "LibCPA CBS");
+		System.out.println("--------------------------------------------------------------------------------------------------------");
+		
+		System.out.format("Total number edges               | %9s | %9s | %10s | %10s | %9s | %9s |\n",
+			chaGraph.nrOfEdges(), rtaGraph.nrOfEdges(), rtaGraphEA.nrOfEdges(), rtaGraphEAMax.nrOfEdges(), this.result.cpa_callEdgesCount, this.result.cpa_callBySignatureEdgesCount);
+		System.out.format("Total number of call sites       | %9s | %9s | %10s | %10s |\n",
+			chaGraph.nrOfCallSites(), rtaGraph.nrOfCallSites(), rtaGraphEA.nrOfCallSites(), rtaGraphEAMax.nrOfCallSites());
+		System.out.format(" - Virtual call sites            | %9s | %9s | %10s | %10s |\n",
+			chaGraph.nrOfVirtualCallSites(), rtaGraph.nrOfVirtualCallSites(), rtaGraphEA.nrOfVirtualCallSites(), rtaGraphEAMax.nrOfVirtualCallSites());
+		System.out.format("     (of which are monomorphic)  | %9s | %9s | %10s | %10s |\n",
+			chaGraph.nrOfVirtualMonoCallSites(), rtaGraph.nrOfVirtualMonoCallSites(), rtaGraphEA.nrOfVirtualMonoCallSites(), rtaGraphEAMax.nrOfVirtualMonoCallSites());
+		System.out.format("     (of which are empty)        | %9s | %9s | %10s | %10s |\n",
+				chaGraph.nrOfVirtualEmptyCallSites(), rtaGraph.nrOfVirtualEmptyCallSites(), rtaGraphEA.nrOfVirtualEmptyCallSites(), rtaGraphEAMax.nrOfVirtualEmptyCallSites());
+		System.out.format(" - Static call sites             | %9s | %9s | %10s | %10s |\n",
+			chaGraph.nrOfStaticCallSites(), rtaGraph.nrOfStaticCallSites(), rtaGraphEA.nrOfStaticCallSites(), rtaGraphEAMax.nrOfStaticCallSites());
+		System.out.println("------------------------------------------------------------------------------------");
+		
 	}
 	
 	public void printTotals(LibraryResult result1, LibraryResult result2) {

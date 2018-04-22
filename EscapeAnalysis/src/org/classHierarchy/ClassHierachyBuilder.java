@@ -12,8 +12,9 @@ import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.tree.JavaTypeSet;
 
-/*
+/**
  * Builds a class hierarchy.
  */
 public class ClassHierachyBuilder extends JarFileSetVisitor  {

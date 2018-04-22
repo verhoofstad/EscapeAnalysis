@@ -35,7 +35,7 @@ public abstract class JavaType {
 		this.packagePath = internalName.substring(0, internalName.lastIndexOf("/"));
 	}
 	
-	/*
+	/**
 	 * Gets the fully qualified name that uniquely identifies this type.
 	 */
 	public String id() {
@@ -58,31 +58,26 @@ public abstract class JavaType {
 		return !isPublic();
 	}
 	
-	public boolean isFinal() {
-		return this.accessFlags.isFinal();
-	}
-	
 	public boolean isFinalPackagePrivate() {
 		return isPackagePrivate() && !hasPublicSubClass();
+	}
+	
+	public boolean isFinal() {
+		return this.accessFlags.isFinal();
 	}
 	
 	public boolean isAbstract() {
 		return this.accessFlags.isAbstract();
 	}
 	
-	public boolean isAccessible() {
-		return this.isPublic()
-			|| this.hasPublicSubClass();
-	}
-	
-	/*
+	/**
 	 * Gets the JAR-file this type was loaded from.
 	 */
 	public JarFile jarFile() {
 		return this.jarFile;
 	}
 	
-	/*
+	/**
 	 * Returns the sub classes of the current type. If the current type represents an interface,
 	 * it returns the classes that implement it.
 	 */
@@ -90,7 +85,7 @@ public abstract class JavaType {
 		return this.subClasses;
 	}
 	
-	/*
+	/**
 	 * Returns the cone set of the current type.
 	 * If the current type is a class, it returns the current instance and all direct and indirect sub classes.
 	 * If the current type is an interface, it returns the current instance, all direct and indirect sub interfaces
@@ -169,7 +164,9 @@ public abstract class JavaType {
 		}
 	}
 	
-	
+	/**
+	 * Returns a value indicating whether this type has at least one public sub class (transitive).
+	 */
 	public boolean hasPublicSubClass() {
 		for(JavaType subClass : this.subClasses) {
 			if(subClass.isPublic() || subClass.hasPublicSubClass()) {
@@ -179,6 +176,9 @@ public abstract class JavaType {
 		return false;
 	}
 
+	/**
+	 * Finds a method that matches the given signature.
+	 */
 	public JavaMethod findMethod(String signature) {
 		for(JavaMethod method : this.declaredMethods) {
 			if(method.signature().equals(signature)) { 
@@ -188,6 +188,9 @@ public abstract class JavaType {
 		return null;
 	}
 	
+	/**
+	 * Finds a method that matches the given signature.
+	 */
 	public JavaMethod findMethod(String name, String desc) {
 		for(JavaMethod method : this.declaredMethods) {
 			if(method.signatureEquals(name, desc)) { 
@@ -207,6 +210,10 @@ public abstract class JavaType {
 		}
 	}
 	
+	/**
+	 * Finds a static method that matches the given signature. If it cannot be found in the current type,
+	 * the super interfaces of this type are searched.
+	 */
 	public JavaMethod findStaticMethod(String name, String desc) {
 		
 		for(JavaMethod declaredMethod : this.declaredMethods()) {

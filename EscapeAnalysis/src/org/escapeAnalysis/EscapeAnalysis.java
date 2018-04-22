@@ -8,6 +8,7 @@ import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.tree.JavaTypeSet;
 import org.escapeAnalysis.connectionGraph.EscapeState;
 import org.escapeAnalysis.connectionGraph.ObjectNode;
 
@@ -61,9 +62,6 @@ public class EscapeAnalysis {
 
 		Scene scene = Scene.v();
 	
-		//scene.setSootClassPath(jarFiles.getClassPath());		
-		
-		System.out.println("Soot-class-path: " + jarFiles.getSootClassPath());
 		System.out.println("Soot-class-path: " +  scene.getSootClassPath());
     	System.out.println("Soot process-dir: " +  methods.jarFiles().toSootStringList());		
 		scene.loadNecessaryClasses(); // Triggers Soot exception

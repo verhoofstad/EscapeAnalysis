@@ -9,7 +9,7 @@ import java.util.Set;
 import org.asm.JarFile;
 import org.asm.JarFileSet;
 
-/*
+/**
  * Represents a set of methods.
  */
 public class JavaMethodSet implements Iterable<JavaMethod> {

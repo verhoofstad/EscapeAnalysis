@@ -70,8 +70,7 @@ public class DataSet implements Iterable<Library> {
 		DataSet completeSet = DataSet.getCompleteSet();
 		DataSet correctSet = new DataSet();
 
-		Integer[] correctIds = {1,2,3,4,5,6,8,11,17,18,19,21,26,27,30,33,35,37,41,47,48,49,/*50,*/51,52,60,71,72,86,88,91,95,97};
-		
+		Integer[] correctIds = {1,2,3,4,5,6,8,11,17,18,19,21,26,27,30,33,35,37,41,47,48,49,51,52,60,71,72,86,88,91,95,97};		
 		List<Integer> correctLibraries = new ArrayList<Integer>(Arrays.asList(correctIds));
 
 		for(Library library : completeSet) {
@@ -435,10 +434,11 @@ public class DataSet implements Iterable<Library> {
     	dataSet.addLibrary(49, "commons-cli", "commons-cli", "1.3.1", 
     		"Libraries\\commons-cli\\commons-cli\\jars\\commons-cli-1.3.1.jar", new String[] {
     		"JavaJDK\\java-8-openjdk-amd64\\jre\\lib"});
-    	dataSet.addLibrary(50, "javax.mail", "mail", "1.4.7", 
-    		"Libraries\\javax.mail\\mail\\jars\\mail-1.4.7.jar", new String[] {
-    		"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
-    		"Libraries\\javax.activation\\activation\\jars\\activation-1.1.jar"});
+    	dataSet.addLibrary(50, "javax.mail", "mail", "1.4.7", "Libraries\\javax.mail\\mail\\jars\\mail-1.4.7.jar", 
+    		new String[] {
+    			"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",
+    			"Libraries\\javax.activation\\activation\\jars\\activation-1.1.jar"
+    		});
     	dataSet.addLibrary(51, "org.assertj", "assertj-core", "3.2.0", 
     		"Libraries\\org.assertj\\assertj-core\\bundles\\assertj-core-3.2.0.jar", new String[] {
     		"JavaJDK\\java-8-openjdk-amd64\\jre\\lib",

@@ -52,7 +52,7 @@ public class JavaMethod {
 		this.id = createId();
 	}
 	
-	/*
+	/**
 	 * Gets the fully qualified name that uniquely identifies this method.
 	 */
 	public String id() {
@@ -75,6 +75,9 @@ public class JavaMethod {
 		return this.containedIn;
 	}
 	
+	/**
+	 * Returns the set of method that directly overrides this method (non transitive).
+	 */
 	public JavaMethodSet overridenBy() {
 		return this.overridenBy;
 	}
@@ -107,7 +110,7 @@ public class JavaMethod {
 		return this.name.equals("<clinit>");
 	}
 		
-	/*
+	/**
 	 * Gets the JAR-file this method was loaded from.
 	 */
 	public JarFile jarFile() {
@@ -116,7 +119,7 @@ public class JavaMethod {
 	
 	/**
 	 * Resolves the applies-to set for this method.
-	 * This method can be called when the entire class hierarchy is constructed.
+	 * This method should only be called when the entire class hierarchy is constructed.
 	 */
 	void resolveAppliestoSet() {
 		
@@ -143,24 +146,6 @@ public class JavaMethod {
 		this.overridenBy.add(overridingMethod);
 	}
 	
-	
-	/**
-	 * 
-	 */
-	public boolean isClientCallable() {
-		
-		boolean hasPublicSubClassThatInheritsMethod = false;
-		for(JavaType subType : this.appliesTo) {
-			if(subType instanceof JavaClass && subType.isPublic()) {
-				hasPublicSubClassThatInheritsMethod = true;
-				break;
-			}
-		}
-		
-		return (this.isPublic() || this.isProtected()) &&
-			(this.containedIn.isPublic() || hasPublicSubClassThatInheritsMethod);
-	}
-	
 	@Override
 	public boolean equals(Object obj) {
 		if(obj == null || !(obj instanceof JavaMethod)) {
@@ -170,7 +155,7 @@ public class JavaMethod {
 		}
 	}
 	
-	/*
+	/**
 	 * Determines whether a given method has the same signature (i.e. name, arguments and return type) as the current instance.
 	 */
 	public boolean signatureEquals(JavaMethod other) {

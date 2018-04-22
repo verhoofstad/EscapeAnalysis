@@ -4,6 +4,7 @@ import org.asm.JarFileSet;
 import org.classHierarchy.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.tree.JavaTypeSet;
 import org.escapeAnalysis.EscapeAnalysis;
 import org.methodFinding.JarFileSetMethodFinder;
 
@@ -53,5 +54,6 @@ public class JDKAnalyser {
 		System.out.format("Final package-private classes count: %s\n", this.jdkPackagePrivateClasses.size());
 		System.out.format("Escaping classes count:              %s\n", escapeAnalysis.escapingClasses().size());
 		System.out.format("Confined classes count:              %s\n", this.jdkConfinedClasses.size());
+		System.out.println();
 	}
 }
