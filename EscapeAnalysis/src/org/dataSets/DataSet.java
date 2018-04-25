@@ -5,12 +5,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.Environment;
 import org.asm.JarFile;
 import org.asm.JarFileSet;
 
 public class DataSet implements Iterable<Library> {
-
-    private String rootFolder = "C:\\CallGraphData\\";
 
     private List<Library> libraries = new ArrayList<Library>();
 
@@ -21,12 +20,12 @@ public class DataSet implements Iterable<Library> {
     private void addLibrary(int id, String organisation, String name, String revision, String cpFile,
             String[] libFiles) {
 
-        JarFile cpJarFile = new JarFile(rootFolder + cpFile);
+        JarFile cpJarFile = new JarFile(Environment.rootFolder + cpFile);
 
         List<String> libJarFiles = new ArrayList<String>();
 
         for (String libFile : libFiles) {
-            libJarFiles.add(rootFolder + libFile);
+            libJarFiles.add(Environment.rootFolder + libFile);
         }
 
         this.libraries.add(new Library(id, organisation, name, revision, cpJarFile, new JarFileSet(libJarFiles)));

@@ -20,7 +20,7 @@ public class Main {
 
         DataSet dataSet = DataSet.getCorrectSet();
 
-        validateLibraries(dataSet);
+        //validateLibraries(dataSet);
         analyseLibraries(dataSet);
     }
 
@@ -28,7 +28,7 @@ public class Main {
 
         // Because the JDK is a dependency of every other library,
         // we analyze it one time separately so we can re-use the results.
-        JDKAnalyser jdkAnalyser = new JDKAnalyser("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib");
+        JDKAnalyser jdkAnalyser = new JDKAnalyser(Environment.jdkFolder);
         jdkAnalyser.analyseJDK();
 
         LibraryResultSet libResults = readResultFile();
@@ -70,7 +70,7 @@ public class Main {
 
     public static LibraryResultSet readResultFile() {
 
-        String csvFile = "C:\\CallGraphData\\results.txt";
+        String csvFile = Environment.rootFolder + "results.txt";
         BufferedReader br = null;
         String line = "";
         String cvsSplitBy = "\t";

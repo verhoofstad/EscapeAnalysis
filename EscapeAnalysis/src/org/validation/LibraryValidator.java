@@ -6,7 +6,7 @@ import java.util.Set;
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
 
-/*
+/**
  * Validates whether a library (set of jar-files) is complete and has no missing dependencies. 
  * i.e. all classes and interfaces that are extended, implemented, instantiated, invoked, etc. are 
  * present in the library.
@@ -15,8 +15,7 @@ public class LibraryValidator extends JarFileSetVisitor {
 
     // Classes and interfaces that are defined in the JAR-set
     Set<String> declaredTypes = new HashSet<String>();
-    // Classes and interfaces that are referenced in the JAR-set (i.e. the
-    // dependencies)
+    // Classes and interfaces that are referenced in the JAR-set (i.e. the dependencies)
     Set<String> extendedTypes = new HashSet<String>();
     Set<String> implementedTypes = new HashSet<String>();
     Set<String> invokedTypes = new HashSet<String>();
