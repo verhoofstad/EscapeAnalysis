@@ -18,12 +18,9 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // DataSet dataSet = DataSet.getFixedSet();
         DataSet dataSet = DataSet.getCorrectSet();
 
-        // validateJDK();
-        // validateLibraries(dataSet);
-
+        validateLibraries(dataSet);
         analyseLibraries(dataSet);
     }
 
@@ -44,14 +41,6 @@ public class Main {
             analyser.analyse();
         }
         System.out.println("Finished");
-    }
-
-    private static void validateJDK() {
-
-        LibraryValidator validator = new LibraryValidator();
-        JarFileSet jdkFiles = new JarFileSet("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib");
-
-        jdkFiles.accept(validator);
     }
 
     private static void validateLibraries(DataSet dataSet) {

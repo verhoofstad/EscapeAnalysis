@@ -8,9 +8,8 @@ import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
-import org.classHierarchy.tree.JavaTypeSet;
 
-/*
+/**
  * Performs Rapid Type Analysis over a previously computed CHA call graph.
  */
 public class RapidTypeAnalysis {
@@ -55,12 +54,7 @@ public class RapidTypeAnalysis {
 
         while (!this.worklist.isEmpty()) {
 
-            if (i % 100 == 0) {
-                println("Worklist size: %s (processed: %s)", this.worklist.size(), this.worklist.processed());
-            }
-            i++;
-
-            JavaMethod currentMethod = this.worklist.removeItem();
+            JavaMethod currentMethod = this.worklist.getItem();
 
             CallSiteSet callSites = this.chaGraph.getCallSites(currentMethod);
 

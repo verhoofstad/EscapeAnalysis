@@ -17,7 +17,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
     }
 
     private AnalysisType analysisType;
-    private Boolean verbose = false;
+    private boolean verbose = false;
 
     private ConnectionGraph connectionGraph;
 

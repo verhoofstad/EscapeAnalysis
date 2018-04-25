@@ -59,7 +59,7 @@ public class DataSet implements Iterable<Library> {
         return dataSet;
     }
 
-    /*
+    /**
      * Returns a data set containing those libraries for which a complete and valid
      * class hierarchy can be build (i.e. which do not have a missing dependency).
      */
@@ -78,16 +78,6 @@ public class DataSet implements Iterable<Library> {
             }
         }
         return correctSet;
-    }
-
-    public static DataSet getFixedSet() {
-
-        DataSet completeSet = DataSet.getCompleteSet();
-        DataSet fixedSet = new DataSet();
-
-        fixedSet.addLibrary(completeSet.get(10));
-
-        return fixedSet;
     }
 
     public static DataSet getCompleteSet() {

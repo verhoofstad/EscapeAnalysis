@@ -12,7 +12,6 @@ import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
-import org.classHierarchy.tree.JavaTypeSet;
 
 /**
  * Builds a class hierarchy.
@@ -123,7 +122,7 @@ public class ClassHierachyBuilder extends JarFileSetVisitor {
 
     private JavaClass resolveTempClass(JavaTempType tempClass, JavaClass superClass) {
 
-        JavaTypeSet implementedInterfaces = getImplementedInterfaces(tempClass);
+        JavaTypeSet implementedInterfaces = this.interfaces.get(tempClass.superInterfaces());
         JavaClass javaClass = tempClass.resolveToJavaClass(superClass, implementedInterfaces);
 
         // Find sub-classes
@@ -142,19 +141,6 @@ public class ClassHierachyBuilder extends JarFileSetVisitor {
         return javaClass;
     }
 
-    private JavaTypeSet getImplementedInterfaces(JavaTempType tempClass) {
-
-        JavaTypeSet implementedInterfaces = this.interfaces.find(tempClass.superInterfaces());
-
-        if (implementedInterfaces.size() != tempClass.superInterfaces().length) {
-
-            String error = String.format("Interfaces missing (1). Expected: %s, actual: %s\n",
-                    tempClass.superInterfaces().length, implementedInterfaces.size());
-
-            throw new Error(error);
-        }
-        return implementedInterfaces;
-    }
 
     private List<JavaTempType> findRootClasses() {
 

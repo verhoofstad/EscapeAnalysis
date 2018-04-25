@@ -6,6 +6,10 @@ import java.util.Map;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 
+/**
+ * Represents a call graph.
+ *
+ */
 public class CallGraph {
 
     private Map<String, CallSiteSet> callSites = new HashMap<String, CallSiteSet>();
@@ -27,10 +31,10 @@ public class CallGraph {
         this.callSites.get(sourceId).addCallSite(callSite);
     }
 
-    /*
+    /**
      * Gets all call sites for a given method.
      * 
-     * A method can have zero or more call sites.
+     * Remark: A method can have zero or more call sites.
      */
     public CallSiteSet getCallSites(JavaMethod javaMethod) {
 

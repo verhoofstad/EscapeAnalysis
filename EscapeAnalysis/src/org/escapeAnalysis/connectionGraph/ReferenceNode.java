@@ -41,7 +41,7 @@ public abstract class ReferenceNode extends Node {
 
         ObjectNodeSet objectNodes = new ObjectNodeSet();
 
-        objectNodes.addAll(pointsToNodes.values());
+        objectNodes.addAll(currentNode.pointsToNodes.values());
         visitedNodes.add(currentNode.id());
 
         for (ReferenceNode node : currentNode.deferredNodes.values()) {

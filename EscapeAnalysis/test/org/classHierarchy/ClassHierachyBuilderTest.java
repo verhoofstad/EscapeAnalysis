@@ -14,7 +14,11 @@ import org.classHierarchy.tree.JavaTypeSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class ClassHierarchyIntegrationTest {
+/**
+ * Tests the org.classHierarchy.ClassHierachyBuilder class by constructing a class hierarchy for the JDK library
+ * and asserting whether certain properties hold. 
+ */
+class ClassHierachyBuilderTest {
 
     private static String javaObject = "java/lang/Object";
     private static String jdkFolder = "C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib";
@@ -93,10 +97,11 @@ class ClassHierarchyIntegrationTest {
     void JavaClass_id() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        // Assert all classes have an id.
+        // Assert that all classes have an id.
         for (JavaType javaClass : allClasses) {
             assertNotNull(javaClass.id(), "The method JavaType.id() should never return null.");
             assertNotEquals("", javaClass.id(), "The method JavaType.id() should never return an empty string.");
+            assertFalse(javaClass.id().startsWith("/"));
         }
     }
 
@@ -104,7 +109,7 @@ class ClassHierarchyIntegrationTest {
     void JavaClass_name() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        // Assert all classes have a name.
+        // Assert that all classes have a name.
         for (JavaType javaClass : allClasses) {
             assertNotNull(javaClass.name(), "The method JavaType.name() should never return null.");
             assertNotEquals("", javaClass.name(), "The method JavaType.name() should never return an empty string.");
@@ -115,11 +120,10 @@ class ClassHierarchyIntegrationTest {
     void JavaClass_sootName() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        // Assert all classes have a name.
+        // Assert that all classes have a Soot name.
         for (JavaType javaClass : allClasses) {
             assertNotNull(javaClass.sootName(), "The method JavaType.sootName() should never return null.");
-            assertNotEquals("", javaClass.sootName(),
-                    "The method JavaType.sootName() should never return an empty string.");
+            assertNotEquals("", javaClass.sootName(), "The method JavaType.sootName() should never return an empty string.");
         }
     }
 
@@ -127,8 +131,7 @@ class ClassHierarchyIntegrationTest {
     void JavaClass_publicOrPackagePrivate() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        // Assert all classes are either public or package-private (not both nor
-        // neither).
+        // Assert all classes are either public or package-private (not both nor neither).
         for (JavaType javaClass : allClasses) {
             assertTrue(javaClass.isPublic() ^ javaClass.isPackagePrivate());
 
@@ -145,7 +148,7 @@ class ClassHierarchyIntegrationTest {
     void JavaClass_isFinal() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        // Assert all final classes don't have any subclasses.
+        // Assert no final classes have a subclass.
         for (JavaType javaClass : allClasses) {
             if (javaClass.isFinal()) {
                 assertEquals(0, javaClass.subClasses().size());
@@ -178,8 +181,7 @@ class ClassHierarchyIntegrationTest {
         // Assert all classes have a package path.
         for (JavaType javaClass : allClasses) {
             assertNotNull(javaClass.packagePath(), "The method JavaType.packagePath() should never return null.");
-            assertNotEquals("", javaClass.packagePath(),
-                    "The method JavaType.packagePath() should never return an empty string.");
+            assertNotEquals("", javaClass.packagePath(), "The method JavaType.packagePath() should never return an empty string.");
         }
     }
 
@@ -211,8 +213,10 @@ class ClassHierarchyIntegrationTest {
             assertNotNull(javaClass.coneSet(), "The method JavaType.coneSet() should never return null.");
             assertNotEquals(0, javaClass.coneSet().size(), "The method JavaType.coneSet() should never be empty.");
 
-            // Assert that the cone set of a class only contains classes (i.e. not
-            // interfaces).
+            // Assert the cone set of a class contains at least the class itself.
+            assertTrue(javaClass.coneSet().contains(javaClass));
+            
+            // Assert that the cone set of a class only contains classes (i.e. not interfaces).
             for (JavaType coneClass : javaClass.coneSet()) {
                 assertTrue(coneClass instanceof JavaClass);
             }
@@ -224,8 +228,7 @@ class ClassHierarchyIntegrationTest {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
         for (JavaType javaType : allClasses) {
-
-            assertNotNull(javaType.declaredMethods());
+            assertNotNull(javaType.declaredMethods(), "The method JavaType.declaredMethods() should never return null.");
         }
     }
 
@@ -233,7 +236,7 @@ class ClassHierarchyIntegrationTest {
     void JavaClass_superClass() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        // Assert all classes a superclass (except java.lang.Object).
+        // Assert all classes have a superclass (except java.lang.Object).
         for (JavaType javaType : allClasses) {
             JavaClass javaClass = (JavaClass) javaType;
 
@@ -241,12 +244,10 @@ class ClassHierarchyIntegrationTest {
                 assertFalse(javaClass.hasSuperClass(), "The class java.lang.Object should not have a superclass.");
                 assertNull(javaClass.superClass(), "The class java.lang.Object should not have a superclass.");
             } else {
-                assertTrue(javaClass.hasSuperClass(),
-                        "All classes other than java.lang.Object must have a superclass.");
-                assertNotNull(javaClass.superClass(),
-                        "All classes other than java.lang.Object must have a superclass.");
+                assertTrue(javaClass.hasSuperClass(), "All classes other than java.lang.Object must have a superclass.");
+                assertNotNull(javaClass.superClass(), "All classes other than java.lang.Object must have a superclass.");
                 assertFalse(javaClass.coneSet().contains(javaClass.superClass()),
-                        "A superclass of a class can never be a subclass of that same class.");
+                    "A superclass of a class can never be a subclass of that same class.");
             }
         }
     }
@@ -269,8 +270,7 @@ class ClassHierarchyIntegrationTest {
         // Assert all interfaces have a name.
         for (JavaType javaInterface : allInterfaces) {
             assertNotNull(javaInterface.name(), "The method JavaType.name() should never return null.");
-            assertNotEquals("", javaInterface.name(),
-                    "The method JavaType.name() should never return an empty string.");
+            assertNotEquals("", javaInterface.name(), "The method JavaType.name() should never return an empty string.");
         }
     }
 
@@ -281,8 +281,7 @@ class ClassHierarchyIntegrationTest {
         // Assert all interfaces have a name.
         for (JavaType javaInterface : allInterfaces) {
             assertNotNull(javaInterface.sootName(), "The method JavaType.sootName() should never return null.");
-            assertNotEquals("", javaInterface.sootName(),
-                    "The method JavaType.sootName() should never return an empty string.");
+            assertNotEquals("", javaInterface.sootName(), "The method JavaType.sootName() should never return an empty string.");
         }
     }
 
@@ -290,8 +289,7 @@ class ClassHierarchyIntegrationTest {
     void JavaInterface_publicOrPackagePrivate() {
         JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
 
-        // Assert all interfaces are either public or package-private (not both nor
-        // neither).
+        // Assert all interfaces are either public or package-private (not both nor neither).
         for (JavaType javaInterface : allInterfaces) {
             assertTrue(javaInterface.isPublic() ^ javaInterface.isPackagePrivate());
 
@@ -331,8 +329,7 @@ class ClassHierarchyIntegrationTest {
         // Assert all interfaces have a package path.
         for (JavaType javaInterface : allInterfaces) {
             assertNotNull(javaInterface.packagePath(), "The method JavaType.packagePath() should never return null.");
-            assertNotEquals("", javaInterface.packagePath(),
-                    "The method JavaType.packagePath() should never return an empty string.");
+            assertNotEquals("", javaInterface.packagePath(), "The method JavaType.packagePath() should never return an empty string.");
         }
     }
 
@@ -372,8 +369,7 @@ class ClassHierarchyIntegrationTest {
 
         for (JavaType javaInterface : allInterfaces) {
             JavaMethodSet interfaceMethods = javaInterface.declaredMethods();
-
-            assertNotNull(interfaceMethods);
+            assertNotNull(interfaceMethods, "The method JavaType.declaredMethods() should never return null.");
         }
     }
 
@@ -398,8 +394,7 @@ class ClassHierarchyIntegrationTest {
         for (JavaType javaClass : allClasses) {
             for (JavaMethod javaMethod : javaClass.declaredMethods()) {
                 assertNotNull(javaMethod.name(), "The method JavaMethod.name() should never return null.");
-                assertNotEquals("", javaMethod.name(),
-                        "The method JavaMethod.name() should never return an empty string.");
+                assertNotEquals("", javaMethod.name(), "The method JavaMethod.name() should never return an empty string.");
             }
         }
     }
@@ -431,6 +426,11 @@ class ClassHierarchyIntegrationTest {
                 if (javaMethod.isStaticInitializer()) {
                     assertTrue(javaMethod.isStatic());
                     assertFalse(javaMethod.isConstructor());
+                    assertFalse(javaMethod.isAbstract());
+                }
+                if(javaMethod.isConstructor()) {
+                    assertFalse(javaMethod.isStatic());
+                    assertFalse(javaMethod.isStaticInitializer());
                     assertFalse(javaMethod.isAbstract());
                 }
             }
@@ -479,7 +479,7 @@ class ClassHierarchyIntegrationTest {
                 for (JavaMethod overridingMethod : overridenBy) {
                     // have the same signature,
                     assertTrue(overridingMethod.signatureEquals(javaMethod));
-                    // are contained in a different class,
+                    // but are contained in a different class,
                     assertTrue(overridingMethod.containedIn() != javaClass);
                     // are contained in one of the sub classes
                     assertTrue(javaClass.coneSet().contains(overridingMethod.containedIn()));

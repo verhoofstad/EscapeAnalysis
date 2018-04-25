@@ -6,7 +6,7 @@ import java.util.Set;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 
-/*
+/**
  * Represents a work list for Rapid Type Analysis in which a work item can only be processed once.
  */
 class Worklist {
@@ -18,19 +18,7 @@ class Worklist {
         this.toProcess = new JavaMethodSet(worklist);
     }
 
-    public boolean isEmpty() {
-        return this.toProcess.isEmpty();
-    }
-
-    public int size() {
-        return this.toProcess.size();
-    }
-
-    public int processed() {
-        return this.processed.size();
-    }
-
-    public JavaMethod removeItem() {
+    public JavaMethod getItem() {
         JavaMethod item = this.toProcess.getRandom();
         this.toProcess.remove(item.id());
         this.processed.add(item.id());
@@ -41,5 +29,13 @@ class Worklist {
         if (!this.toProcess.contains(item.id()) && !this.processed.contains(item.id())) {
             this.toProcess.add(item);
         }
+    }
+    
+    public int size() {
+        return this.toProcess.size();
+    }
+    
+    public boolean isEmpty() {
+        return this.toProcess.isEmpty();
     }
 }

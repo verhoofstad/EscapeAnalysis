@@ -21,7 +21,7 @@ public class LibraryAnalyser {
 
     private boolean buildHierarchies = true;
     private boolean buildGraphs = true;
-    private boolean includeEscapeAnalysis = false;
+    private boolean includeEscapeAnalysis = true;
 
     private JavaTypeSet jdkPackagePrivateClasses;
     private JavaTypeSet jdkConfinedClasses;
@@ -111,13 +111,10 @@ public class LibraryAnalyser {
                                 confinedClasses.addAll(packagePrivateClasses);
                                 confinedClasses.difference(escapeAnalysis.escapingClasses());
 
-                                System.out.format("Final package-private classes count: %s\n",
-                                        packagePrivateClasses.size());
-                                System.out.format("Escaping classes count:              %s\n",
-                                        escapeAnalysis.escapingClasses().size());
+                                System.out.format("Final package-private classes count: %s\n", packagePrivateClasses.size());
+                                System.out.format("Escaping classes count:              %s\n", escapeAnalysis.escapingClasses().size());
                                 System.out.format("Confined classes count:              %s\n", confinedClasses.size());
-                                System.out.format("JDK confined classes count:          %s\n",
-                                        this.jdkConfinedClasses.size());
+                                System.out.format("JDK confined classes count:          %s\n", this.jdkConfinedClasses.size());
 
                                 confinedClasses.addAll(this.jdkConfinedClasses);
                                 System.out.format("Total confined classes count:        %s\n", confinedClasses.size());

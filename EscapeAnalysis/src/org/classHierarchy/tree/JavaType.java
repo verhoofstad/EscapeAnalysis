@@ -165,7 +165,7 @@ public abstract class JavaType {
      * Returns a value indicating whether this type has at least one public sub
      * class (transitive).
      */
-    public boolean hasPublicSubClass() {
+    private boolean hasPublicSubClass() {
         for (JavaType subClass : this.subClasses) {
             if (subClass.isPublic() || subClass.hasPublicSubClass()) {
                 return true;

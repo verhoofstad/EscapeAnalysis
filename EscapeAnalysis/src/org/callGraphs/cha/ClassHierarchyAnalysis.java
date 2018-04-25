@@ -11,6 +11,10 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+/**
+ * Constructs a call graph using Class Hierarchy Analysis.
+ *
+ */
 public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 
     private ClassHierarchy classHierarchy;
@@ -23,6 +27,9 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
         this.appliesToSets = new AppliesToSets(this.classHierarchy);
     }
 
+    /**
+     * Gets the constructed call graph.
+     */
     public CallGraph callGraph() {
         return this.callGraph;
     }
