@@ -55,7 +55,7 @@ public class Main {
             System.out.format("PROCESSING: %s with %s | %s | %s\n", library.id(), library.organisation(),
                     library.name(), library.revision());
             System.out.println();
-            System.out.format("CPFILE: %s\n", library.cpFile().getAbsolutePath());
+            System.out.format("CPFILE: %s\n", library.cpFile().toString());
             System.out.format("JAR FILES: %s\n", library.jarFiles().size());
             System.out.println();
 

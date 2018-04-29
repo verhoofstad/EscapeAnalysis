@@ -19,6 +19,9 @@ import soot.RefType;
 import soot.VoidType;
 import soot.ShortType;
 
+/**
+ * Represents a Java method in a specific class or interface.
+ */
 public class JavaMethod {
 
     private String id;
@@ -37,9 +40,7 @@ public class JavaMethod {
 
     public JavaMethod(JavaType containedIn, int access, String name, String desc) {
 
-        if (containedIn == null) {
-            throw new Error("Argument null");
-        }
+        if (containedIn == null) { throw new IllegalArgumentException("Parameter 'containedIn' should not be null."); }
 
         this.accessFlags = new AccessFlags(access);
         this.name = name;
@@ -65,10 +66,6 @@ public class JavaMethod {
         return this.name;
     }
 
-    public String desc() {
-        return this.desc;
-    }
-
     public String signature() {
         return this.signature;
     }
@@ -78,8 +75,7 @@ public class JavaMethod {
     }
 
     /**
-     * Returns the set of method that directly overrides this method (non
-     * transitive).
+     * Returns the set of method that directly overrides this method (non-transitive).
      */
     public JavaMethodSet overridenBy() {
         return this.overridenBy;
@@ -151,6 +147,11 @@ public class JavaMethod {
         this.overridenBy.add(overridingMethod);
     }
 
+    @Override
+    public int hashCode() {
+        return this.id().hashCode();
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof JavaMethod)) {
@@ -246,15 +247,6 @@ public class JavaMethod {
         return String.format("%s::%s", name, desc);
     }
 
-    public static String toName(String owner, String name, String desc) {
-        List<String> arguments = new ArrayList<String>();
-        for (Type argumentType : Type.getMethodType(desc).getArgumentTypes()) {
-            arguments.add(argumentToString(argumentType));
-        }
-
-        return String.format("%s/%s(%s)", owner, name, String.join(",", arguments));
-    }
-
     private String createId() {
         List<String> arguments = new ArrayList<String>();
         for (Type argumentType : this.methodType.getArgumentTypes()) {
@@ -280,7 +272,7 @@ public class JavaMethod {
                 return argumentToString(argumentType.getElementType())
                         + new String(new char[argumentType.getDimensions()]).replace("\0", "[]");
             } catch (NullPointerException ex) {
-                System.out.format("Null pointer exception.");
+                throw new Error("Null pointer exception.");
             }
         case Type.OBJECT:
             return argumentType.getInternalName();

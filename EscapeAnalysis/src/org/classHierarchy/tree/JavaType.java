@@ -119,7 +119,7 @@ public abstract class JavaType {
 
     protected void addToConeSet(JavaType subType) {
 
-        if (!this.coneSet.contains(subType.id())) {
+        if (!this.coneSet.contains(subType)) {
             this.coneSet.add(subType);
         }
         for (JavaType superInterface : this.superInterfaces) {
@@ -162,8 +162,7 @@ public abstract class JavaType {
     }
 
     /**
-     * Returns a value indicating whether this type has at least one public sub
-     * class (transitive).
+     * Returns a value indicating whether this type has at least one public sub class (transitive).
      */
     private boolean hasPublicSubClass() {
         for (JavaType subClass : this.subClasses) {
@@ -203,8 +202,7 @@ public abstract class JavaType {
         if (method != null) {
             return method;
         } else {
-            throw new Error("Cannot find method " + name + "() in class " + this.name() + " in JAR-file "
-                    + this.jarFile().getAbsolutePath());
+            throw new Error("Cannot find method " + name + "() in type " + this.name() + " in JAR-file " + this.jarFile());
         }
     }
 

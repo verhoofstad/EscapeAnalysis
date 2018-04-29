@@ -77,7 +77,6 @@ class JavaClassTest {
     @Test
     void JavaClass_javaObject_accessFlags() {
         assertTrue(TestData.javaObject().isPublic());
-
         assertFalse(TestData.javaObject().isPackagePrivate());
         assertFalse(TestData.javaObject().isFinal());
         assertFalse(TestData.javaObject().isFinalPackagePrivate());

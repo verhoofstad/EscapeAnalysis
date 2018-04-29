@@ -50,8 +50,6 @@ public class RapidTypeAnalysis {
 
     public void analyse() {
 
-        int i = 0;
-
         while (!this.worklist.isEmpty()) {
 
             JavaMethod currentMethod = this.worklist.getItem();
@@ -62,7 +60,7 @@ public class RapidTypeAnalysis {
                 // Find all instantiated classes in this method.
                 if (callSite.isConstructor()) {
                     JavaClass instantiatedClass = callSite.getInstantiatedClass();
-                    if (!this.liveClasses.contains(instantiatedClass.id())) {
+                    if (!this.liveClasses.contains(instantiatedClass)) {
                         this.liveClasses.add(instantiatedClass);
                     }
                 }

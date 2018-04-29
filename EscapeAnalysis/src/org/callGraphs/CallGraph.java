@@ -22,7 +22,7 @@ public class CallGraph {
         this.addCallSite(new CallSite(source, virtualTargets));
     }
 
-    public void addCallSite(CallSite callSite) {
+    private void addCallSite(CallSite callSite) {
         String sourceId = callSite.source().id();
         if (!this.callSites.containsKey(sourceId)) {
             this.callSites.put(sourceId, new CallSiteSet(callSite.source()));

@@ -1,7 +1,6 @@
 package org.asm;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,10 +15,6 @@ public class JarFileSet implements Iterable<JarFile> {
 
     private Set<JarFile> jarFiles = new HashSet<JarFile>();
 
-    public JarFileSet(File location) {
-        findJarFiles(location);
-    }
-
     public JarFileSet(String location) {
         findJarFiles(new File(location));
     }
@@ -33,14 +28,6 @@ public class JarFileSet implements Iterable<JarFile> {
 
     public JarFileSet(Set<JarFile> jarFiles) {
         this.jarFiles.addAll(jarFiles);
-    }
-
-    public void add(File jarFile) {
-        try {
-            this.jarFiles.add(new JarFile(jarFile));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     public void add(JarFile jarFile) {
@@ -74,11 +61,7 @@ public class JarFileSet implements Iterable<JarFile> {
             }
         } else {
             if (getFileExtension(fileOrFolder).equalsIgnoreCase("jar")) {
-                try {
-                    this.jarFiles.add(new JarFile(fileOrFolder));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+                this.jarFiles.add(new JarFile(fileOrFolder));
             }
         }
     }

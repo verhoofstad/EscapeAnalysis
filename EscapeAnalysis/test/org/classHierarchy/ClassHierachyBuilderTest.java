@@ -2,6 +2,8 @@ package org.classHierarchy;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.Environment;
+import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.classHierarchy.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
@@ -21,12 +23,11 @@ import org.junit.jupiter.api.Test;
 class ClassHierachyBuilderTest {
 
     private static String javaObject = "java/lang/Object";
-    private static String jdkFolder = "C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib";
     private static ClassHierarchy jdkHierarchy;
 
     @BeforeAll
     public static void beforeClass() {
-        JarFileSet jdkFiles = new JarFileSet(jdkFolder);
+        JarFileSet jdkFiles = new JarFileSet(Environment.jdkFolder);
         ClassHierachyBuilder builder = new ClassHierachyBuilder();
         jdkFiles.accept(builder);
         jdkHierarchy = builder.classHierarchy();
@@ -88,9 +89,13 @@ class ClassHierachyBuilderTest {
 
     @Test
     void ClassHierarchy_getExportedMethods() {
-        JavaMethodSet exportedMethods = jdkHierarchy.getExportedMethods();
+        JarFile jarFile = new JarFile("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib\\rt.jar");
+        JavaMethodSet exportedMethods = jdkHierarchy.getExportedMethods(jarFile);
 
         assertNotNull(exportedMethods, "The method ClassHierarchy.getExportedMethods() should never return null.");
+        for(JavaMethod exportedMethod : exportedMethods) {
+            assertEquals(jarFile, exportedMethod.jarFile());
+        }
     }
 
     @Test
@@ -495,6 +500,130 @@ class ClassHierachyBuilderTest {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
         for (JavaType javaClass : allClasses) {
+            for (JavaMethod javaMethod : javaClass.declaredMethods()) {
+                assertSame(javaClass.jarFile(), javaMethod.jarFile());
+            }
+        }
+    }
+    
+    
+    @Test
+    void JavaInterfaceMethod_id() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        // Assert all interface methods have a non-empty id.
+        for (JavaType javaInterface : allInterfaces) {
+            for (JavaMethod javaMethod : javaInterface.declaredMethods()) {
+                assertNotNull(javaMethod.id(), "The method JavaMethod.id() should never return null.");
+                assertNotEquals("", javaMethod.id(), "The method JavaMethod.id() should never return an empty string.");
+            }
+        }
+    }
+
+    @Test
+    void JavaInterfaceMethod_name() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        // Assert all interface methods have a non-empty name.
+        for (JavaType javaInterface : allInterfaces) {
+            for (JavaMethod javaMethod : javaInterface.declaredMethods()) {
+                assertNotNull(javaMethod.name(), "The method JavaMethod.name() should never return null.");
+                assertNotEquals("", javaMethod.name(), "The method JavaMethod.name() should never return an empty string.");
+            }
+        }
+    }
+
+    @Test
+    void JavaInterfaceMethod_accessFlags() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        for (JavaType javaInterface : allInterfaces) {
+            for (JavaMethod javaMethod : javaInterface.declaredMethods()) {
+
+                assertFalse(javaMethod.isConstructor(), "An interface can never declare a constructor.");
+
+                if (javaMethod.isPublic()) {
+                    assertFalse(javaMethod.isProtected());
+                    assertFalse(javaMethod.isPrivate());
+                }
+                if (javaMethod.isProtected()) {
+                    assertFalse(javaMethod.isPublic());
+                    assertFalse(javaMethod.isPrivate());
+                }
+                if (javaMethod.isPrivate()) {
+                    assertFalse(javaMethod.isProtected());
+                    assertFalse(javaMethod.isPublic());
+                }
+                if (javaMethod.isAbstract()) {
+                    assertFalse(javaMethod.isStaticInitializer());
+                    assertFalse(javaMethod.isStatic());
+                }
+                if (javaMethod.isStaticInitializer()) {
+                    assertTrue(javaMethod.isStatic());
+                    assertFalse(javaMethod.isAbstract());
+                }
+            }
+        }
+    }
+
+    @Test
+    void JavaInterfaceMethod_containedIn() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        for (JavaType javaInterface : allInterfaces) {
+            for (JavaMethod javaMethod : javaInterface.declaredMethods()) {
+                assertSame(javaInterface, javaMethod.containedIn());
+            }
+        }
+    }
+
+    @Test
+    void JavaInterfaceMethod_appliesTo() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        for (JavaType javaInterface : allInterfaces) {
+            for (JavaMethod javaMethod : javaInterface.declaredMethods()) {
+
+                JavaTypeSet appliesToSet = javaMethod.appliesTo();
+
+                assertNotNull(appliesToSet, "The method JavaMethod.appliesTo() should never return null.");
+                assertTrue(appliesToSet.isSubSetOfOrEqualTo(javaInterface.coneSet()));
+                assertTrue(appliesToSet.contains(javaInterface));
+            }
+        }
+    }
+
+    @Test
+    void JavaInterfaceMethod_overridenBy() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        for (JavaType javaInterface : allInterfaces) {
+            for (JavaMethod javaMethod : javaInterface.declaredMethods()) {
+
+                JavaMethodSet overridenBy = javaMethod.overridenBy();
+
+                assertNotNull(overridenBy, "The method JavaMethod.overridenBy() should never return null.");
+
+                // Assert that overriding methods...
+                for (JavaMethod overridingMethod : overridenBy) {
+                    // have the same signature,
+                    assertTrue(overridingMethod.signatureEquals(javaMethod));
+                    // but are contained in a different class or interface,
+                    assertTrue(overridingMethod.containedIn() != javaInterface);
+                    // are contained in one of the sub classes
+                    assertTrue(javaInterface.coneSet().contains(overridingMethod.containedIn()));
+                    // and apply to a different set of types than the overridden method.
+                    assertTrue(overridingMethod.appliesTo().isDisjointOf(javaMethod.appliesTo()));
+                }
+            }
+        }
+    }
+
+    @Test
+    void JavaInterfaceMethod_jarFile() {
+        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
+
+        for (JavaType javaClass : allInterfaces) {
             for (JavaMethod javaMethod : javaClass.declaredMethods()) {
                 assertSame(javaClass.jarFile(), javaMethod.jarFile());
             }

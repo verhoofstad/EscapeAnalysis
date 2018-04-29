@@ -47,6 +47,32 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
         return this.methods.containsKey(method.id());
     }
 
+    /**
+     * Gets a value indicating whether this set contains a constructor method.
+     * @return True, if this set contains a constructor; otherwise, false.
+     */
+    public boolean containsConstructor() {
+        for(JavaMethod method : this.methods.values()) {
+            if(method.isConstructor()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether this set contains a static method.
+     * @return True, if this set contains a static method; otherwise, false.
+     */
+    public boolean containsStaticMethod() {
+        for(JavaMethod method : this.methods.values()) {
+            if(method.isStatic()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public JavaMethod getRandom() {
         return this.methods.values().iterator().next();
     }

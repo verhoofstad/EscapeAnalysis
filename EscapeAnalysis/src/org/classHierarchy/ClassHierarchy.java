@@ -75,26 +75,6 @@ public class ClassHierarchy {
     }
 
     /**
-     * Gets the exported methods for RTA.
-     * 
-     * @see
-     */
-    public JavaMethodSet getExportedMethods() {
-        JavaMethodSet exportedMethods = new JavaMethodSet();
-        for (JavaType publicClass : this.getPublicClasses()) {
-
-            boolean isNonFinal = !publicClass.isFinal();
-            for (JavaMethod method : publicClass.declaredMethods()) {
-
-                if (method.isPublic() || (method.isProtected() && isNonFinal)) {
-                    exportedMethods.add(method);
-                }
-            }
-        }
-        return exportedMethods;
-    }
-
-    /**
      * Gets the exported methods for RTA which are contained in a given library
      * (JAR-file).
      */
@@ -102,7 +82,7 @@ public class ClassHierarchy {
         JavaMethodSet exportedMethods = new JavaMethodSet();
         for (JavaType publicClass : this.getPublicClasses()) {
 
-            if (publicClass.jarFile().getAbsolutePath().equals(jarFile.getAbsolutePath())) {
+            if (publicClass.jarFile().equals(jarFile)) {
 
                 boolean isNonFinal = !publicClass.isFinal();
                 for (JavaMethod method : publicClass.declaredMethods()) {

@@ -2,9 +2,7 @@ package org.asm;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -18,20 +16,19 @@ public class JarFile {
     private File jarFile;
 
     public JarFile(String jarFile) {
-        this.jarFile = new File(jarFile);
+        this(new File(jarFile));
     }
 
-    public JarFile(File jarFile) throws FileNotFoundException {
-        if (!jarFile.exists())
-            throw new FileNotFoundException("File " + jarFile.getAbsolutePath() + " not found.");
-
+    public JarFile(File jarFile) {
+        if (jarFile == null) { throw new IllegalArgumentException("Parameter 'jarFile' should not be null."); }
+        
         this.jarFile = jarFile;
     }
 
     public String getAbsolutePath() {
         return this.jarFile.getAbsolutePath();
     }
-
+    
     public void accept(JarFileVisitor visitor) throws IOException {
 
         FileInputStream fis = new FileInputStream(this.jarFile);
@@ -41,7 +38,7 @@ public class JarFile {
         while (entry != null) {
             if (entry.getName().endsWith(".class")) {
 
-                ClassReader cr = getClassReader(jarStream);
+                ClassReader cr = new ClassReader(jarStream);
                 JarClassVisitor cp = new JarClassVisitor(visitor, cr);
 
                 cr.accept(cp, 0);
@@ -54,6 +51,11 @@ public class JarFile {
     }
 
     @Override
+    public int hashCode() {
+        return this.getAbsolutePath().hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == null || !(obj instanceof JarFile)) {
             return false;
@@ -61,15 +63,9 @@ public class JarFile {
 
         return this.getAbsolutePath().equals(((JarFile) obj).getAbsolutePath());
     }
-
-    /**
-     * Returns an ASM ClassReader based on an input stream.
-     */
-    private ClassReader getClassReader(InputStream classStream) {
-        try {
-            return new ClassReader(classStream);
-        } catch (Exception e) {
-            return null;
-        }
+    
+    @Override
+    public String toString() {
+        return this.getAbsolutePath();
     }
 }

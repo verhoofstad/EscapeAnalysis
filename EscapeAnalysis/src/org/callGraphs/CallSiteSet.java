@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.classHierarchy.tree.JavaMethod;
 
-/*
+/**
  * Represents the set of all call sites in a single method.
  */
 public class CallSiteSet implements Iterable<CallSite> {

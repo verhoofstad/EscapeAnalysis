@@ -75,4 +75,26 @@ public class TestData {
         classF.addMethod(classFp);
         return classA;
     }
+    
+    public static JavaMethod waitMethod() {
+        
+        int access = Opcodes.ACC_PUBLIC;
+        
+        return new JavaMethod(javaObject(), access, "wait", "()V");
+    }
+    
+    public static JavaMethod waitMethodWithTimeoutParameter() {
+        
+        int access = Opcodes.ACC_PUBLIC;
+        
+        return new JavaMethod(javaObject(), access, "wait", "(J)V");
+    }
+    
+    public static JavaMethod waitMethodWithTimeoutAndNanosParameters() {
+        
+        int access = Opcodes.ACC_PUBLIC;
+        
+        return new JavaMethod(javaObject(), access, "wait", "(JI)V");
+    }
+
 }

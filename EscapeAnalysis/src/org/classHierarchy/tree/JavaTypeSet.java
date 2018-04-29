@@ -1,17 +1,17 @@
 package org.classHierarchy.tree;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
+/**
+ * Represents a set of Java types (classes and/or interfaces).
+ *
+ */
 public class JavaTypeSet implements Iterable<JavaType> {
     private Map<String, JavaType> types = new HashMap<String, JavaType>();
 
-    public JavaTypeSet() {
-    }
+    public JavaTypeSet() { }
 
     public JavaTypeSet(JavaType item) {
         add(item);
@@ -45,10 +45,6 @@ public class JavaTypeSet implements Iterable<JavaType> {
         if(item == null) { return false; }
         
         return this.types.containsKey(item.id());
-    }
-
-    public void remove(String id) {
-        this.types.remove(id);
     }
 
     /**
@@ -92,7 +88,7 @@ public class JavaTypeSet implements Iterable<JavaType> {
 
         for (JavaType javaType : typeSet) {
             if (this.contains(javaType)) {
-                this.remove(javaType.id());
+                this.types.remove(javaType.id());
             }
         }
     }
