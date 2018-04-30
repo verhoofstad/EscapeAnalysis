@@ -17,7 +17,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
     }
 
     private AnalysisType analysisType;
-    private boolean verbose = false;
+    private boolean verbose = true;
 
     private ConnectionGraph connectionGraph;
 
@@ -31,7 +31,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         return this.connectionGraph;
     }
 
-    /*
+    /**
      * Visit the assignment of 'this' to a local variable.
      */
     @Override
@@ -40,7 +40,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         this.connectionGraph.addThisVariable(localName);
     }
 
-    /*
+    /**
      * Visit the assignment of a reference parameter to a local variable.
      */
     @Override
@@ -49,7 +49,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         this.connectionGraph.addParameterVariable(localName);
     }
 
-    /*
+    /**
      * (1) Visit an assignment of the form of p = new T()
      */
     @Override
@@ -74,7 +74,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         target.pointsTo(objectNode);
     }
 
-    /*
+    /**
      * (2) Visit an assignment of the form of p = q
      */
     @Override
@@ -93,7 +93,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         target.addNode(source);
     }
 
-    /*
+    /**
      * (3a) Visit a field assignment of the form of p.f = q (non-static)
      */
     @Override
@@ -136,7 +136,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         }
     }
 
-    /*
+    /**
      * (3b) Visit a static field assignment of the form of P.f = q (static)
      */
     @Override
@@ -181,7 +181,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         }
     }
 
-    /*
+    /**
      * (4a) Visit an assignment of the form of p = q.f (non-static)
      */
     @Override
@@ -217,7 +217,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
             // Lazily add a field node 'v' if it doesn't exist yet.
             if (fieldNode == null) {
 
-                fieldNode = new NonStaticField(fieldName, objectNode.getEscapeState());
+                fieldNode = new NonStaticField(fieldName);
 
                 // Add a field edge
                 objectNode.addNode(fieldNode);
@@ -229,7 +229,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         }
     }
 
-    /*
+    /**
      * (4b) Visit an assignment in the form of p = Q.f (static)
      */
     @Override
@@ -282,7 +282,7 @@ public class ConnectionGraphBuilder extends EscapeStatementVisitor {
         node.setEscape(EscapeState.ESCAPE);
     }
 
-    /*
+    /**
      * Visit the invocation of a method.
      */
     public void visitMethodInvoke(List<String> localArguments) {

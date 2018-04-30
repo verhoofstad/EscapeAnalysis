@@ -2,7 +2,9 @@ package org.escapeAnalysis.connectionGraph;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import soot.RefType;
 
@@ -25,6 +27,15 @@ public class ObjectNode extends Node {
 
     public Collection<FieldNode> getFieldNodes() {
         return this.fieldNodes.values();
+    }
+    
+    @Override
+    public Set<Node> successorNodes() {
+        Set<Node> successorNodes = new HashSet<Node>();
+        for(Node fieldNode : this.fieldNodes.values()) {
+            successorNodes.add(fieldNode);
+        }
+        return successorNodes;
     }
 
     public RefType getObjectType() {
@@ -56,15 +67,6 @@ public class ObjectNode extends Node {
      */
     public FieldNode getFieldNode(String id) {
         return this.fieldNodes.get(id);
-    }
-
-    @Override
-    public void setEscape(EscapeState escapeState) {
-        super.setEscape(escapeState);
-
-        for (FieldNode fieldNode : this.fieldNodes.values()) {
-            fieldNode.setEscape(escapeState);
-        }
     }
 
     @Override

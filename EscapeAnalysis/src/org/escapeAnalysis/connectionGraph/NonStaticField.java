@@ -1,16 +1,12 @@
 package org.escapeAnalysis.connectionGraph;
 
 /**
- * Represents a field.
+ * Represents an instance field of an object.
  */
 public class NonStaticField extends FieldNode {
 
     public NonStaticField(String id) {
         super(id);
-    }
-
-    public NonStaticField(String id, EscapeState escapeState) {
-        super(id, escapeState);
     }
 
     @Override

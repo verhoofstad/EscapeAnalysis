@@ -1,7 +1,7 @@
 package org.escapeAnalysis.connectionGraph;
 
 /**
- * Represents a
+ * Represents a local reference variable.
  */
 public class ReferenceVariable extends ReferenceNode {
 

@@ -54,6 +54,9 @@ public class SomeClass {
 		a.f.f.f = objectEscapes;
 	}
 
+    public void paperExample(T a) {
+        a.b.c.d = new T();
+    }
 	
 	public void thisEscape() {
 		

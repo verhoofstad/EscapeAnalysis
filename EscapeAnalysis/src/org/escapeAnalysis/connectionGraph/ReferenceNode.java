@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/*
+/**
  * Represents a non-object; i.e. a reference variable or a static or non-static field.
  */
 public abstract class ReferenceNode extends Node {
@@ -33,6 +33,18 @@ public abstract class ReferenceNode extends Node {
         }
     }
 
+    @Override
+    public Set<Node> successorNodes() {
+        Set<Node> successorNodes = new HashSet<Node>();
+        for(Node pointsToNode : this.pointsToNodes.values()) {
+            successorNodes.add(pointsToNode);
+        }
+        for(Node deferredNode : this.deferredNodes.values()) {
+            successorNodes.add(deferredNode);
+        }
+        return successorNodes;
+    }
+    
     public ObjectNodeSet pointsTo() {
         return pointsTo(this, new HashSet<String>());
     }
@@ -62,7 +74,7 @@ public abstract class ReferenceNode extends Node {
     }
 
     public boolean pointsToNothing() {
-        return this.pointsTo().size() == 0;
+        return this.pointsTo().isEmpty();
     }
 
     public void byPass(ReferenceNode nodeToByPass) {

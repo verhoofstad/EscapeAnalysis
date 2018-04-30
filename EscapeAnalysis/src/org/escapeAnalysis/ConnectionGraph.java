@@ -28,14 +28,14 @@ public class ConnectionGraph {
         return this.objectNodes;
     }
 
-    /*
+    /**
      * Adds a local variable for 'this' with its escape state set to ESCAPE.
      */
     public void addThisVariable(String name) {
         this.referenceVariables.put(name, new ReferenceVariable(name, EscapeState.ESCAPE));
     }
 
-    /*
+    /**
      * Adds a local variable for a parameter with its escape state set to ESCAPE.
      */
     public void addParameterVariable(String name) {
@@ -93,29 +93,30 @@ public class ConnectionGraph {
     }
 
     public void resolveEscapeState() {
-
+        
+        // Initialize the work list with the nodes that have their escape state on ESCAPE.
+        Worklist workList = new Worklist();
+        
         for (ObjectNode objectNode : this.objectNodes) {
             if (objectNode.getEscapeState() == EscapeState.ESCAPE) {
-
-                for (FieldNode field : objectNode.getFieldNodes()) {
-
-                    field.setEscape(EscapeState.ESCAPE);
-                    ObjectNodeSet objects = field.pointsTo();
-
-                    for (ObjectNode referedObject : objects) {
-                        referedObject.setEscape(EscapeState.ESCAPE);
-                    }
-                }
+                workList.add(objectNode);
             }
         }
-
+        
         for (ReferenceNode referenceNode : this.referenceVariables.values()) {
             if (referenceNode.getEscapeState() == EscapeState.ESCAPE) {
-
-                ObjectNodeSet objects = referenceNode.pointsTo();
-
-                for (ObjectNode referedObject : objects) {
-                    referedObject.setEscape(EscapeState.ESCAPE);
+                workList.add(referenceNode);
+            }
+        }
+        
+        while(!workList.isEmpty()) {
+            Node node = workList.getItem();
+            
+            for(Node successorNode : node.successorNodes()) {
+                if(successorNode.getEscapeState() != EscapeState.ESCAPE) {
+                    
+                    successorNode.setEscape(EscapeState.ESCAPE);
+                    workList.add(successorNode);
                 }
             }
         }

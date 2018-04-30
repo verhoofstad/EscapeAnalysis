@@ -16,7 +16,7 @@ import soot.jimple.internal.JAssignStmt;
 import soot.jimple.*;
 import soot.toolkits.graph.UnitGraph;
 
-/*
+/**
  * Traverses a Soot unit graph and calls the appropriate methods of a provided escape statement visitor.
  */
 public class UnitGraphContainer {
@@ -24,7 +24,7 @@ public class UnitGraphContainer {
     private UnitGraph graph;
     private List<Unit> visitedUnits = new ArrayList<Unit>();
 
-    private boolean verbose = false;
+    private boolean verbose = true;
 
     public UnitGraphContainer(UnitGraph graph) {
 

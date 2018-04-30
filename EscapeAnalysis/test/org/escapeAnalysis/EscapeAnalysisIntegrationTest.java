@@ -127,7 +127,7 @@ class EscapeAnalysisIntegrationTest {
         // Arrange
         JavaMethodSet methodsToAnalyse = getMethodByName(someClass, "thisEscape");
         EscapeAnalysis escapeAnalysis = new EscapeAnalysis(classHierarchy.getClasses());
-        
+                
         // Act
         escapeAnalysis.analyse(methodsToAnalyse, jarFiles);
         
