@@ -24,7 +24,7 @@ public class UnitGraphContainer {
     private UnitGraph graph;
     private List<Unit> visitedUnits = new ArrayList<Unit>();
 
-    private boolean verbose = true;
+    private boolean verbose = false;
 
     public UnitGraphContainer(UnitGraph graph) {
 

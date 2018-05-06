@@ -1,9 +1,13 @@
 package org;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,15 +36,67 @@ public class Main {
         jdkAnalyser.analyseJDK();
 
         LibraryResultSet libResults = readResultFile();
+        File resultsFile = createResultsFile();
 
         for (Library library : dataSet) {
             LibraryResult result = libResults.find(library);
-            LibraryAnalyser analyser = new LibraryAnalyser(library, result);
+            LibraryAnalyser analyser = new LibraryAnalyser(library, result, resultsFile);
             analyser.setJDKResults(jdkAnalyser.jdkPackagePrivateClasses(), jdkAnalyser.jdkConfinedClasses());
 
             analyser.analyse();
         }
         System.out.println("Finished");
+    }
+
+    private static File createResultsFile() {
+        
+        List<String> headers = new ArrayList<String>();
+        headers.add("id");
+        headers.add("organisation");
+        headers.add("name");
+        headers.add("revision");
+        
+        headers.add("libraries_classCount");
+        headers.add("libraries_packageVisibleClassCount");
+        headers.add("all_classCount");
+        headers.add("all_packageVisibleClassCount");
+
+        headers.add("rta_entryPoints");
+        headers.add("chaCpa_entryPoints");
+        headers.add("old_entryPoints");
+
+        headers.add("cha_edgeCount");
+        headers.add("cha_callSiteCount");
+        headers.add("cha_virtualCallSiteCount");
+        headers.add("cha_staticCallSiteCount");
+
+        headers.add("rta_edgeCount");
+        headers.add("rta_callSiteCount");
+        headers.add("rta_virtualCallSiteCount");
+        headers.add("rta_staticCallSiteCount");
+
+        headers.add("rtaEA_edgeCount");
+        headers.add("rtaEA_callSiteCount");
+        headers.add("rtaEA_virtualCallSiteCount");
+        headers.add("rtaEA_staticCallSiteCount");
+
+        headers.add("rtaEAMax_edgeCount");
+        headers.add("rtaEAMax_callSiteCount");
+        headers.add("rtaEAMax_virtualCallSiteCount");
+        headers.add("rtaEAMax_staticCallSiteCount");
+
+        List<String> header = new ArrayList<String>();
+        header.add(String.join(";", headers));
+
+        File resultsFile = new File(Environment.resultFile);
+        try {
+            Files.write(resultsFile.toPath(), header, Charset.forName("UTF-8"), StandardOpenOption.CREATE);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return resultsFile;
     }
 
     private static void validateLibraries(DataSet dataSet) {
@@ -68,7 +124,7 @@ public class Main {
         System.out.format("Identifiers: %s\n\n", String.join(",", validLibraries));
     }
 
-    public static LibraryResultSet readResultFile() {
+    private static LibraryResultSet readResultFile() {
 
         String csvFile = Environment.rootFolder + "results.txt";
         BufferedReader br = null;
