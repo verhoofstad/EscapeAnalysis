@@ -13,6 +13,7 @@ import org.classHierarchy.tree.JavaMethodSet;
 public class CallGraph {
 
     private Map<String, CallSiteSet> callSites = new HashMap<String, CallSiteSet>();
+    public int newMonoMorphicCallSites = 0;
 
     public void addStaticCallSite(JavaMethod source, JavaMethod target) {
         this.addCallSite(new CallSite(source, target));

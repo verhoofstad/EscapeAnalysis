@@ -1,7 +1,6 @@
 package org.asm;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,14 +40,8 @@ public class JarFileSet implements Iterable<JarFile> {
     public void accept(JarFileSetVisitor visitor) {
 
         for (JarFile jarFile : this.jarFiles) {
-
             visitor.visitJarFile(jarFile);
-
-            try {
-                jarFile.accept(visitor);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            jarFile.accept(visitor);
         }
         visitor.visitEnd();
     }

@@ -2,6 +2,7 @@ package org.asm;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -29,25 +30,31 @@ public class JarFile {
         return this.jarFile.getAbsolutePath();
     }
     
-    public void accept(JarFileVisitor visitor) throws IOException {
+    public void accept(JarFileVisitor visitor) {
 
-        FileInputStream fis = new FileInputStream(this.jarFile);
-        JarInputStream jarStream = new JarInputStream(fis);
-        JarEntry entry = jarStream.getNextJarEntry();
-
-        while (entry != null) {
-            if (entry.getName().endsWith(".class")) {
-
-                ClassReader cr = new ClassReader(jarStream);
-                JarClassVisitor cp = new JarClassVisitor(visitor, cr);
-
-                cr.accept(cp, 0);
+        FileInputStream fis;
+        try {
+            fis = new FileInputStream(this.jarFile);
+            JarInputStream jarStream = new JarInputStream(fis);
+            JarEntry entry = jarStream.getNextJarEntry();
+    
+            while (entry != null) {
+                if (entry.getName().endsWith(".class")) {
+    
+                    ClassReader cr = new ClassReader(jarStream);
+                    JarClassVisitor cp = new JarClassVisitor(visitor, cr);
+    
+                    cr.accept(cp, 0);
+                }
+                entry = jarStream.getNextJarEntry();
             }
-            entry = jarStream.getNextJarEntry();
+    
+            jarStream.close();
+            fis.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-
-        jarStream.close();
-        fis.close();
     }
 
     @Override

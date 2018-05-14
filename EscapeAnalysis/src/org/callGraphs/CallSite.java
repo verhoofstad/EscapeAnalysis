@@ -6,7 +6,7 @@ import org.classHierarchy.tree.JavaMethodSet;
 
 /**
  * Represents a single method invocation from a source method to a set of possible targets.
- * Note: A single call site represents 1-n edges in a call graph.
+ * Note: A single call site represents 1:n edges in a call graph.
  */
 public class CallSite {
 
@@ -33,8 +33,7 @@ public class CallSite {
         if (source == null) { throw new IllegalArgumentException("Parameter 'source' should not be null."); }
         if (virtualTargets == null) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not be null."); }
         if (virtualTargets.containsConstructor()) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not contain a constructor method."); }
-        // To-do: this exception is thrown for some reason, find out why.
-        //if (virtualTargets.containsStaticMethod()) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not contain a static method."); }
+        if (virtualTargets.containsStaticMethod()) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not contain a static method."); }
 
         this.isStatic = false;
         this.source = source;

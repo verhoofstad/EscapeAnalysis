@@ -10,8 +10,7 @@ import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 
 /**
- * Represents a set of all the applies-to sets in a class hierarchy.
- *
+ * Represents an optimized look-up storage set of all the applies-to sets in a class hierarchy.
  */
 class AppliesToSets {
 
@@ -26,11 +25,16 @@ class AppliesToSets {
 
             for (JavaMethod declaredMethod : javaClass.declaredMethods()) {
 
-                if (!this.appliesToSet.containsKey(declaredMethod.signature())) {
-
-                    this.appliesToSet.put(declaredMethod.signature(), new JavaMethodSet());
+                // Ignore static methods that happen to have the same signature as existing instance methods.
+                // Since the applies-to sets are used to resolve virtual instance calls, they can not apply to static methods by definition.
+                // E.g. library 'scala-library-2.10.4.jar' has a static variant named hashCode() in the 'scala.collection.concurrent.TrieMapSerializationEnd' class.
+                if(!declaredMethod.isStatic()) {
+                    if (!this.appliesToSet.containsKey(declaredMethod.signature())) {
+    
+                        this.appliesToSet.put(declaredMethod.signature(), new JavaMethodSet());
+                    }
+                    this.appliesToSet.get(declaredMethod.signature()).add(declaredMethod);
                 }
-                this.appliesToSet.get(declaredMethod.signature()).add(declaredMethod);
             }
         }
 
@@ -38,7 +42,9 @@ class AppliesToSets {
 
             for (JavaMethod declaredMethod : javaInterface.declaredMethods()) {
 
-                if (!declaredMethod.isAbstract()) {
+                // Ignore static methods that happen to have the same signature as another existing instance method.
+                // Since the applies-to sets are used to resolve virtual instance calls, they can not apply to static methods by definition.
+                if (!declaredMethod.isStatic() && !declaredMethod.isAbstract()) {
                     if (!this.appliesToSet.containsKey(declaredMethod.signature())) {
 
                         this.appliesToSet.put(declaredMethod.signature(), new JavaMethodSet());

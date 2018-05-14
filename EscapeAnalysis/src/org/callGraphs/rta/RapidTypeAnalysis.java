@@ -23,11 +23,13 @@ public class RapidTypeAnalysis {
     private JavaTypeSet confinedClasses;
 
     private boolean verbose = false;
+    private boolean analyseWithConfinedClasses = false;
 
     public RapidTypeAnalysis(CallGraph chaGraph) {
 
         this.chaGraph = chaGraph;
         this.rtaGraph = new CallGraph();
+        
         this.confinedClasses = new JavaTypeSet();
     }
 
@@ -46,6 +48,7 @@ public class RapidTypeAnalysis {
 
     public void setConfinedClasses(JavaTypeSet confinedClasses) {
         this.confinedClasses = confinedClasses;
+        this.analyseWithConfinedClasses = true;
     }
 
     public void analyse() {
@@ -73,15 +76,25 @@ public class RapidTypeAnalysis {
                     this.worklist.add(staticTarget);
                 } else {
                     JavaMethodSet rtaVirtualTargets = new JavaMethodSet();
-
+                    int classicRtaEdgeCount = 0;
+                    
+                    // For each virtual target determined by Class Hierarchy Analysis...
                     for (JavaMethod virtualTarget : callSite.targets()) {
                         JavaType targetType = virtualTarget.containedIn();
 
+                        // ...Rapid Type Analysis only adds those which belong to instantiated classes.
                         if (this.liveClasses.contains(targetType.id())) {
 
-                            if (!this.isCrossPackageMethodInvocation(callSite.source(), virtualTarget)
-                                    || !this.confinedClasses.contains(targetType)) {
+                            // If we analyze with confined classes, some extra checks are needed.
+                            if(this.analyseWithConfinedClasses) {
+                                if (!this.isCrossPackageMethodInvocation(callSite.source(), virtualTarget)
+                                        || !this.confinedClasses.contains(targetType)) {
 
+                                    rtaVirtualTargets.add(virtualTarget);
+                                    this.worklist.add(virtualTarget);
+                                }
+                            } else {
+                                classicRtaEdgeCount++;
                                 rtaVirtualTargets.add(virtualTarget);
                                 this.worklist.add(virtualTarget);
                             }
@@ -89,6 +102,12 @@ public class RapidTypeAnalysis {
                     }
                     if (rtaVirtualTargets.size() > 0) {
                         this.rtaGraph.addVirtualCallSite(currentMethod, rtaVirtualTargets);
+                    }
+                    if(this.analyseWithConfinedClasses 
+                       && rtaVirtualTargets.size() == 1 && classicRtaEdgeCount > 1) {
+                        // In this case RTA combined with confined classes has discovered a new call site that can
+                        // be statically resolved.
+                        this.rtaGraph.newMonoMorphicCallSites++;
                     }
                 }
             }

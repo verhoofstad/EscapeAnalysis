@@ -56,10 +56,12 @@ public class Main {
         headers.add("name");
         headers.add("revision");
         
-        headers.add("libraries_classCount");
-        headers.add("libraries_packageVisibleClassCount");
         headers.add("all_classCount");
         headers.add("all_packageVisibleClassCount");
+        headers.add("libraries_classCount");
+        headers.add("libraries_packageVisibleClassCount");
+        
+        headers.add("confinedClassCount");
 
         headers.add("rta_entryPoints");
         headers.add("chaCpa_entryPoints");
@@ -79,11 +81,13 @@ public class Main {
         headers.add("rtaEA_callSiteCount");
         headers.add("rtaEA_virtualCallSiteCount");
         headers.add("rtaEA_staticCallSiteCount");
+        headers.add("rtaEA_newMonoMorphicCallSiteCount");
 
         headers.add("rtaEAMax_edgeCount");
         headers.add("rtaEAMax_callSiteCount");
         headers.add("rtaEAMax_virtualCallSiteCount");
         headers.add("rtaEAMax_staticCallSiteCount");
+        headers.add("rtaEAMax_newMonoMorphicCallSiteCount");
 
         List<String> header = new ArrayList<String>();
         header.add(String.join(";", headers));

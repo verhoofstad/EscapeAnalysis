@@ -8,6 +8,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.callGraphs.CallGraph;
 import org.callGraphs.cha.ClassHierarchyAnalysis;
@@ -17,6 +18,7 @@ import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaTypeSet;
 import org.counting.ClassCounter;
+import org.counting.CountResults;
 import org.dataSets.Library;
 import org.dataSets.LibraryResult;
 import org.escapeAnalysis.EscapeAnalysis;
@@ -48,18 +50,24 @@ public class LibraryAnalyser {
     public void analyse() {
 
         JarFileSet jarFiles = this.library.jarFiles();
+        JarFile cpFile = this.library.cpFile();
 
-        System.out.format("PROCESSING: %s with %s | %s | %s\n", library.id(), library.organisation(), library.name(),
-                library.revision());
+        System.out.format("PROCESSING: %s with %s | %s | %s\n", library.id(), library.organisation(), library.name(), library.revision());
         System.out.println();
-        System.out.format("CPFILE: %s\n", library.cpFile().toString());
-        System.out.format("JAR FILES: %s\n", library.jarFiles().size());
+        System.out.format("CPFILE: %s\n", cpFile.toString());
+        System.out.format("JAR FILES: %s\n", jarFiles.size());
         System.out.println();
 
-        ClassCounter classCounter = new ClassCounter(library);
+        System.out.print("Counting classes and methods...");
+        ClassCounter classCounter = new ClassCounter();
         jarFiles.accept(classCounter);
-        LibraryResult libraryResult = classCounter.libraryResult();
-        printTotals(libraryResult, this.result);
+        CountResults totalCounts = classCounter.countResults();
+        
+        ClassCounter libraryCounter = new ClassCounter();
+        cpFile.accept(libraryCounter);
+        CountResults libraryCounts = libraryCounter.countResults();
+        System.out.println("Ok");
+        
 
         System.out.print("Building class hierarchy...");
         ClassHierachyBuilder builder = new ClassHierachyBuilder();
@@ -68,10 +76,10 @@ public class LibraryAnalyser {
         System.out.println("Ok");
 
         JavaTypeSet packagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
+        JavaTypeSet confinedClasses = new JavaTypeSet();
 
         JavaMethodSet entryPoints = classHierarchy.getExportedMethods(this.library.cpFile());
         
-        System.out.format("Class hierarchy contains %s classes.\n", classHierarchy.classCount());
         System.out.format("There are %s final package-private classes.\n", packagePrivateClasses.size());
         System.out.format("Number of RTA entry points: %s\n", entryPoints.size());
 
@@ -97,8 +105,6 @@ public class LibraryAnalyser {
                 // Since we already determined the confined classes of the JDK,
                 // we do not need to analyze them again.
                 packagePrivateClasses.difference(this.jdkPackagePrivateClasses);
-
-                JavaTypeSet confinedClasses = new JavaTypeSet();
 
                 if (packagePrivateClasses.size() > 0) {
 
@@ -158,42 +164,21 @@ public class LibraryAnalyser {
             System.out.println("Ok");
 
             printGraphTotals(chaGraph, rtaGraph, rtaGraphEA, rtaGraphEAMax);
-            printToFile(this.resultsFile, libraryResult, this.result, entryPoints, chaGraph, rtaGraph, rtaGraphEA, rtaGraphEAMax);
+            printToFile(this.resultsFile, totalCounts, libraryCounts, this.result, entryPoints, confinedClasses, chaGraph, rtaGraph, rtaGraphEA, rtaGraphEAMax);
         }
 
-        System.out.println();
-    }
-
-    private void printTotals(LibraryResult result) {
-        System.out.format("Public class count:              %9s\n", result.all_publicClassCount);
-        System.out.format("Package-private class count:     %9s\n", result.all_packageVisibleClassCount);
-        System.out.format("Total class count:               %9s\n", result.all_classCount);
-        System.out.println();
-        System.out.format("Public interface count:          %9s\n", result.all_publicInterfaceCount);
-        System.out.format("Package-private interface count: %9s\n", result.all_packageVisibleInterfaceCount);
-        System.out.format("Total interface count:           %9s\n", result.all_interfaceCount);
-        System.out.println();
-        System.out.format("Public method count:             %9s\n", result.all_publicMethods);
-        System.out.format("Protected method count:          %9s\n", result.all_protectedMethods);
-        System.out.format("Package-private method count:    %9s\n", result.all_packagePrivateMethods);
-        System.out.format("Private method count:            %9s\n", result.all_privateMethods);
-        System.out.format("Total method count:              %9s\n", result.all_methodCount);
         System.out.println();
     }
 
     private void printGraphTotals(CallGraph chaGraph, CallGraph rtaGraph, CallGraph rtaGraphEA,
             CallGraph rtaGraphEAMax) {
 
-        System.out.println(
-                "--------------------------------------------------------------------------------------------------------");
-        System.out.format("                                 | %9s | %9s | %10s | %10s | %9s | %9s |\n", "CHA", "RTA",
-                "RTA EA", "RTA EA max", "LibCPA", "LibCPA CBS");
-        System.out.println(
-                "--------------------------------------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------");
+        System.out.format("                                 | %9s | %9s | %10s | %10s |\n", "CHA", "RTA", "RTA EA", "RTA EA max");
+        System.out.println("------------------------------------------------------------------------------------");
 
-        System.out.format("Total number edges               | %9s | %9s | %10s | %10s | %9s | %9s |\n",
-                chaGraph.nrOfEdges(), rtaGraph.nrOfEdges(), rtaGraphEA.nrOfEdges(), rtaGraphEAMax.nrOfEdges(),
-                this.result.cpa_callEdgesCount, this.result.cpa_callBySignatureEdgesCount);
+        System.out.format("Total number edges               | %9s | %9s | %10s | %10s |\n",
+                chaGraph.nrOfEdges(), rtaGraph.nrOfEdges(), rtaGraphEA.nrOfEdges(), rtaGraphEAMax.nrOfEdges());
         System.out.format("Total number of call sites       | %9s | %9s | %10s | %10s |\n", chaGraph.nrOfCallSites(),
                 rtaGraph.nrOfCallSites(), rtaGraphEA.nrOfCallSites(), rtaGraphEAMax.nrOfCallSites());
         System.out.format(" - Virtual call sites            | %9s | %9s | %10s | %10s |\n",
@@ -212,41 +197,9 @@ public class LibraryAnalyser {
 
     }
 
-    public void printTotals(LibraryResult result1, LibraryResult result2) {
-        if (result2 == null) {
-            printTotals(result1);
-            return;
-        }
-
-        printLine("Public class count", result1.all_publicClassCount, result2.all_publicClassCount);
-        printLine("Package-private class count", result1.all_packageVisibleClassCount,
-                result2.all_packageVisibleClassCount);
-        printLine("Total class count", result1.all_classCount, result2.all_classCount);
-        System.out.println();
-        printLine("Public interface count", result1.all_publicInterfaceCount, result2.all_publicInterfaceCount);
-        printLine("Package-private interface count", result1.all_packageVisibleInterfaceCount,
-                result2.all_packageVisibleInterfaceCount);
-        printLine("Total interface count", result1.all_interfaceCount, result2.all_interfaceCount);
-        System.out.println();
-        printLine("Public method count", result1.all_publicMethods, result2.all_publicMethods);
-        printLine("Protected method count", result1.all_protectedMethods, result2.all_protectedMethods);
-        printLine("Package-private method count", result1.all_packagePrivateMethods, result2.all_packagePrivateMethods);
-        printLine("Private method count", result1.all_privateMethods, result2.all_privateMethods);
-        printLine("Total method count", result1.all_methodCount, result2.all_methodCount);
-        System.out.println();
-    }
-
-    private void printLine(String description, int result1, int result2) {
-
-        System.out.format("%-33s : %9s  %9s", description, result1, result2);
-        if (result1 != result2) {
-            System.out.format("%9s", result1 - result2);
-        }
-        System.out.println();
-    }
     
-    private void printToFile(File file, LibraryResult libraryResult, LibraryResult chaCpaResult, JavaMethodSet entryPoints, CallGraph chaGraph, 
-            CallGraph rtaGraph, CallGraph rtaGraphEA, CallGraph rtaGraphEAMax) {
+    private void printToFile(File file, CountResults totalCounts, CountResults libraryCounts, LibraryResult chaCpaResult, JavaMethodSet entryPoints, 
+            JavaTypeSet confinedClasses, CallGraph chaGraph, CallGraph rtaGraph, CallGraph rtaGraphEA, CallGraph rtaGraphEAMax) {
         
         List<String> fields = new ArrayList<String>();
         fields.add("" + this.library.id()); 
@@ -254,10 +207,12 @@ public class LibraryAnalyser {
         fields.add(library.name());
         fields.add(library.revision());
         
-        fields.add("" + libraryResult.libraries_classCount);
-        fields.add("" + libraryResult.libraries_packageVisibleClassCount);
-        fields.add("" + libraryResult.all_classCount);
-        fields.add("" + libraryResult.all_packageVisibleClassCount);
+        fields.add("" + totalCounts.classCount);
+        fields.add("" + totalCounts.packagePrivateClassCount);
+        fields.add("" + libraryCounts.classCount);
+        fields.add("" + libraryCounts.packagePrivateClassCount);
+        
+        fields.add("" + confinedClasses.size());
 
         fields.add("" + entryPoints.size());
         fields.add("" + chaCpaResult.cpa_entryPoints);
@@ -277,11 +232,13 @@ public class LibraryAnalyser {
         fields.add("" + rtaGraphEA.nrOfCallSites());
         fields.add("" + rtaGraphEA.nrOfVirtualCallSites());
         fields.add("" + rtaGraphEA.nrOfStaticCallSites());
+        fields.add("" + rtaGraphEA.newMonoMorphicCallSites);
 
         fields.add("" + rtaGraphEAMax.nrOfEdges());
         fields.add("" + rtaGraphEAMax.nrOfCallSites());
         fields.add("" + rtaGraphEAMax.nrOfVirtualCallSites());
         fields.add("" + rtaGraphEAMax.nrOfStaticCallSites());
+        fields.add("" + rtaGraphEAMax.newMonoMorphicCallSites);
 
         List<String> line = new ArrayList<String>();
         line.add(String.join(";", fields));

@@ -1,16 +1,15 @@
 package org.counting;
 
 import org.asm.jvm.AccessFlags;
-import org.dataSets.LibraryResult;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 public class MethodCounter extends ClassVisitor {
 
-    private LibraryResult result;
+    private CountResults result;
 
-    public MethodCounter(LibraryResult result) {
+    public MethodCounter(CountResults result) {
         super(Opcodes.ASM6);
 
         this.result = result;
@@ -21,16 +20,16 @@ public class MethodCounter extends ClassVisitor {
 
         AccessFlags accessFlags = new AccessFlags(access);
 
-        this.result.all_methodCount++;
+        this.result.methodCount++;
 
         if (accessFlags.isPublic()) {
-            this.result.all_publicMethods++;
+            this.result.publicMethods++;
         } else if (accessFlags.isProtected()) {
-            this.result.all_protectedMethods++;
+            this.result.protectedMethods++;
         } else if (accessFlags.isPackagePrivate()) {
-            this.result.all_packagePrivateMethods++;
+            this.result.packagePrivateMethods++;
         } else if (accessFlags.isPrivate()) {
-            this.result.all_privateMethods++;
+            this.result.privateMethods++;
         } else {
             throw new Error();
         }
