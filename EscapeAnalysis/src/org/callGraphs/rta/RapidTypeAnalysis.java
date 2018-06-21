@@ -59,15 +59,16 @@ public class RapidTypeAnalysis {
 
             CallSiteSet callSites = this.chaGraph.getCallSites(currentMethod);
 
+            // Find all instantiated classes in this method.
             for (CallSite callSite : callSites) {
-                // Find all instantiated classes in this method.
                 if (callSite.isConstructor()) {
                     JavaClass instantiatedClass = callSite.getInstantiatedClass();
-                    if (!this.liveClasses.contains(instantiatedClass)) {
-                        this.liveClasses.add(instantiatedClass);
-                    }
+                    
+                    addToLiveClasses(instantiatedClass);
                 }
-
+            }
+            
+            for (CallSite callSite : callSites) {
                 if (callSite.isStatic()) {
 
                     JavaMethod staticTarget = callSite.targets().getRandom();
@@ -92,9 +93,10 @@ public class RapidTypeAnalysis {
 
                                     rtaVirtualTargets.add(virtualTarget);
                                     this.worklist.add(virtualTarget);
+                                } else {
+                                    classicRtaEdgeCount++;
                                 }
                             } else {
-                                classicRtaEdgeCount++;
                                 rtaVirtualTargets.add(virtualTarget);
                                 this.worklist.add(virtualTarget);
                             }
@@ -114,6 +116,15 @@ public class RapidTypeAnalysis {
         }
     }
 
+    private void addToLiveClasses(JavaClass javaClass) {
+        if (!this.liveClasses.contains(javaClass)) {
+            this.liveClasses.add(javaClass);
+        }
+        if (javaClass.hasSuperClass()) {
+            addToLiveClasses(javaClass.superClass());
+        }
+    }
+    
     private boolean isCrossPackageMethodInvocation(JavaMethod source, JavaMethod target) {
 
         JavaType sourceType = source.containedIn();
