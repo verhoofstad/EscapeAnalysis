@@ -70,6 +70,9 @@ public class UnitGraphContainer {
         }
     }
 
+    //
+    // Copied large chunks from /src/main/java/soot/jimple/toolkits/annotation/purity/PurityIntraproceduralAnalysis.java (Soot)
+    //
     private void acceptUnit(Unit unit, EscapeStatementVisitor visitor) {
         Stmt stmt = (Stmt) unit;
 
