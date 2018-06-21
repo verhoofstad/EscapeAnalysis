@@ -93,15 +93,4 @@ public class CallGraph {
         }
         return nrOfCallSites;
     }
-
-    public void printReport() {
-
-        System.out.println("Call graph");
-        System.out.println("----------");
-        System.out.format("Total number of edges:       %s\n", nrOfEdges());
-        System.out.format("Total number of call sites:  %s\n", nrOfCallSites());
-        System.out.format(" - Virtual call sites:       %s\n", nrOfVirtualCallSites());
-        System.out.format(" - Monomorphic call sites:   %s\n", nrOfVirtualMonoCallSites());
-        System.out.format(" - Static call sites:        %s\n", nrOfStaticCallSites());
-    }
 }
