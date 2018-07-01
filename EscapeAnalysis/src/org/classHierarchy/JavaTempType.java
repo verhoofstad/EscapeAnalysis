@@ -9,7 +9,7 @@ import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
 import org.classHierarchy.tree.JavaTypeSet;
 
-/*
+/**
  * Represents a Java class or interface.
  */
 class JavaTempType {

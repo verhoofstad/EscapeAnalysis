@@ -1,6 +1,8 @@
-package org.dataSets;
+package org.results.reif;
 
-public class LibraryResult {
+import org.dataSets.Library;
+
+public class ReifLibraryResult {
 
     public String organisation;
     public String name;
@@ -60,13 +62,13 @@ public class LibraryResult {
     public double cpa_callGraphBuildTime;
     public String cpa_Memory;
 
-    public LibraryResult(Library library) {
+    public ReifLibraryResult(Library library) {
         this.organisation = library.organisation();
         this.name = library.name();
         this.revision = library.revision();
     }
 
-    public LibraryResult(String[] parts) {
+    public ReifLibraryResult(String[] parts) {
 
         this.organisation = parts[0];
         this.name = parts[1];

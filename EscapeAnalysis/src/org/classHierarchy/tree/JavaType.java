@@ -41,10 +41,9 @@ public abstract class JavaType {
         return this.internalName;
     }
 
-    public String name() {
-        return this.internalName;
-    }
-
+    /**
+     * Gets the path of the package this type is contained in. 
+     */
     public String packagePath() {
         return this.packagePath;
     }
@@ -94,6 +93,9 @@ public abstract class JavaType {
         return this.coneSet;
     }
 
+    /**
+     * Returns the set of methods which are declared (concrete or abstract) in this type.
+     */
     public JavaMethodSet declaredMethods() {
         return this.declaredMethods;
     }
@@ -109,7 +111,7 @@ public abstract class JavaType {
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof JavaType && this.internalName.equals(((JavaType) obj).name());
+        return obj != null && obj instanceof JavaType && this.id().equals(((JavaType) obj).id());
     }
 
     public void addSubClass(JavaClass subClass) {
@@ -202,7 +204,7 @@ public abstract class JavaType {
         if (method != null) {
             return method;
         } else {
-            throw new Error("Cannot find method " + name + "() in type " + this.name() + " in JAR-file " + this.jarFile());
+            throw new Error("Cannot find method " + name + "() in type " + this.id() + " in JAR-file " + this.jarFile());
         }
     }
 

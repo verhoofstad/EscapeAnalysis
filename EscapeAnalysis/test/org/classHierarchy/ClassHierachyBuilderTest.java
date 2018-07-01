@@ -111,17 +111,6 @@ class ClassHierachyBuilderTest {
     }
 
     @Test
-    void JavaClass_name() {
-        JavaTypeSet allClasses = jdkHierarchy.getClasses();
-
-        // Assert that all classes have a name.
-        for (JavaType javaClass : allClasses) {
-            assertNotNull(javaClass.name(), "The method JavaType.name() should never return null.");
-            assertNotEquals("", javaClass.name(), "The method JavaType.name() should never return an empty string.");
-        }
-    }
-
-    @Test
     void JavaClass_sootName() {
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
@@ -265,17 +254,6 @@ class ClassHierachyBuilderTest {
         for (JavaType javaInterface : allInterfaces) {
             assertNotNull(javaInterface.id(), "The method JavaType.id() should never return null.");
             assertNotEquals("", javaInterface.id(), "The method JavaType.id() should never return an empty string.");
-        }
-    }
-
-    @Test
-    void JavaInterface_name() {
-        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
-
-        // Assert all interfaces have a name.
-        for (JavaType javaInterface : allInterfaces) {
-            assertNotNull(javaInterface.name(), "The method JavaType.name() should never return null.");
-            assertNotEquals("", javaInterface.name(), "The method JavaType.name() should never return an empty string.");
         }
     }
 

@@ -7,7 +7,7 @@ import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
 
-/*
+/**
  * Finds the methods in which one of the provided classes is instantiated.
  */
 public class JarFileSetMethodFinder extends JarFileSetVisitor {

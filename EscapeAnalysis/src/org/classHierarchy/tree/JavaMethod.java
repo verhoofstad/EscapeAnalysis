@@ -124,13 +124,14 @@ public class JavaMethod {
 
         // Initialize the applies-to set with the cone set of the class or interface
         // it's declared in.
-        this.appliesTo = new JavaTypeSet(this.containedIn().coneSet());
+        JavaTypeSet appliesTo = new JavaTypeSet(this.containedIn().coneSet());
 
         // Subtract the applies-to set with the cone sets of the methods that directly
         // override this method.
         for (JavaMethod overridingMethod : this.overridenBy) {
-            this.appliesTo.difference(overridingMethod.containedIn().coneSet());
+            appliesTo = appliesTo.difference(overridingMethod.containedIn().coneSet());
         }
+        this.appliesTo = appliesTo;
     }
 
     /**
@@ -240,7 +241,7 @@ public class JavaMethod {
             arguments.add(argumentToString(argumentType));
         }
 
-        return String.format("%s/%s(%s)", this.containedIn.name(), this.name, String.join(",", arguments));
+        return String.format("%s/%s(%s)", this.containedIn.id(), this.name, String.join(",", arguments));
     }
 
     public static String toSignature(String name, String desc) {
@@ -252,7 +253,7 @@ public class JavaMethod {
         for (Type argumentType : this.methodType.getArgumentTypes()) {
             arguments.add(argumentToString(argumentType));
         }
-        return String.format("%s/%s(%s):(%s)", this.containedIn.name(), this.name, String.join(",", arguments),
+        return String.format("%s/%s(%s):(%s)", this.containedIn.id(), this.name, String.join(",", arguments),
                 argumentToString(this.methodType.getReturnType()));
     }
 

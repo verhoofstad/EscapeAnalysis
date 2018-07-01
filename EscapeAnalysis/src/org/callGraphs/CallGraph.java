@@ -1,28 +1,46 @@
 package org.callGraphs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.asm.JarFile;
+import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 
 /**
  * Represents a call graph.
- *
  */
 public class CallGraph {
 
     private Map<String, CallSiteSet> callSites = new HashMap<String, CallSiteSet>();
-    public int newMonoMorphicCallSites = 0;
+    
+    private List<CallSite> newMonomorphicCallSites = new ArrayList<CallSite>();
+    private JavaMethodSet invokedMethods = new JavaMethodSet();
 
     public void addStaticCallSite(JavaMethod source, JavaMethod target) {
-        this.addCallSite(new CallSite(source, target));
+        CallSite staticCallSite = new CallSite(source, target);
+        
+        this.addCallSite(staticCallSite);
+        this.addInvokedMethods(staticCallSite);
     }
 
     public void addVirtualCallSite(JavaMethod source, JavaMethodSet virtualTargets) {
-        this.addCallSite(new CallSite(source, virtualTargets));
+        CallSite virtualCallSite = new CallSite(source, virtualTargets);
+        
+        this.addCallSite(virtualCallSite);
+        this.addInvokedMethods(virtualCallSite);
     }
 
+    public void addMonomorphicCallSite(JavaMethod source, JavaMethodSet virtualTargets) {
+        if (virtualTargets == null) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not be null."); }
+        if (virtualTargets.size() != 1) { throw new IllegalArgumentException("Parameter 'virtualTargets' should contain exactly one target method."); }
+        
+        this.newMonomorphicCallSites.add(new CallSite(source, virtualTargets));
+    }
+    
     private void addCallSite(CallSite callSite) {
         String sourceId = callSite.source().id();
         if (!this.callSites.containsKey(sourceId)) {
@@ -30,6 +48,14 @@ public class CallGraph {
         }
 
         this.callSites.get(sourceId).addCallSite(callSite);
+    }
+    
+    private void addInvokedMethods(CallSite callSite) {
+        for(JavaMethod invokedMethod : callSite.targets()) {
+            if(!this.invokedMethods.contains(invokedMethod)) {
+                this.invokedMethods.add(invokedMethod);
+            }
+        }        
     }
 
     /**
@@ -46,6 +72,9 @@ public class CallGraph {
         }
     }
 
+    /**
+     * Gets the total number of edges in the call graph.
+     */
     public int nrOfEdges() {
         int nrOfEdges = 0;
         for (CallSiteSet callSiteSet : this.callSites.values()) {
@@ -54,6 +83,22 @@ public class CallGraph {
         return nrOfEdges;
     }
 
+    /**
+     * Gets the number of edges that originated from a method in a given JAR-file.
+     */
+    public int nrOfEdges(JarFile fromSource) {
+        int nrOfEdges = 0;
+        for (CallSiteSet callSiteSet : this.callSites.values()) {
+            if(callSiteSet.source().jarFile().equals(fromSource)) {
+                nrOfEdges += callSiteSet.nrOfEdges();
+            }
+        }
+        return nrOfEdges;
+    }
+
+    /**
+     * Gets the total number of call sites in the call graph.
+     */
     public int nrOfCallSites() {
         int nrOfCallSites = 0;
         for (CallSiteSet callSiteSet : this.callSites.values()) {
@@ -62,6 +107,22 @@ public class CallGraph {
         return nrOfCallSites;
     }
 
+    /**
+     * Gets the number of call sites in a given JAR-file.
+     */
+    public int nrOfCallSites(JarFile fromSource) {
+        int nrOfCallSites = 0;
+        for (CallSiteSet callSiteSet : this.callSites.values()) {
+            if(callSiteSet.source().jarFile().equals(fromSource)) {
+                nrOfCallSites += callSiteSet.size();
+            }
+        }
+        return nrOfCallSites;
+    }
+
+    /**
+     * Gets the total number of virtual call sites in the call graph.
+     */
     public int nrOfVirtualCallSites() {
         int nrOfCallSites = 0;
         for (CallSiteSet callSiteSet : this.callSites.values()) {
@@ -70,14 +131,43 @@ public class CallGraph {
         return nrOfCallSites;
     }
 
-    public int nrOfVirtualMonoCallSites() {
+    /**
+     * Gets the number of virtual call sites in a given JAR-file.
+     */
+    public int nrOfVirtualCallSites(JarFile fromSource) {
         int nrOfCallSites = 0;
         for (CallSiteSet callSiteSet : this.callSites.values()) {
-            nrOfCallSites += callSiteSet.nrOfVirtualMonoCallSites();
+            if(callSiteSet.source().jarFile().equals(fromSource)) {
+                nrOfCallSites += callSiteSet.nrOfVirtualCallSites();
+            }
+        }
+        return nrOfCallSites;
+    }
+    
+    /**
+     * Gets the total number of virtual call sites in the call graph which resolve to one target method.
+     */
+    public int nrOfMonomorphicCallSites() {
+        int nrOfCallSites = 0;
+        for (CallSiteSet callSiteSet : this.callSites.values()) {
+            nrOfCallSites += callSiteSet.nrOfMonomorphicCallSites();
         }
         return nrOfCallSites;
     }
 
+    /**
+     * Gets the number of virtual call sites in a given JAR-file which resolve to one target method.
+     */
+    public int nrOfMonomorphicCallSites(JarFile fromSource) {
+        int nrOfCallSites = 0;
+        for (CallSiteSet callSiteSet : this.callSites.values()) {
+            if(callSiteSet.source().jarFile().equals(fromSource)) {
+                nrOfCallSites += callSiteSet.nrOfMonomorphicCallSites();
+            }
+        } 
+        return nrOfCallSites;
+    }
+    
     public int nrOfVirtualEmptyCallSites() {
         int nrOfCallSites = 0;
         for (CallSiteSet callSiteSet : this.callSites.values()) {
@@ -92,5 +182,34 @@ public class CallGraph {
             nrOfCallSites += callSiteSet.nrOfStaticCallSites();
         }
         return nrOfCallSites;
+    }
+    
+    public int nrOfNewMonomorphicCallSites() {
+        return this.newMonomorphicCallSites.size();
+    }
+    
+    public int nrOfNewMonomorphicCallSites(JarFile fromSource) {
+        int nrOfNewMonomorphicCallSites = 0;
+        for(CallSite callSite : this.newMonomorphicCallSites) {
+            if(callSite.source().jarFile().equals(fromSource)) {
+                nrOfNewMonomorphicCallSites += 1;
+            }
+        }
+        return nrOfNewMonomorphicCallSites;
+    }
+    
+
+    /**
+     * Returns the set of methods that have never been invoked.
+     * @param classHierarchy The class hierarchy that contains all methods.
+     * @param jarFile 
+     * @return The set of methods that have never been invoked.
+     */
+    public JavaMethodSet getDeadMethods(ClassHierarchy classHierarchy, JarFile jarFile) {
+        
+        JavaMethodSet methodsInJarFile = classHierarchy.getMethods(jarFile);
+        JavaMethodSet entryPoints = classHierarchy.getExportedMethods(jarFile);
+        
+        return methodsInJarFile.difference(this.invokedMethods).difference(entryPoints);
     }
 }

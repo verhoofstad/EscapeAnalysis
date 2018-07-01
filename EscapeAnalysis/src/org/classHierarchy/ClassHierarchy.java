@@ -74,6 +74,20 @@ public class ClassHierarchy {
         return publicClasses;
     }
 
+    
+    public JavaMethodSet getMethods(JarFile jarFile) {
+        JavaMethodSet exportedMethods = new JavaMethodSet();
+        
+        for (JavaType publicClass : this.getPublicClasses()) {
+            for (JavaMethod method : publicClass.declaredMethods()) {
+                if (publicClass.jarFile().equals(jarFile)) {
+                    exportedMethods.add(method);
+                }
+            }
+        }
+        return exportedMethods;        
+    }
+    
     /**
      * Gets the exported methods for RTA which are contained in a given library
      * (JAR-file).

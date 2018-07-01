@@ -78,6 +78,21 @@ public class DataSet implements Iterable<Library> {
         }
         return correctSet;
     }
+    
+    public static DataSet getTestSet() {
+        DataSet completeSet = DataSet.getCompleteSet();
+        DataSet correctSet = new DataSet();
+
+        Integer[] correctIds = { 2, 4, 6 };
+        List<Integer> correctLibraries = new ArrayList<Integer>(Arrays.asList(correctIds));
+
+        for (Library library : completeSet) {
+            if (correctLibraries.contains(library.id())) {
+                correctSet.addLibrary(library);
+            }
+        }
+        return correctSet;        
+    }
 
     public static DataSet getCompleteSet() {
 

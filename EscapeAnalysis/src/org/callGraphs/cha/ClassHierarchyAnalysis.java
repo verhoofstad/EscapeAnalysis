@@ -150,13 +150,13 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
                 return;
             }
 
-            // If the declared type is an abstract class and the invoked method is defined
-            // in an implemented interface, the class may not have a concrete implementation
-            // for
-            // that method.
             JavaMethodSet virtualTargets = appliesToSets.appliesTo(declaredType.coneSet(), name, desc);
-
-            this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
+            
+            // If the declared type is an abstract class or an interface, the invoked method may not 
+            // have a concrete implementation. If the call-site has no target methods, we omit it from the call graph.
+            if(!virtualTargets.isEmpty()) {
+                this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
+            }
         }
 
         private void visitInvokeStatic(JavaType declaredType, String name, String desc) {

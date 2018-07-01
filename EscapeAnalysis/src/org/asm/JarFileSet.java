@@ -15,10 +15,13 @@ public class JarFileSet implements Iterable<JarFile> {
     private Set<JarFile> jarFiles = new HashSet<JarFile>();
 
     public JarFileSet(String location) {
+        if (location == null) { throw new IllegalArgumentException("Parameter 'location' should not be null."); }
+
         findJarFiles(new File(location));
     }
 
     public JarFileSet(List<String> locations) {
+        if (locations == null) { throw new IllegalArgumentException("Parameter 'locations' should not be null."); }
 
         for (String location : locations) {
             findJarFiles(new File(location));
@@ -26,10 +29,14 @@ public class JarFileSet implements Iterable<JarFile> {
     }
 
     public JarFileSet(Set<JarFile> jarFiles) {
+        if (jarFiles == null) { throw new IllegalArgumentException("Parameter 'jarFiles' should not be null."); }
+
         this.jarFiles.addAll(jarFiles);
     }
 
     public void add(JarFile jarFile) {
+        if (jarFile == null) { throw new IllegalArgumentException("Parameter 'jarFile' should not be null."); }
+
         this.jarFiles.add(jarFile);
     }
 
@@ -69,13 +76,7 @@ public class JarFileSet implements Iterable<JarFile> {
     }
 
     public String getSootClassPath() {
-
-        StringBuilder classPath = new StringBuilder();
-
-        for (JarFile jarFile : this.jarFiles) {
-            classPath.append(jarFile.getAbsolutePath() + ";");
-        }
-        return classPath.toString();
+        return String.join(";", toSootStringList());
     }
 
     public List<String> toSootStringList() {

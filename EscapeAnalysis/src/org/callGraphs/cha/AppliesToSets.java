@@ -14,10 +14,11 @@ import org.classHierarchy.tree.JavaMethodSet;
  */
 class AppliesToSets {
 
-    // Contains all the methods grouped by their signature.
+    // Contains all the method's applies-to sets grouped by their signature.
     Map<String, JavaMethodSet> appliesToSet;
 
     public AppliesToSets(ClassHierarchy classHierarchy) {
+        if (classHierarchy == null) { throw new IllegalArgumentException("Parameter 'classHierarchy' should not be null."); }
 
         this.appliesToSet = new HashMap<String, JavaMethodSet>();
 
@@ -25,12 +26,13 @@ class AppliesToSets {
 
             for (JavaMethod declaredMethod : javaClass.declaredMethods()) {
 
-                // Ignore static methods that happen to have the same signature as existing instance methods.
-                // Since the applies-to sets are used to resolve virtual instance calls, they can not apply to static methods by definition.
-                // E.g. library 'scala-library-2.10.4.jar' has a static variant named hashCode() in the 'scala.collection.concurrent.TrieMapSerializationEnd' class.
-                if(!declaredMethod.isStatic()) {
+                // Ignore static methods: Since the applies-to sets are used to resolve virtual instance calls, 
+                // they can not apply to static methods by definition.
+                // Ignore abstract methods: Since abstract methods are never called at run-time, they can be omitted
+                // from the applies-to set as well. This can however, introduce empty call-sites if the method has no 
+                // concrete implementation anywhere in the code.
+                if(!declaredMethod.isStatic() && !declaredMethod.isAbstract()) {
                     if (!this.appliesToSet.containsKey(declaredMethod.signature())) {
-    
                         this.appliesToSet.put(declaredMethod.signature(), new JavaMethodSet());
                     }
                     this.appliesToSet.get(declaredMethod.signature()).add(declaredMethod);
@@ -42,8 +44,12 @@ class AppliesToSets {
 
             for (JavaMethod declaredMethod : javaInterface.declaredMethods()) {
 
-                // Ignore static methods that happen to have the same signature as another existing instance method.
-                // Since the applies-to sets are used to resolve virtual instance calls, they can not apply to static methods by definition.
+                // Ignore static methods: Since the applies-to sets are used to resolve virtual instance calls, 
+                // they can not apply to static methods by definition.
+                // Ignore abstract methods: Since abstract methods are never called at run-time, they can be omitted
+                // from the applies-to set as well. This can however, introduce empty call-sites if the method has no 
+                // concrete implementation anywhere in the code.
+                // Note that since Java 8, interfaces still can have concrete methods (default methods) that need to be added here.
                 if (!declaredMethod.isStatic() && !declaredMethod.isAbstract()) {
                     if (!this.appliesToSet.containsKey(declaredMethod.signature())) {
 
@@ -56,6 +62,9 @@ class AppliesToSets {
     }
 
     public JavaMethodSet appliesTo(JavaTypeSet coneSet, String name, String desc) {
+        if (coneSet == null) { throw new IllegalArgumentException("Parameter 'coneSet' should not be null."); }
+        if (name == null) { throw new IllegalArgumentException("Parameter 'name' should not be null."); }
+        if (desc == null) { throw new IllegalArgumentException("Parameter 'desc' should not be null."); }
 
         String signature = JavaMethod.toSignature(name, desc);
 

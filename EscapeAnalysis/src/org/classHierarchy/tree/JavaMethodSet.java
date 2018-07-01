@@ -38,6 +38,18 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
             add(item);
         }
     }
+    
+    public JavaMethodSet difference(JavaMethodSet methodSet) {
+        if (methodSet == null) { throw new IllegalArgumentException("Parameter 'methodSet' should not be null."); }
+
+        JavaMethodSet difference = new JavaMethodSet();
+        for (JavaMethod javaMethod : this.methods.values()) {
+            if (!methodSet.contains(javaMethod)) {
+                difference.add(javaMethod);
+            }
+        }
+        return difference;
+    }
 
     public boolean contains(String id) {
         return this.methods.containsKey(id);
@@ -49,11 +61,12 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 
     /**
      * Gets a value indicating whether this set contains a constructor method.
+     * 
      * @return True, if this set contains a constructor; otherwise, false.
      */
     public boolean containsConstructor() {
-        for(JavaMethod method : this.methods.values()) {
-            if(method.isConstructor()) {
+        for (JavaMethod method : this.methods.values()) {
+            if (method.isConstructor()) {
                 return true;
             }
         }
@@ -62,11 +75,12 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
 
     /**
      * Gets a value indicating whether this set contains a static method.
+     * 
      * @return True, if this set contains a static method; otherwise, false.
      */
     public boolean containsStaticMethod() {
-        for(JavaMethod method : this.methods.values()) {
-            if(method.isStatic()) {
+        for (JavaMethod method : this.methods.values()) {
+            if (method.isStatic()) {
                 return true;
             }
         }

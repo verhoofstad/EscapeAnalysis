@@ -13,9 +13,10 @@ class JavaMethodTest {
 
     @Test
     void testId() {
-
-
-        
+        // Act & Assert
+        assertEquals("java/lang/Object/wait():(V)", TestData.waitMethod().id());
+        assertEquals("java/lang/Object/wait(long):(V)", TestData.waitMethodWithTimeoutParameter().id());
+        assertEquals("java/lang/Object/wait(long,int):(V)", TestData.waitMethodWithTimeoutAndNanosParameters().id());
     }
 
     @Test
@@ -37,9 +38,9 @@ class JavaMethodTest {
     @Test
     void testContainedIn() {
         // Act & Assert
-        assertEquals(TestData.javaObject(), TestData.waitMethod().signature());
-        assertEquals(TestData.javaObject(), TestData.waitMethodWithTimeoutParameter().signature());
-        assertEquals(TestData.javaObject(), TestData.waitMethodWithTimeoutAndNanosParameters().signature());
+        assertEquals(TestData.javaObject(), TestData.waitMethod().containedIn());
+        assertEquals(TestData.javaObject(), TestData.waitMethodWithTimeoutParameter().containedIn());
+        assertEquals(TestData.javaObject(), TestData.waitMethodWithTimeoutAndNanosParameters().containedIn());
     }
 
     @Test

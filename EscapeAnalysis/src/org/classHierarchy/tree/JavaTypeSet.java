@@ -84,13 +84,17 @@ public class JavaTypeSet implements Iterable<JavaType> {
         return types;
     }
 
-    public void difference(JavaTypeSet typeSet) {
+    public JavaTypeSet difference(JavaTypeSet typeSet) {
+        if (typeSet == null) { throw new IllegalArgumentException("Parameter 'typeSet' should not be null."); }
 
-        for (JavaType javaType : typeSet) {
-            if (this.contains(javaType)) {
-                this.types.remove(javaType.id());
+        JavaTypeSet difference = new JavaTypeSet();
+
+        for (JavaType javaType : this.types.values()) {
+            if (!typeSet.contains(javaType)) {
+                difference.add(javaType);
             }
         }
+        return difference;
     }
 
     /**

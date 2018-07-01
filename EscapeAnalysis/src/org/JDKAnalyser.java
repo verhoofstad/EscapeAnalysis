@@ -6,26 +6,17 @@ import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaTypeSet;
 import org.escapeAnalysis.EscapeAnalysis;
 import org.methodFinding.JarFileSetMethodFinder;
+import org.results.JDKResults;
 
 public class JDKAnalyser {
 
     private JarFileSet jdkFiles;
-    private JavaTypeSet jdkPackagePrivateClasses;
-    private JavaTypeSet jdkConfinedClasses;
 
     public JDKAnalyser(String jdkFolder) {
         this.jdkFiles = new JarFileSet(jdkFolder);
     }
 
-    public JavaTypeSet jdkPackagePrivateClasses() {
-        return this.jdkPackagePrivateClasses;
-    }
-
-    public JavaTypeSet jdkConfinedClasses() {
-        return this.jdkConfinedClasses;
-    }
-
-    public void analyseJDK() {
+    public JDKResults analyseJDK() {
 
         System.out.println("Pre-analyse the JDK library separately...");
 
@@ -35,10 +26,10 @@ public class JDKAnalyser {
         ClassHierarchy classHierarchy = builder.classHierarchy();
         System.out.println("Ok");
 
-        this.jdkPackagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
+        JavaTypeSet jdkPackagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
 
         System.out.print("Find the methods in which package-private classes are instantiated...");
-        JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(classHierarchy, this.jdkPackagePrivateClasses);
+        JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(classHierarchy, jdkPackagePrivateClasses);
         jdkFiles.accept(methodFinder);
         System.out.println("Ok");
         System.out.format("Total of %s methods found.\n", methodFinder.foundMethods().size());
@@ -47,12 +38,12 @@ public class JDKAnalyser {
 
         escapeAnalysis.analyse(methodFinder.foundMethods(), jdkFiles);
 
-        this.jdkConfinedClasses = new JavaTypeSet(this.jdkPackagePrivateClasses);
-        this.jdkConfinedClasses.difference(escapeAnalysis.escapingClasses());
+        JavaTypeSet confinedClasses = jdkPackagePrivateClasses.difference(escapeAnalysis.escapingClasses());
 
-        System.out.format("Final package-private classes count: %s\n", this.jdkPackagePrivateClasses.size());
-        System.out.format("Escaping classes count:              %s\n", escapeAnalysis.escapingClasses().size());
-        System.out.format("Confined classes count:              %s\n", this.jdkConfinedClasses.size());
+        System.out.format("Final package-private classes count: %s\n", jdkPackagePrivateClasses.size());
+        System.out.format("Confined classes count:              %s\n", confinedClasses.size());
         System.out.println();
+        
+        return new JDKResults(jdkPackagePrivateClasses, confinedClasses);
     }
 }

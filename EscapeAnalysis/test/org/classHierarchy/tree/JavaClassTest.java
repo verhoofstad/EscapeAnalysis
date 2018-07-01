@@ -17,11 +17,6 @@ class JavaClassTest {
     }
 
     @Test
-    void JavaClass_javaObject_name() {
-        assertEquals("java/lang/Object", TestData.javaObject().name());
-    }
-
-    @Test
     void JavaClass_javaObject_packagePath() {
         assertEquals("java/lang", TestData.javaObject().packagePath());
     }

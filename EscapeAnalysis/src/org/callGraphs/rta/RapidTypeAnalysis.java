@@ -24,7 +24,7 @@ public class RapidTypeAnalysis {
 
     private boolean verbose = false;
     private boolean analyseWithConfinedClasses = false;
-
+    
     public RapidTypeAnalysis(CallGraph chaGraph) {
 
         this.chaGraph = chaGraph;
@@ -109,7 +109,7 @@ public class RapidTypeAnalysis {
                        && rtaVirtualTargets.size() == 1 && classicRtaEdgeCount > 1) {
                         // In this case RTA combined with confined classes has discovered a new call site that can
                         // be statically resolved.
-                        this.rtaGraph.newMonoMorphicCallSites++;
+                        this.rtaGraph.addMonomorphicCallSite(currentMethod, rtaVirtualTargets);
                     }
                 }
             }

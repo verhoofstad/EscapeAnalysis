@@ -17,10 +17,6 @@ class Worklist {
     
     }
     
-    Worklist(Set<Node> worklist) {
-        this.toProcess = new HashSet<Node>(worklist);
-    }
-
     public Node getItem() {
         Node item = this.toProcess.iterator().next();
         this.toProcess.remove(item);

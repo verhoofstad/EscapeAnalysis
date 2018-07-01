@@ -68,9 +68,9 @@ public final class JavaClass extends JavaType {
     @Override
     public String toString() {
         if (this.hasSuperClass()) {
-            return this.name() + " extends " + this.superClass.name();
+            return this.id() + " extends " + this.superClass.id();
         } else {
-            return this.name();
+            return this.id();
         }
     }
 }

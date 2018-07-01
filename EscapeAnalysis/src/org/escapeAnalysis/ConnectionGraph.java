@@ -121,19 +121,4 @@ public class ConnectionGraph {
             }
         }
     }
-
-    public void printEdges() {
-
-        for (ObjectNode objectNode : this.objectNodes) {
-
-            objectNode.prettyPrint(0);
-        }
-        for (ReferenceNode nonObjectNode : this.referenceVariables.values()) {
-
-            nonObjectNode.prettyPrint(0);
-        }
-        for (PhantomObjectNode phantomObjectNode : this.phantomObjectNodes) {
-            phantomObjectNode.prettyPrint(0);
-        }
-    }
 }

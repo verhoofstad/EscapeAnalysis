@@ -45,14 +45,6 @@ public class UnitGraphContainer {
         visitor.visitEnd();
     }
 
-    private void printGraph(List<Unit> units) {
-
-        for (Unit unit : units) {
-            System.out.format("%s\n", unit.toString());
-            printGraph(this.graph.getSuccsOf(unit));
-        }
-    }
-
     private void acceptGraphDepthFirst(Unit unit, EscapeStatementVisitor visitor) {
 
         if (!this.visitedUnits.contains(unit)) {
