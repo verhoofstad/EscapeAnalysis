@@ -14,14 +14,16 @@ public class JarClass {
     private String[] interfaces;
     private AccessFlags accessFlags;
     private ClassReader reader;
+    private JarFile jarFile;
 
-    JarClass(String name, String superName, String[] interfaces, AccessFlags accessFlags, ClassReader reader) {
+    JarClass(String name, String superName, String[] interfaces, AccessFlags accessFlags, ClassReader reader, JarFile jarFile) {
 
         this.name = name;
         this.superName = superName;
         this.interfaces = interfaces;
         this.accessFlags = accessFlags;
         this.reader = reader;
+        this.jarFile = jarFile;
     }
 
     /**
@@ -53,6 +55,13 @@ public class JarClass {
         return this.accessFlags;
     }
 
+    /**
+     * Gets the JAR-file this class was loaded from.
+     */
+    public JarFile jarFile() {
+        return this.jarFile;
+    }
+    
     public void accept(ClassVisitor visitor) {
         this.reader.accept(visitor, 0);
     }

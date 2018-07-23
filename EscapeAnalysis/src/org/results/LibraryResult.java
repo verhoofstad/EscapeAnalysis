@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class LibraryResult {
     public int libraryPublicClassCount = 0;
     public int libraryPackagePrivateClassCount = 0;
     public int libraryConfinedClassCount = 0;
+    
+    public int libraryConcreteMethodCount = 0;
+    public int libraryEntryPointMethodCount = 0;
+    public int libraryCompilerMethodCount = 0;
     
     public int rtaEdgeCount = 0;
     public int rtaEaEdgeCount = 0;
@@ -45,6 +50,13 @@ public class LibraryResult {
     public int rtaEaDeadMethods = 0;
     public int rtaMaxDeadMethods = 0;
 
+    public long classHierarchyBuildTime = 0;
+    public long chaBuildTime = 0;
+    public long rtaBuildTime = 0;
+    public long escapeAnalysisTime = 0;
+    public long rtaEaTime = 0;
+    public long rtaMaxTime = 0;
+    public long totalAnalysisTime = 0;
     
     private double rtaReductionEa = 0;
     private double rtaReductionMax = 0;
@@ -58,6 +70,14 @@ public class LibraryResult {
     
     public String name() {
         return this.library.name();
+    }
+    
+    public double rtaReductionEa() {
+        return this.rtaReductionEa;
+    }
+    
+    public double rtaReductionMax() {
+        return this.rtaReductionMax;
     }
     
     private void calculate() {
@@ -100,21 +120,15 @@ public class LibraryResult {
         latexTable.append(this.library.name());
         latexTable.append(" & ");
 
-        latexTable.append(this.rtaCallSiteCount);
-        latexTable.append(" & ");
         latexTable.append(this.rtaVirtualCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaMonomorphicCallSiteCount);
-        latexTable.append(" & ");
-        latexTable.append(this.rtaEaCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaEaVirtualCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaEaMonomorphicCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaEaNewMonomorphicCallSiteCount);
-        latexTable.append(" & ");
-        latexTable.append(this.rtaMaxCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaMaxVirtualCallSiteCount);
         latexTable.append(" & ");
@@ -126,18 +140,58 @@ public class LibraryResult {
         latexTable.append("\n");
     }
     
-    public void addToLatexTable3(StringBuilder latexTable) {
+    void addToDeadMethodsTable(StringBuilder latexTable) {
+        
+        int additionalRtaEa = this.rtaEaDeadMethods - this.rtaDeadMethods;
+        int additionalrtaMax = this.rtaMaxDeadMethods - this.rtaDeadMethods;
+        
         latexTable.append(this.library.name());
         latexTable.append(" & ");
-
+        
+        latexTable.append(this.libraryConcreteMethodCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryEntryPointMethodCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryCompilerMethodCount);
+        latexTable.append(" & ");
+        
         latexTable.append(this.rtaDeadMethods);
         latexTable.append(" & ");
-        latexTable.append(this.rtaEaDeadMethods);
+        latexTable.append(additionalRtaEa == 0 ? "0" : "+" + additionalRtaEa);
         latexTable.append(" & ");
-        latexTable.append(this.rtaMaxDeadMethods);
+        latexTable.append(additionalrtaMax == 0 ? "0" : "+" + additionalrtaMax);
 
         latexTable.append("\\\\");
         latexTable.append("\n");
+    }
+    
+    void addToLatexTable4(StringBuilder latexTable) {
+        
+        latexTable.append(this.library.name());
+        latexTable.append(" & ");
+
+        latexTable.append(formatNanoTime(this.classHierarchyBuildTime));
+        latexTable.append(" & ");
+        latexTable.append(formatNanoTime(this.chaBuildTime));
+        latexTable.append(" & ");
+        latexTable.append(formatNanoTime(this.rtaBuildTime));
+        latexTable.append(" & ");
+        latexTable.append(formatNanoTime(this.escapeAnalysisTime));
+        latexTable.append(" & ");
+        latexTable.append(formatNanoTime(this.rtaEaTime));
+        latexTable.append(" & ");
+        latexTable.append(formatNanoTime(this.rtaMaxTime));
+        latexTable.append(" & ");
+        latexTable.append(formatNanoTime(this.totalAnalysisTime));
+        
+        latexTable.append("\\\\");
+        latexTable.append("\n");
+    }
+    
+    private String formatNanoTime(long nanoTime) {
+        
+        DecimalFormat formatter = new DecimalFormat("#.00");
+        return formatter.format((double)nanoTime / 1000 / 1000 / 1000);
     }
     
     private void printToFile(File file, CountResults totalCounts, CountResults libraryCounts, LibraryResult chaCpaResult, JavaMethodSet entryPoints, 

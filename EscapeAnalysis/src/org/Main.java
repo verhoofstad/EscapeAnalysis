@@ -1,10 +1,5 @@
 package org;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +14,10 @@ import org.validation.LibraryValidator;
 public class Main {
 
     public static void main(String[] args) {
-
-        //DataSet dataSet = DataSet.getCorrectSet();
-        DataSet dataSet = DataSet.getTestSet();
-
+        
+        DataSet dataSet = DataSet.getCorrectSet();
+        //DataSet dataSet = DataSet.getTestSet();
+        
         //validateLibraries(dataSet);
         analyseLibraries(dataSet);
     }
@@ -37,17 +32,21 @@ public class Main {
         LibraryResultSet libResults = new LibraryResultSet();
 
         for (Library library : dataSet) {
+            
+            long startTime = System.nanoTime();
 
             LibraryAnalyser analyser = new LibraryAnalyser(library);
             analyser.setJDKResults(jdkResults.finalPackagePrivateClasses(), jdkResults.confinedClasses());
 
             LibraryResult libraryResult = analyser.analyse();
+            libraryResult.totalAnalysisTime = (System.nanoTime() - startTime);
             libResults.add(libraryResult);
         }
         
-        libResults.printLatexTable();
-        libResults.printLatexTable2();
-        libResults.printLatexTable3();
+        libResults.printCallEdgeTable();
+        libResults.printMonomorphicCallSitesTable();
+        libResults.printDeadMethodsTable();
+        libResults.printLatexTable4();
         
         System.out.println("Finished");
     }
@@ -76,6 +75,4 @@ public class Main {
         System.out.format("Finished. %s out of %s libraries are complete.\n", validLibraries.size(), dataSet.size());
         System.out.format("Identifiers: %s\n\n", String.join(",", validLibraries));
     }
-
- 
 }

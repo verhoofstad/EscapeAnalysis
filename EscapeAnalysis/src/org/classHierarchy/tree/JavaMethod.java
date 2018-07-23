@@ -108,12 +108,30 @@ public class JavaMethod {
     public boolean isStaticInitializer() {
         return this.name.equals("<clinit>");
     }
+    
+    public boolean isSynthetic() {
+        return this.accessFlags.isSynthetic();
+    }
 
     /**
      * Gets the JAR-file this method was loaded from.
      */
     public JarFile jarFile() {
         return this.containedIn.jarFile();
+    }
+
+    /**
+     * Determines whether this method is part of a give Java type.
+     */
+    public boolean containedIn(JavaType javaType) {
+        return this.containedIn.equals(javaType);
+    }
+
+    /**
+     * Determines whether this method was loaded from a specified JAR-file.
+     */
+    public boolean containedIn(JarFile jarFile) {
+        return this.containedIn.containedIn(jarFile);
     }
 
     /**
@@ -246,6 +264,62 @@ public class JavaMethod {
 
     public static String toSignature(String name, String desc) {
         return String.format("%s::%s", name, desc);
+    }
+    
+    public String modifiers() {
+        StringBuilder modifiers = new StringBuilder();
+        if(this.accessFlags.isPublic()) {
+            modifiers.append("PUBLIC ");
+        }
+        if(this.accessFlags.isProtected()) {
+            modifiers.append("PROTECTED ");
+        }
+        if(this.accessFlags.isPackagePrivate()) {
+            modifiers.append("PACKAGE ");
+        }
+        if(this.accessFlags.isPrivate()) {
+            modifiers.append("PRIVATE ");
+        }
+        if(this.accessFlags.isAbstract()) {
+            modifiers.append("ABSTRACT ");
+        }
+        if(this.accessFlags.isAnnotation()) {
+            modifiers.append("ANNOTATION ");
+        }
+        if(this.accessFlags.isSynthetic()) {
+            modifiers.append("SYNTHETIC ");
+        }
+        if(this.accessFlags.isBridge()) {
+            modifiers.append("BRIDGE ");
+        }
+        if(this.accessFlags.isNative()) {
+            modifiers.append("NATIVE ");
+        }
+        if(this.accessFlags.isInterface()) {
+            modifiers.append("INTERFACE ");
+        }
+        if(this.accessFlags.isFinal()) {
+            modifiers.append("FINAL ");
+        }
+        if(this.accessFlags.isStatic()) {
+            modifiers.append("STATIC ");
+        }
+        if(this.accessFlags.isStrict()) {
+            modifiers.append("STRICT ");
+        }
+        if(this.accessFlags.isSynchronized()) {
+            modifiers.append("SYNCHRONIZE ");
+        }
+        if(this.accessFlags.isTransient()) {
+            modifiers.append("TRANSIENT ");
+        }
+        if(this.accessFlags.isVarArgs()) {
+            modifiers.append("VARARGS ");
+        }
+        if(this.accessFlags.isVolatile()) {
+            modifiers.append("VOLATILE ");
+        }
+        return modifiers.toString();
     }
 
     private String createId() {

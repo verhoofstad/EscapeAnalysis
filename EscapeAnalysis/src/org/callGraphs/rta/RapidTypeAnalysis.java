@@ -33,10 +33,6 @@ public class RapidTypeAnalysis {
         this.confinedClasses = new JavaTypeSet();
     }
 
-    public CallGraph callGraph() {
-        return this.rtaGraph;
-    }
-
     public void setLibraryAnalysis(JavaTypeSet exportedClasses, JavaMethodSet exportedMethods) {
 
         this.liveClasses = exportedClasses;
@@ -51,7 +47,7 @@ public class RapidTypeAnalysis {
         this.analyseWithConfinedClasses = true;
     }
 
-    public void analyse() {
+    public CallGraph buildGraph() {
 
         while (!this.worklist.isEmpty()) {
 
@@ -114,6 +110,7 @@ public class RapidTypeAnalysis {
                 }
             }
         }
+        return this.rtaGraph;
     }
 
     private void addToLiveClasses(JavaClass javaClass) {

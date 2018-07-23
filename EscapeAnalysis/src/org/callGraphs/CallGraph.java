@@ -21,6 +21,9 @@ public class CallGraph {
     private JavaMethodSet invokedMethods = new JavaMethodSet();
 
     public void addStaticCallSite(JavaMethod source, JavaMethod target) {
+        if (source == null) { throw new IllegalArgumentException("Parameter 'source' should not be null."); }
+        if (target == null) { throw new IllegalArgumentException("Parameter 'target' should not be null."); }
+
         CallSite staticCallSite = new CallSite(source, target);
         
         this.addCallSite(staticCallSite);
@@ -28,6 +31,9 @@ public class CallGraph {
     }
 
     public void addVirtualCallSite(JavaMethod source, JavaMethodSet virtualTargets) {
+        if (source == null) { throw new IllegalArgumentException("Parameter 'source' should not be null."); }
+        if (virtualTargets == null) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not be null."); }
+
         CallSite virtualCallSite = new CallSite(source, virtualTargets);
         
         this.addCallSite(virtualCallSite);
@@ -35,10 +41,14 @@ public class CallGraph {
     }
 
     public void addMonomorphicCallSite(JavaMethod source, JavaMethodSet virtualTargets) {
+        if (source == null) { throw new IllegalArgumentException("Parameter 'source' should not be null."); }
         if (virtualTargets == null) { throw new IllegalArgumentException("Parameter 'virtualTargets' should not be null."); }
         if (virtualTargets.size() != 1) { throw new IllegalArgumentException("Parameter 'virtualTargets' should contain exactly one target method."); }
         
-        this.newMonomorphicCallSites.add(new CallSite(source, virtualTargets));
+        CallSite monomorphicCallSite = new CallSite(source, virtualTargets);
+        
+        this.newMonomorphicCallSites.add(monomorphicCallSite);
+        this.addInvokedMethods(monomorphicCallSite);
     }
     
     private void addCallSite(CallSite callSite) {
@@ -201,15 +211,17 @@ public class CallGraph {
 
     /**
      * Returns the set of methods that have never been invoked.
+     * Because the call graph never contains edges to abstract methods, only concrete methods are considered.
      * @param classHierarchy The class hierarchy that contains all methods.
      * @param jarFile 
      * @return The set of methods that have never been invoked.
      */
     public JavaMethodSet getDeadMethods(ClassHierarchy classHierarchy, JarFile jarFile) {
         
-        JavaMethodSet methodsInJarFile = classHierarchy.getMethods(jarFile);
+        JavaMethodSet methodsInJarFile = classHierarchy.getConcreteMethods(jarFile);
         JavaMethodSet entryPoints = classHierarchy.getExportedMethods(jarFile);
+        JavaMethodSet compilerGenerated = classHierarchy.getCompilerGeneratedMethods(jarFile);
         
-        return methodsInJarFile.difference(this.invokedMethods).difference(entryPoints);
+        return methodsInJarFile.difference(this.invokedMethods).difference(entryPoints).difference(compilerGenerated);
     }
 }

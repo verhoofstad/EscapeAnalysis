@@ -74,6 +74,13 @@ public abstract class JavaType {
     public JarFile jarFile() {
         return this.jarFile;
     }
+    
+    /**
+     * Determines whether this type was loaded from a specified JAR-file.
+     */
+    public boolean containedIn(JarFile jarFile) {
+        return this.jarFile.equals(jarFile);
+    }
 
     /**
      * Returns the sub classes of the current type. If the current type represents

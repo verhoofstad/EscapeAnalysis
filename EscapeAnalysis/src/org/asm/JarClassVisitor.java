@@ -6,14 +6,16 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 
 class JarClassVisitor extends ClassVisitor {
-    private JarFileVisitor _visitor;
-    private ClassReader _reader;
+    private JarFileVisitor visitor;
+    private ClassReader reader;
+    private JarFile jarfile;
 
-    public JarClassVisitor(JarFileVisitor visitor, ClassReader reader) {
+    public JarClassVisitor(JarFileVisitor visitor, ClassReader reader, JarFile jarFile) {
         super(Opcodes.ASM6);
 
-        _visitor = visitor;
-        _reader = reader;
+        this.visitor = visitor;
+        this.reader = reader;
+        this.jarfile = jarFile;
     }
 
     /*
@@ -27,27 +29,27 @@ class JarClassVisitor extends ClassVisitor {
         if (accessFlags.isEnum()) {
 
             if (accessFlags.isPublic()) {
-                _visitor.visitPublicEnum(new JarClass(name, superName, interfaces, accessFlags, _reader));
+                this.visitor.visitPublicEnum(new JarClass(name, superName, interfaces, accessFlags, this.reader, this.jarfile));
             } else {
-                _visitor.visitPackagePrivateEnum(new JarClass(name, superName, interfaces, accessFlags, _reader));
+                this.visitor.visitPackagePrivateEnum(new JarClass(name, superName, interfaces, accessFlags, this.reader, this.jarfile));
             }
         }
 
         if (accessFlags.isInterface()) {
 
             if (accessFlags.isPublic()) {
-                _visitor.visitPublicInterface(new JarClass(name, superName, interfaces, accessFlags, _reader));
+                this.visitor.visitPublicInterface(new JarClass(name, superName, interfaces, accessFlags, this.reader, this.jarfile));
             } else {
-                _visitor.visitPackagePrivateInterface(new JarClass(name, superName, interfaces, accessFlags, _reader));
+                this.visitor.visitPackagePrivateInterface(new JarClass(name, superName, interfaces, accessFlags, this.reader, this.jarfile));
             }
         }
 
         if (!accessFlags.isEnum() && !accessFlags.isInterface()) {
 
             if (accessFlags.isPublic()) {
-                _visitor.visitPublicClass(new JarClass(name, superName, interfaces, accessFlags, _reader));
+                this.visitor.visitPublicClass(new JarClass(name, superName, interfaces, accessFlags, this.reader, this.jarfile));
             } else {
-                _visitor.visitPackagePrivateClass(new JarClass(name, superName, interfaces, accessFlags, _reader));
+                this.visitor.visitPackagePrivateClass(new JarClass(name, superName, interfaces, accessFlags, this.reader, this.jarfile));
             }
         }
     }

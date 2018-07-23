@@ -41,7 +41,7 @@ public class JarFile {
                 if (entry.getName().endsWith(".class")) {
     
                     ClassReader cr = new ClassReader(jarStream);
-                    JarClassVisitor cp = new JarClassVisitor(visitor, cr);
+                    JarClassVisitor cp = new JarClassVisitor(visitor, cr, this);
     
                     cr.accept(cp, 0);
                 }

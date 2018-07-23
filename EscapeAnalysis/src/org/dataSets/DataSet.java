@@ -532,7 +532,11 @@ public class DataSet implements Iterable<Library> {
                 new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
         dataSet.addLibrary(90, "org.easymock", "easymockclassextension", "3.2",
                 "Libraries\\org.easymock\\easymockclassextension\\jars\\easymockclassextension-3.2.jar",
-                new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+                new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib", 
+                        // Added
+                        //"Libraries\\org.easymock\\easymock\\jars\\easymock-3.4.jar",
+                        "Libraries\\org.objenesis\\objenesis\\jars\\objenesis-2.2.jar"
+                });
         dataSet.addLibrary(91, "org.aspectj", "aspectjrt", "1.8.7",
                 "Libraries\\org.aspectj\\aspectjrt\\jars\\aspectjrt-1.8.7.jar",
                 new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });

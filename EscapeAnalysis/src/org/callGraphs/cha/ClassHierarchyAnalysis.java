@@ -13,7 +13,6 @@ import org.objectweb.asm.Opcodes;
 
 /**
  * Constructs a call graph using Class Hierarchy Analysis.
- *
  */
 public class ClassHierarchyAnalysis extends JarFileSetVisitor {
 
