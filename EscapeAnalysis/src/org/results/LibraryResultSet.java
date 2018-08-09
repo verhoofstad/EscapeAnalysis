@@ -90,6 +90,27 @@ public class LibraryResultSet {
         System.out.println(latexTable.toString());        
     }
     
+    public void printEntryPointTable() {
+        
+        StringBuilder latexTable = new StringBuilder();
+        
+        latexTable.append("\\begin{table}\n");
+        latexTable.append("\\begin{tabular}{ l | r | r r | r r | r r }\n");
+        latexTable.append("\\hline\n");
+        latexTable.append("Project & RTA & \\multicolumn{2}{c|}{Old} & \\multicolumn{2}{c|}{OPA} & \\multicolumn{2}{c}{CPA} \\\\ \n");
+        latexTable.append(" & & Calc. & Reif. & Calc. & Reif. & Calc. & Reif. \\\\ \n");
+        latexTable.append("\\hline\n");
+        for(LibraryResult libraryResult : this.libraryResults) {
+            libraryResult.addToEntryPointTable(latexTable);
+        }
+        latexTable.append("\\hline\n");
+        latexTable.append("\\end{tabular}\n");
+        latexTable.append("\\caption{\\label{tbl:entryPoints}Entry point calculation.}\n");
+        latexTable.append("\\end{table}\n");
+        
+        System.out.println(latexTable.toString());
+    }
+    
     public void printLatexTable4() {
         
         StringBuilder latexTable = new StringBuilder();

@@ -2,6 +2,7 @@ package org.classHierarchy.tree;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.classHierarchy.ClassHierarchyVisitor;
 
 /**
  * Represents a Java class.
@@ -16,6 +17,24 @@ public final class JavaClass extends JavaType {
 
         this.superClass = superClass;
     }
+    
+    @Override
+    public boolean isClass() {
+        return true;
+    }
+    
+    @Override
+    public void accept(ClassHierarchyVisitor visitor) {
+        if(this.isPublic()) {
+            visitor.visitPublicClass(this);
+        }
+        else {
+            visitor.visitPackagePrivateClass(this);
+        }
+        for(JavaMethod declaredMethod : this.declaredMethods()) {
+            declaredMethod.accept(visitor);
+        }
+    }
 
     public JavaClass superClass() {
         return this.superClass;
@@ -23,6 +42,54 @@ public final class JavaClass extends JavaType {
 
     public boolean hasSuperClass() {
         return this.superClass != null;
+    }
+    
+    @Override
+    public boolean isSubTypeOf(String internalName) {
+        
+        if(super.isSubTypeOf(internalName)) {
+            return true;
+        }
+        if(this.hasSuperClass()) {
+            if(this.superClass.id().equals(internalName)) {
+                return true;
+            } else {
+                return superClass.isSubTypeOf(internalName);
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Gets the set of constructors this class contains.
+     */
+    public JavaMethodSet constructors() {
+        JavaMethodSet constructors = new JavaMethodSet();
+        
+        for(JavaMethod declaredMethod : this.declaredMethods()) {
+            if(declaredMethod.isConstructor()) {
+                constructors.add(declaredMethod);
+            }
+        }
+        return constructors;
+    }
+    
+    public boolean hasNonPrivateConstructor() {
+        for(JavaMethod constructor : this.constructors()) {
+            if(!constructor.isPrivate()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean hasFactoryMethod() {
+        for(JavaMethod declaredMethod : this.declaredMethods()) {
+            if(declaredMethod.isFactoryMethod()) {
+                return true;
+            }
+        }
+        return true;
     }
 
     @Override

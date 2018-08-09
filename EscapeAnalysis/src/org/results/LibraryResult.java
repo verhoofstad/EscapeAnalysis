@@ -1,18 +1,7 @@
 package org.results;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.callGraphs.CallGraph;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaTypeSet;
-import org.counting.CountResults;
 import org.dataSets.Library;
 
 /**
@@ -29,6 +18,14 @@ public class LibraryResult {
     public int libraryConcreteMethodCount = 0;
     public int libraryEntryPointMethodCount = 0;
     public int libraryCompilerMethodCount = 0;
+    
+    public int libraryRtaEntryPointCount = 0;
+    public int libraryOldEntryPointCount = 0;
+    public int libraryOpaEntryPointCount = 0;
+    public int libraryCpaEntryPointCount = 0;
+    public int libraryReifOldEntryPointCount = 0;
+    public int libraryReifOpaEntryPointCount = 0;
+    public int libraryReifCpaEntryPointCount = 0;
     
     public int rtaEdgeCount = 0;
     public int rtaEaEdgeCount = 0;
@@ -188,12 +185,34 @@ public class LibraryResult {
         latexTable.append("\n");
     }
     
+    void addToEntryPointTable(StringBuilder latexTable) {
+        latexTable.append(this.library.name());
+        latexTable.append(" & ");
+
+        latexTable.append(this.libraryRtaEntryPointCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryOldEntryPointCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryReifOldEntryPointCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryOpaEntryPointCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryReifOpaEntryPointCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryCpaEntryPointCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryReifCpaEntryPointCount);
+        
+        latexTable.append("\\\\");
+        latexTable.append("\n");        
+    }
+    
     private String formatNanoTime(long nanoTime) {
         
         DecimalFormat formatter = new DecimalFormat("#.00");
         return formatter.format((double)nanoTime / 1000 / 1000 / 1000);
     }
-    
+    /*
     private void printToFile(File file, CountResults totalCounts, CountResults libraryCounts, LibraryResult chaCpaResult, JavaMethodSet entryPoints, 
             JavaTypeSet confinedClasses, CallGraph chaGraph, CallGraph rtaGraph, CallGraph rtaGraphEA, CallGraph rtaGraphEAMax) {
         
@@ -203,8 +222,8 @@ public class LibraryResult {
         fields.add(library.name());
         fields.add(library.revision());
         
-        fields.add("" + totalCounts.classCount);
-        fields.add("" + totalCounts.packagePrivateClassCount);
+        fields.add("" + totalCounts.all_classCount);
+        fields.add("" + totalCounts.all_packageVisibleClassCount);
         fields.add("" + libraryCounts.classCount);
         fields.add("" + libraryCounts.packagePrivateClassCount);
         
@@ -246,5 +265,5 @@ public class LibraryResult {
             e.printStackTrace();
         }
     }
-    
+    */
 }

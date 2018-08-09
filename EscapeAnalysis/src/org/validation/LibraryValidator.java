@@ -114,6 +114,10 @@ public class LibraryValidator extends JarFileSetVisitor {
         
         for (String implementedInterface : jarClass.interfaces()) {
             this.implementedTypes.add(implementedInterface);
+            
+            if(implementedInterface.equals("org/junit/rules/TestRule")) {
+                System.out.format("Class %s implements %s in %s.\r\n", jarClass.name(), implementedInterface, jarClass.jarFile());
+            }
         }
 
         jarClass.accept(new ClassValidator(this.invokedTypes, this.instantiatedTypes));

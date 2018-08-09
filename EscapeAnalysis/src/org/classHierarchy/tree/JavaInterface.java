@@ -2,6 +2,7 @@ package org.classHierarchy.tree;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.classHierarchy.ClassHierarchyVisitor;
 
 /**
  * Represents a Java interface.
@@ -16,6 +17,24 @@ public final class JavaInterface extends JavaType {
         this.subInterfaces = new JavaTypeSet();
     }
 
+    @Override
+    public boolean isClass() {
+        return false;
+    }
+    
+    @Override
+    public void accept(ClassHierarchyVisitor visitor) {
+        if(this.isPublic()) {
+            visitor.visitPublicInterface(this);
+        }
+        else {
+            visitor.visitPackagePrivateInterface(this);
+        }
+        for(JavaMethod declaredMethod : this.declaredMethods()) {
+            declaredMethod.accept(visitor);
+        }
+    }
+    
     public void addSubInterface(JavaInterface subInterface) {
         this.subInterfaces.add(subInterface);
 

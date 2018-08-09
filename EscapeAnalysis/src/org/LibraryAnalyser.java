@@ -15,6 +15,10 @@ import org.callGraphs.cha.ClassHierarchyAnalysis;
 import org.callGraphs.rta.RapidTypeAnalysis;
 import org.classHierarchy.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
+import org.classHierarchy.entryPoints.CPAEntryPointCollector;
+import org.classHierarchy.entryPoints.ExportedMethodCollector;
+import org.classHierarchy.entryPoints.OPAEntryPointCollector;
+import org.classHierarchy.entryPoints.OldEntryPointCollector;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
@@ -23,6 +27,8 @@ import org.counting.ClassCounter;
 import org.counting.CountResults;
 import org.dataSets.Library;
 import org.results.LibraryResult;
+import org.results.reif.ReifLibraryResult;
+import org.results.reif.ReifLibraryResultSet;
 import org.escapeAnalysis.EscapeAnalysis;
 import org.methodFinding.JarFileSetMethodFinder;
 
@@ -58,7 +64,7 @@ public class LibraryAnalyser {
         System.out.println();
 
         System.out.print("Counting classes and methods...");
-        ClassCounter libraryCounter = new ClassCounter();
+        ClassCounter libraryCounter = new ClassCounter(cpFile);
         cpFile.accept(libraryCounter);
         CountResults libraryCounts = libraryCounter.countResults();
         System.out.println("Ok");
@@ -70,6 +76,22 @@ public class LibraryAnalyser {
         ClassHierarchy classHierarchy = builder.classHierarchy();
         libraryResult.classHierarchyBuildTime = (System.nanoTime() - startTime);
         System.out.println("Ok");
+        
+        System.out.print("Find types with factory method...");
+        classHierarchy.loadFactoryMethods();
+        System.out.println("Ok");
+        //System.out.format("Found %s types with factory methods.\n", typesWithFactoryMethods.size());
+
+        System.out.print("Find entry points for library...");
+        ExportedMethodCollector exportedMethodCollector = new ExportedMethodCollector(cpFile);
+        JavaMethodSet libraryEntryPoints = exportedMethodCollector.collectEntryPointsFrom(classHierarchy);
+        OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile);
+        JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
+        OPAEntryPointCollector opaEntryPointCollector = new OPAEntryPointCollector(cpFile);
+        JavaMethodSet libraryEntryPointsOpa = opaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
+        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile);
+        JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
+        System.out.println("Ok");
 
         System.out.print("Performing Class Hierarchy Analysis...");
         startTime = System.nanoTime(); 
@@ -79,7 +101,24 @@ public class LibraryAnalyser {
         libraryResult.chaBuildTime = (System.nanoTime() - startTime);
         System.out.println("Ok");
 
-        JavaMethodSet libraryEntryPoints = classHierarchy.getExportedMethods(cpFile);
+        ReifLibraryResult reifResult = ReifLibraryResultSet.readFromFile().find(this.library);
+        
+        System.out.format("Old entry points: %s - %s\n", libraryEntryPointsOld.size(), reifResult.old_entryPoints);
+        System.out.format("OPA entry points: %s - %s\n", libraryEntryPointsOpa.size(), reifResult.opa_entryPoints);
+        System.out.format("CPA entry points: %s - %s\n", libraryEntryPointsCpa.size(), reifResult.cpa_entryPoints);
+        
+        System.out.println("Open package entry points:");
+        int i = 1;
+        for(JavaMethod entryPoint : libraryEntryPointsOpa) {
+            System.out.println("   " + i + " " + entryPoint.modifiers() + " " + entryPoint.toString());
+            i++;
+        }
+        System.out.println("Closed package entry points:");
+        i = 1;
+        for(JavaMethod entryPoint : libraryEntryPointsCpa) {
+            System.out.println("   " + i + " " + entryPoint.modifiers() + " " + entryPoint.toString());
+            i++;
+        }
 
         System.out.print("Performing Rapid Type Analysis...");
         startTime = System.nanoTime(); 
@@ -133,12 +172,10 @@ public class LibraryAnalyser {
                         // Count the confined final package-private classes in the library.
                         JavaTypeSet libraryFinalPackagePrivateClasses = new JavaTypeSet();
                         for(JavaType finalPackagePrivateClass : classHierarchy.getFinalPackagePrivateClasses()) {
-                            if(finalPackagePrivateClass.containedIn(cpFile)) {
+                            if(finalPackagePrivateClass.isLoadedFrom(cpFile)) {
                                 libraryFinalPackagePrivateClasses.add(finalPackagePrivateClass);
                             }
                         }
-                        System.out.format("Library final package-private class count: %s -- %s\n", 
-                                libraryCounts.packagePrivateClassCount, libraryFinalPackagePrivateClasses.size());
                         JavaTypeSet libraryConfinedClasses = libraryFinalPackagePrivateClasses.difference(escapeAnalysis.escapingClasses());
                         libraryConfinedClassCount = libraryConfinedClasses.size();
 
@@ -183,12 +220,20 @@ public class LibraryAnalyser {
         printGraphTotals(chaGraph, rtaGraph, rtaGraphEA, rtaGraphEAMax);
         System.out.println();
         
-        libraryResult.libraryPublicClassCount = libraryCounts.publicClassCount;
-        libraryResult.libraryPackagePrivateClassCount = libraryCounts.packagePrivateClassCount;
+        libraryResult.libraryPublicClassCount = libraryCounts.project_publicClassCount;
+        libraryResult.libraryPackagePrivateClassCount = libraryCounts.project_packageVisibleClassCount;
         libraryResult.libraryConfinedClassCount = libraryConfinedClassCount;
         libraryResult.libraryConcreteMethodCount = classHierarchy.getConcreteMethods(cpFile).size();
         libraryResult.libraryEntryPointMethodCount = libraryEntryPoints.size();
         libraryResult.libraryCompilerMethodCount = classHierarchy.getCompilerGeneratedMethods(cpFile).size();
+        
+        libraryResult.libraryRtaEntryPointCount = libraryEntryPoints.size();
+        libraryResult.libraryOldEntryPointCount = libraryEntryPointsOld.size();
+        libraryResult.libraryOpaEntryPointCount = libraryEntryPointsOpa.size();
+        libraryResult.libraryCpaEntryPointCount = libraryEntryPointsCpa.size();
+        libraryResult.libraryReifOldEntryPointCount = reifResult.old_entryPoints;
+        libraryResult.libraryReifOpaEntryPointCount = reifResult.opa_entryPoints;
+        libraryResult.libraryReifCpaEntryPointCount = reifResult.cpa_entryPoints;
         
         libraryResult.rtaEdgeCount = rtaGraph.nrOfEdges(cpFile);
         libraryResult.rtaEaEdgeCount = rtaGraphEA.nrOfEdges(cpFile);

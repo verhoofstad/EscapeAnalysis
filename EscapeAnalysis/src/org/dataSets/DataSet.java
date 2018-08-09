@@ -93,6 +93,23 @@ public class DataSet implements Iterable<Library> {
         }
         return correctSet;        
     }
+    
+    public static DataSet getUnmodifiedSet() {
+
+        DataSet completeSet = DataSet.getCompleteSet();
+        DataSet correctSet = new DataSet();
+
+        Integer[] correctIds = { 1, 2, 3, 6, 8, 11, 17, 18, 19, 21, 26, 27, 30, 33, 35, 37, 41, 47, 48, 49, 51,
+                52, 60, 71, 72, 86, 88, 91, 95, 97 };
+        List<Integer> correctLibraries = new ArrayList<Integer>(Arrays.asList(correctIds));
+
+        for (Library library : completeSet) {
+            if (correctLibraries.contains(library.id())) {
+                correctSet.addLibrary(library);
+            }
+        }
+        return correctSet;
+    }
 
     public static DataSet getCompleteSet() {
 

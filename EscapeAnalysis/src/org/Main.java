@@ -1,5 +1,6 @@
 package org;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,19 +10,30 @@ import org.dataSets.Library;
 import org.results.JDKResults;
 import org.results.LibraryResult;
 import org.results.LibraryResultSet;
+import org.results.reif.ReifLibraryResult;
+import org.results.reif.ReifLibraryResultSet;
 import org.validation.LibraryValidator;
 
 public class Main {
 
     public static void main(String[] args) {
         
-        DataSet dataSet = DataSet.getCorrectSet();
+        //DataSet dataSet = DataSet.getCorrectSet();
         //DataSet dataSet = DataSet.getTestSet();
+        DataSet dataSet = DataSet.getUnmodifiedSet();
+        
+        long startTime = System.nanoTime(); 
         
         //validateLibraries(dataSet);
-        analyseLibraries(dataSet);
+        //analyseLibraries(dataSet);
+        //compareCounts(DataSet.getUnmodifiedSet());
+        analyseEntryPoints(dataSet);
+        
+        long runningTime = (System.nanoTime() - startTime);
+        DecimalFormat formatter = new DecimalFormat("#.00");
+        System.out.println("Total running time: " + formatter.format((double)runningTime / 1000 / 1000 / 1000) + " seconds");
     }
-
+    
     private static void analyseLibraries(DataSet dataSet) {
 
         // Because the JDK is a dependency of every other library,
@@ -43,14 +55,30 @@ public class Main {
             libResults.add(libraryResult);
         }
         
-        libResults.printCallEdgeTable();
-        libResults.printMonomorphicCallSitesTable();
-        libResults.printDeadMethodsTable();
-        libResults.printLatexTable4();
+        //libResults.printCallEdgeTable();
+        //libResults.printMonomorphicCallSitesTable();
+        //libResults.printDeadMethodsTable();
+        libResults.printEntryPointTable();
+        //libResults.printLatexTable4();
         
         System.out.println("Finished");
     }
 
+    private static void analyseEntryPoints(DataSet dataSet) {
+
+        ReifLibraryResultSet reifResults = ReifLibraryResultSet.readFromFile();
+
+        for (Library library : dataSet) {
+            
+            ReifLibraryResult reifResult = reifResults.find(library);
+
+            EntryPointAnalyser analyser = new EntryPointAnalyser(library, reifResult);
+
+            analyser.analyse();
+        }
+    }
+
+    
     private static void validateLibraries(DataSet dataSet) {
 
         List<String> validLibraries = new ArrayList<String>();

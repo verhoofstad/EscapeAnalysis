@@ -87,7 +87,7 @@ class ClassHierachyBuilderTest {
         }
     }
 
-    @Test
+    /*@Test
     void ClassHierarchy_getExportedMethods() {
         JarFile jarFile = new JarFile("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib\\rt.jar");
         JavaMethodSet exportedMethods = jdkHierarchy.getExportedMethods(jarFile);
@@ -96,7 +96,7 @@ class ClassHierachyBuilderTest {
         for(JavaMethod exportedMethod : exportedMethods) {
             assertEquals(jarFile, exportedMethod.jarFile());
         }
-    }
+    }*/
 
     @Test
     void JavaClass_id() {

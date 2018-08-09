@@ -89,4 +89,60 @@ public class AccessFlags {
     public boolean isPackagePrivate() {
         return !isPublic() && !isProtected() && !isPrivate();
     }
+
+    public String toModifierString() {
+        StringBuilder modifiers = new StringBuilder();
+        if(this.isPublic()) {
+            modifiers.append("PUBLIC ");
+        }
+        if(this.isProtected()) {
+            modifiers.append("PROTECTED ");
+        }
+        if(this.isPackagePrivate()) {
+            modifiers.append("PACKAGE ");
+        }
+        if(this.isPrivate()) {
+            modifiers.append("PRIVATE ");
+        }
+        if(this.isAbstract()) {
+            modifiers.append("ABSTRACT ");
+        }
+        if(this.isAnnotation()) {
+            modifiers.append("ANNOTATION ");
+        }
+        if(this.isSynthetic()) {
+            modifiers.append("SYNTHETIC ");
+        }
+        if(this.isBridge()) {
+            modifiers.append("BRIDGE ");
+        }
+        if(this.isNative()) {
+            modifiers.append("NATIVE ");
+        }
+        if(this.isInterface()) {
+            modifiers.append("INTERFACE ");
+        }
+        if(this.isFinal()) {
+            modifiers.append("FINAL ");
+        }
+        if(this.isStatic()) {
+            modifiers.append("STATIC ");
+        }
+        if(this.isStrict()) {
+            modifiers.append("STRICT ");
+        }
+        if(this.isSynchronized()) {
+            modifiers.append("SYNCHRONIZE ");
+        }
+        if(this.isTransient()) {
+            modifiers.append("TRANSIENT ");
+        }
+        if(this.isVarArgs()) {
+            modifiers.append("VARARGS ");
+        }
+        if(this.isVolatile()) {
+            modifiers.append("VOLATILE ");
+        }
+        return modifiers.toString();
+    }
 }

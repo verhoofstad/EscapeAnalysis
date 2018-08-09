@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.classHierarchy.ClassHierarchyVisitor;
 import org.objectweb.asm.Type;
 
 import soot.ArrayType;
@@ -37,6 +38,8 @@ public class JavaMethod {
 
     // The method's applies-to set
     private JavaTypeSet appliesTo;
+    
+    private boolean isFactoryMethod = false;
 
     public JavaMethod(JavaType containedIn, int access, String name, String desc) {
 
@@ -112,7 +115,11 @@ public class JavaMethod {
     public boolean isSynthetic() {
         return this.accessFlags.isSynthetic();
     }
-
+    
+    public boolean isNative() {
+        return this.accessFlags.isNative();
+    }
+    
     /**
      * Gets the JAR-file this method was loaded from.
      */
@@ -130,8 +137,31 @@ public class JavaMethod {
     /**
      * Determines whether this method was loaded from a specified JAR-file.
      */
-    public boolean containedIn(JarFile jarFile) {
-        return this.containedIn.containedIn(jarFile);
+    public boolean isLoadedFrom(JarFile jarFile) {
+        return this.containedIn.isLoadedFrom(jarFile);
+    }
+    
+    public boolean isFactoryMethod() {
+        return this.isFactoryMethod;
+    }
+
+    public void isFactoryMethod(boolean value) {
+        this.isFactoryMethod = value;
+    }
+    
+    void accept(ClassHierarchyVisitor visitor) {
+        if(this.isPublic()) {
+            visitor.visitPublicMethod(this);
+        }
+        else if(this.isProtected()) {
+            visitor.visitProtectedMethod(this);
+        }
+        else if(this.isPrivate()) {
+            visitor.visitPrivateMethod(this);
+        }
+        else {
+            visitor.visitPackagePrivateMethod(this);
+        }
     }
 
     /**
@@ -195,6 +225,25 @@ public class JavaMethod {
 
     public boolean signatureEquals(String name, String desc) {
         return this.name.equals(name) && this.desc.equals(desc);
+    }
+    
+    public String referenceReturnType() {
+        
+        Type returnType = this.methodType.getReturnType();
+
+        switch(returnType.getSort()) {
+        case Type.OBJECT:
+            return returnType.getInternalName();
+        case Type.ARRAY:
+            if(returnType.getElementType().getSort() == Type.OBJECT) {
+                return returnType.getElementType().getInternalName();
+            }
+        }
+        return null;
+    }
+    
+    public boolean hasReferenceReturnType() {
+        return this.referenceReturnType() != null;
     }
 
     public String sootName() {
@@ -267,59 +316,7 @@ public class JavaMethod {
     }
     
     public String modifiers() {
-        StringBuilder modifiers = new StringBuilder();
-        if(this.accessFlags.isPublic()) {
-            modifiers.append("PUBLIC ");
-        }
-        if(this.accessFlags.isProtected()) {
-            modifiers.append("PROTECTED ");
-        }
-        if(this.accessFlags.isPackagePrivate()) {
-            modifiers.append("PACKAGE ");
-        }
-        if(this.accessFlags.isPrivate()) {
-            modifiers.append("PRIVATE ");
-        }
-        if(this.accessFlags.isAbstract()) {
-            modifiers.append("ABSTRACT ");
-        }
-        if(this.accessFlags.isAnnotation()) {
-            modifiers.append("ANNOTATION ");
-        }
-        if(this.accessFlags.isSynthetic()) {
-            modifiers.append("SYNTHETIC ");
-        }
-        if(this.accessFlags.isBridge()) {
-            modifiers.append("BRIDGE ");
-        }
-        if(this.accessFlags.isNative()) {
-            modifiers.append("NATIVE ");
-        }
-        if(this.accessFlags.isInterface()) {
-            modifiers.append("INTERFACE ");
-        }
-        if(this.accessFlags.isFinal()) {
-            modifiers.append("FINAL ");
-        }
-        if(this.accessFlags.isStatic()) {
-            modifiers.append("STATIC ");
-        }
-        if(this.accessFlags.isStrict()) {
-            modifiers.append("STRICT ");
-        }
-        if(this.accessFlags.isSynchronized()) {
-            modifiers.append("SYNCHRONIZE ");
-        }
-        if(this.accessFlags.isTransient()) {
-            modifiers.append("TRANSIENT ");
-        }
-        if(this.accessFlags.isVarArgs()) {
-            modifiers.append("VARARGS ");
-        }
-        if(this.accessFlags.isVolatile()) {
-            modifiers.append("VOLATILE ");
-        }
-        return modifiers.toString();
+        return this.accessFlags.toModifierString();
     }
 
     private String createId() {

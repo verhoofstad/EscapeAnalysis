@@ -219,7 +219,7 @@ public class CallGraph {
     public JavaMethodSet getDeadMethods(ClassHierarchy classHierarchy, JarFile jarFile) {
         
         JavaMethodSet methodsInJarFile = classHierarchy.getConcreteMethods(jarFile);
-        JavaMethodSet entryPoints = classHierarchy.getExportedMethods(jarFile);
+        JavaMethodSet entryPoints = new JavaMethodSet(); //classHierarchy.getExportedMethods(jarFile);
         JavaMethodSet compilerGenerated = classHierarchy.getCompilerGeneratedMethods(jarFile);
         
         return methodsInJarFile.difference(this.invokedMethods).difference(entryPoints).difference(compilerGenerated);

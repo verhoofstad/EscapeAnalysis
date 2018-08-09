@@ -2,6 +2,7 @@ package org.classHierarchy.tree;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.classHierarchy.ClassHierarchyVisitor;
 
 /**
  * Represents a Java class or interface.
@@ -33,6 +34,14 @@ public abstract class JavaType {
 
         this.packagePath = internalName.substring(0, internalName.lastIndexOf("/"));
     }
+    
+    public abstract boolean isClass();
+    
+    public boolean isInterface() {
+        return !this.isClass();
+    }
+    
+    public abstract void accept(ClassHierarchyVisitor visitor);
 
     /**
      * Gets the fully qualified name that uniquely identifies this type.
@@ -67,6 +76,14 @@ public abstract class JavaType {
     public boolean isAbstract() {
         return this.accessFlags.isAbstract();
     }
+    
+    /**
+     * Gets a value indicating whether this type is accessible.
+     * This is the case if the type is public or package-private with a public sub type.
+     */
+    public boolean isAccessible() {
+        return this.isPublic() || hasPublicSubClass();
+    }
 
     /**
      * Gets the JAR-file this type was loaded from.
@@ -78,10 +95,32 @@ public abstract class JavaType {
     /**
      * Determines whether this type was loaded from a specified JAR-file.
      */
-    public boolean containedIn(JarFile jarFile) {
+    public boolean isLoadedFrom(JarFile jarFile) {
         return this.jarFile.equals(jarFile);
     }
-
+    
+    /**
+     * Gets a value indicating whether this type is a sub type (transitive) of a given type.
+     */
+    public boolean isSubTypeOf(JavaType superType) {
+        if(superType == null) { throw new IllegalArgumentException("Parameter 'superType' should not be null."); }
+        
+        return !this.equals(superType) && superType.coneSet.contains(this);
+    }
+    
+    public boolean isSubTypeOf(String internalName) {
+        
+        for(JavaType superInterface : this.superInterfaces) {
+            if(superInterface.id().equals(internalName)) {
+                return true;
+            }
+            if(superInterface.isSubTypeOf(internalName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Returns the sub classes of the current type. If the current type represents
      * an interface, it returns the classes that implement it.
@@ -120,7 +159,7 @@ public abstract class JavaType {
     public boolean equals(Object obj) {
         return obj != null && obj instanceof JavaType && this.id().equals(((JavaType) obj).id());
     }
-
+    
     public void addSubClass(JavaClass subClass) {
         this.subClasses.add(subClass);
         addToConeSet(subClass);

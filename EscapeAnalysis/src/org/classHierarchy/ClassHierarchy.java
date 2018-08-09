@@ -1,6 +1,8 @@
 package org.classHierarchy;
 
 import org.asm.JarFile;
+import org.asm.JarFileSet;
+import org.classHierarchy.factoryMethods.JarFileSetFactoryMethods;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
@@ -11,15 +13,18 @@ public class ClassHierarchy {
     private JavaType rootNode;
     private JavaTypeSet interfaces;
     private JavaTypeSet classes;
+    private JarFileSet jarFiles;
 
-    public ClassHierarchy(JavaType rootNode, JavaTypeSet classes, JavaTypeSet interfaces) {
+    public ClassHierarchy(JavaType rootNode, JavaTypeSet classes, JavaTypeSet interfaces, JarFileSet jarFiles) {
         if(rootNode == null) { throw new IllegalArgumentException("Parameter 'rootNode' should not be null."); }
         if(classes == null) { throw new IllegalArgumentException("Parameter 'classes' should not be null."); }
         if(interfaces == null) { throw new IllegalArgumentException("Parameter 'interfaces' should not be null."); }
+        if(jarFiles == null) { throw new IllegalArgumentException("Parameter 'jarFiles' should not be null."); }
 
         this.rootNode = rootNode;
         this.classes = classes;
         this.interfaces = interfaces;
+        this.jarFiles = jarFiles;
     }
 
     public JavaType rootNode() {
@@ -80,7 +85,7 @@ public class ClassHierarchy {
         JavaTypeSet publicClasses = new JavaTypeSet();
         
         for (JavaType javaClass : this.classes) {
-            if (javaClass.isPublic() && javaClass.containedIn(jarFile)) {
+            if (javaClass.isPublic() && javaClass.isLoadedFrom(jarFile)) {
                 publicClasses.add(javaClass);
             }
         }
@@ -111,7 +116,7 @@ public class ClassHierarchy {
         JavaTypeSet publicInterfaces = new JavaTypeSet();
         
         for (JavaType javaInterface : this.interfaces) {
-            if (javaInterface.isPublic() && javaInterface.containedIn(jarFile)) {
+            if (javaInterface.isPublic() && javaInterface.isLoadedFrom(jarFile)) {
                 publicInterfaces.add(javaInterface);
             }
         }
@@ -140,7 +145,7 @@ public class ClassHierarchy {
         
         for (JavaType javaClass : this.classes) {
             for (JavaMethod method : javaClass.declaredMethods()) {
-                if (javaClass.containedIn(jarFile) && !method.isAbstract()) {
+                if (javaClass.isLoadedFrom(jarFile) && !method.isAbstract()) {
                     concreteMethods.add(method);
                 }
             }
@@ -148,7 +153,7 @@ public class ClassHierarchy {
         // Since Java 8, interfaces can also contain concrete methods (default methods).
         for (JavaType javaInterface : this.interfaces) {
             for (JavaMethod method : javaInterface.declaredMethods()) {
-                if (javaInterface.containedIn(jarFile) && !method.isAbstract()) {
+                if (javaInterface.isLoadedFrom(jarFile) && !method.isAbstract()) {
                     concreteMethods.add(method);
                 }
             }
@@ -156,45 +161,29 @@ public class ClassHierarchy {
         return concreteMethods;        
     }
     
-    /**
-     * Gets the exported methods for RTA which are contained in a given library
-     * (JAR-file).
-     * Abstract methods are excluded since they do not affect the call graph.
-     * We also filter out synthetic methods since those 'should' not be called directly. --> We assume a Closed Package scenario.
-     */
-    public JavaMethodSet getExportedMethods(JarFile jarFile) {
-        JavaMethodSet exportedMethods = new JavaMethodSet();
+    
+    public void loadFactoryMethods() {
         
-        for (JavaType publicClass : this.getPublicClasses(jarFile)) {
-
-            boolean isNonFinal = !publicClass.isFinal();
-            for (JavaMethod method : publicClass.declaredMethods()) {
-
-                if(!method.isAbstract() && !method.isSynthetic()) {
-                    if (method.isPublic() || (method.isProtected() && isNonFinal)) {
-                        exportedMethods.add(method);
-                    }
-                }
-            }
+        JarFileSetFactoryMethods factoryLoader = new JarFileSetFactoryMethods(this);
+        
+        this.jarFiles.accept(factoryLoader);
+    }
+    
+    
+    public void accept(ClassHierarchyVisitor visitor) {
+        for(JavaType javaClass : this.classes) {
+            javaClass.accept(visitor);
         }
-
-        // Since Java 8, interfaces can also contain concrete methods (default methods).
-        // These methods are public by default, so unless they are part of a package-private interface,
-        for (JavaType publicInterface : this.getPublicInterfaces(jarFile)) {
-            for (JavaMethod method : publicInterface.declaredMethods()) {
-                if (!method.isAbstract() && !method.isSynthetic()) {
-                    exportedMethods.add(method);
-                }
-            }
+        for(JavaType javaClass : this.interfaces) {
+            javaClass.accept(visitor);
         }
-        return exportedMethods;
     }
     
     public JavaMethodSet getCompilerGeneratedMethods(JarFile jarFile) {
         JavaMethodSet compilerGeneratedMethods = new JavaMethodSet();
         
         for(JavaType javaClass : this.classes) {
-            if(javaClass.containedIn(jarFile)) {
+            if(javaClass.isLoadedFrom(jarFile)) {
 
                 for(JavaMethod javaMethod : javaClass.declaredMethods()) {
                     if(!javaMethod.isAbstract()) {
@@ -208,7 +197,7 @@ public class ClassHierarchy {
             }
         }
         for(JavaType javaInterface : this.interfaces) {
-            if(javaInterface.containedIn(jarFile)) {
+            if(javaInterface.isLoadedFrom(jarFile)) {
 
                 for(JavaMethod javaMethod : javaInterface.declaredMethods()) {
                     if(!javaMethod.isAbstract()) {

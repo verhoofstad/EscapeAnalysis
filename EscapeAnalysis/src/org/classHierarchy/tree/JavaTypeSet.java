@@ -134,6 +134,18 @@ public class JavaTypeSet implements Iterable<JavaType> {
         }
         return false;
     }
+    
+    /**
+     * Gets a value indicating whether this set contains at least one public type.
+     */
+    public boolean containsPublicType() {
+        for (JavaType javaType : this.types.values()) {
+            if (javaType.isPublic()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Returns the number of elements in this set.
