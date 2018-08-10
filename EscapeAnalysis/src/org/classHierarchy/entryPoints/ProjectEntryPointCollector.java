@@ -3,8 +3,8 @@ package org.classHierarchy.entryPoints;
 import org.asm.JarFile;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.ClassHierarchyVisitor;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 
 abstract class ProjectEntryPointCollector extends ClassHierarchyVisitor {
 

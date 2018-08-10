@@ -3,9 +3,9 @@ package org.asm.methodFinding;
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 
 /**
  * Finds the methods in which one of the provided classes is instantiated.

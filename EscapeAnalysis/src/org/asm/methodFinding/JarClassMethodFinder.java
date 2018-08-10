@@ -1,9 +1,9 @@
 package org.asm.methodFinding;
 
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

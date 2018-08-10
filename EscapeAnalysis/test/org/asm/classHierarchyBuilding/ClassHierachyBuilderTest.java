@@ -1,23 +1,22 @@
-package org.classHierarchy;
+package org.asm.classHierarchyBuilding;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.Environment;
-import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaInterface;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests the org.classHierarchy.ClassHierachyBuilder class by constructing a class hierarchy for the JDK library
+ * Tests the org.asm.classHierarchyBuilding.ClassHierachyBuilder class by constructing a class hierarchy for the JDK library
  * and asserting whether certain properties hold. 
  */
 class ClassHierachyBuilderTest {

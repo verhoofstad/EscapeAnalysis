@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.asm.JarClass;
 import org.asm.JarFile;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaInterface;
+import org.classHierarchy.JavaTypeSet;
 
 /**
  * Represents a Java class or interface.

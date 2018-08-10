@@ -1,8 +1,5 @@
 package org.classHierarchy;
 
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaType;
-
 public abstract class ClassHierarchyVisitor {
 
     public void visitPublicClass(JavaType javaClass) { }

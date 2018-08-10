@@ -1,8 +1,7 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
-import org.classHierarchy.ClassHierarchyVisitor;
 
 /**
  * Represents a Java class.

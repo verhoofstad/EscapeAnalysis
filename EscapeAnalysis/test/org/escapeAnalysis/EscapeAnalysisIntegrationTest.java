@@ -6,9 +6,9 @@ import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

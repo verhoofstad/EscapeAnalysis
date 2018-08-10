@@ -1,4 +1,4 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.asm.JarFile;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 
 /**
  * Represents a call graph.

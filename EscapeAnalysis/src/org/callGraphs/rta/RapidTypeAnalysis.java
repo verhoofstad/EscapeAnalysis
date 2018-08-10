@@ -3,11 +3,11 @@ package org.callGraphs.rta;
 import org.callGraphs.CallGraph;
 import org.callGraphs.CallSite;
 import org.callGraphs.CallSiteSet;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 
 /**
  * Performs Rapid Type Analysis over a previously computed CHA call graph.

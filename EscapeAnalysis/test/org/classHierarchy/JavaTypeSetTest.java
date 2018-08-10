@@ -1,10 +1,12 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 import org.junit.jupiter.api.Test;
 
 class JavaTypeSetTest {

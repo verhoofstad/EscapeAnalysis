@@ -1,7 +1,7 @@
 package org.asm.classHierarchyBuilding;
 
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaType;
 
 class JavaTempMethod {
 

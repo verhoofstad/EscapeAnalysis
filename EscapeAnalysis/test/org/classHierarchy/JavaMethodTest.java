@@ -1,4 +1,4 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.JavaMethod;
 
 /**
  * Represents the set of all call sites in a single method.

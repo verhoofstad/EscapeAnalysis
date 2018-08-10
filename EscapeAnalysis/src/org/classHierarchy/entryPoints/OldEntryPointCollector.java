@@ -1,8 +1,8 @@
 package org.classHierarchy.entryPoints;
 
 import org.asm.JarFile;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaMethod;
 
 public class OldEntryPointCollector extends ReifEntryPointCollector {
 

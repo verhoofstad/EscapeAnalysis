@@ -4,7 +4,7 @@ import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.asm.methodFinding.JarFileSetMethodFinder;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaTypeSet;
 import org.escapeAnalysis.EscapeAnalysis;
 import org.results.JDKResults;
 

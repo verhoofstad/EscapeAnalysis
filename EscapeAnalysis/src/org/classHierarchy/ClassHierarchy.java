@@ -3,10 +3,6 @@ package org.classHierarchy;
 import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.factoryMethods.JarFileSetFactoryMethods;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
 
 public class ClassHierarchy {
 

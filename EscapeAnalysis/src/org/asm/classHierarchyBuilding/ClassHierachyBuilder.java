@@ -12,10 +12,10 @@ import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.JarFileSetVisitor;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaInterface;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaInterface;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 
 /**
  * Builds a class hierarchy.

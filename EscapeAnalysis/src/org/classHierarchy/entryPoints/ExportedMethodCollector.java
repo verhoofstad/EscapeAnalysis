@@ -1,8 +1,8 @@
 package org.classHierarchy.entryPoints;
 
 import org.asm.JarFile;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaType;
 
 /**
  * Collects the exported methods as defined in Rapid Type Analysis.

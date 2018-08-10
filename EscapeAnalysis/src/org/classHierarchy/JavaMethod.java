@@ -1,11 +1,10 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
-import org.classHierarchy.ClassHierarchyVisitor;
 import org.objectweb.asm.Type;
 
 import soot.ArrayType;

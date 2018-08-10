@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 
 /**
  * Represents an optimized look-up storage set of all the applies-to sets in a class hierarchy.

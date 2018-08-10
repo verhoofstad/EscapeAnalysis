@@ -1,6 +1,6 @@
 package org.results;
 
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaTypeSet;
 
 public class JDKResults {
     

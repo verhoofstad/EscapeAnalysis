@@ -1,7 +1,11 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 import org.objectweb.asm.Opcodes;
 
 public class TestData {

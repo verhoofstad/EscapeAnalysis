@@ -4,13 +4,12 @@ import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
+import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.counting.ClassAndMethodCounter;
 import org.classHierarchy.counting.CountResults;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
-import org.classHierarchy.entryPoints.ExportedMethodCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector;
 import org.classHierarchy.entryPoints.OldEntryPointCollector;
-import org.classHierarchy.tree.JavaMethodSet;
 import org.dataSets.Library;
 import org.results.LibraryResult;
 import org.results.reif.ReifLibraryResult;
@@ -59,8 +58,6 @@ public class EntryPointAnalyser {
         //System.out.format("Found %s types with factory methods.\n", typesWithFactoryMethods.size());
         
         System.out.print("Find entry points for library...");
-        ExportedMethodCollector exportedMethodCollector = new ExportedMethodCollector(cpFile);
-        JavaMethodSet libraryEntryPoints = exportedMethodCollector.collectEntryPointsFrom(classHierarchy);
         OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile);
         JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         OPAEntryPointCollector opaEntryPointCollector = new OPAEntryPointCollector(cpFile);

@@ -1,9 +1,14 @@
-package org.classHierarchy.tree;
+package org.classHierarchy;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 import org.junit.jupiter.api.Test;
 
 /**

@@ -3,8 +3,8 @@ package org.callGraphs.rta;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 
 /**
  * Represents a work list for Rapid Type Analysis in which a work item can only be processed once.

@@ -3,7 +3,7 @@ package org.asm.factoryMethods;
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.JavaType;
 
 /**
  * Finds the types which have a static factory method.

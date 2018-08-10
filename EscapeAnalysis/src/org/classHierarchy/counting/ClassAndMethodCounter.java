@@ -2,8 +2,8 @@ package org.classHierarchy.counting;
 
 import org.asm.JarFile;
 import org.classHierarchy.ClassHierarchyVisitor;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaType;
 
 /**
  * Counts the classes, interfaces and methods in a class hierarchy.

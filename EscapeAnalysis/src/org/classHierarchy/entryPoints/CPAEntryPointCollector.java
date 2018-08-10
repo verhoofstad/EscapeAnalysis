@@ -1,9 +1,9 @@
 package org.classHierarchy.entryPoints;
 
 import org.asm.JarFile;
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaType;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaType;
 
 public class CPAEntryPointCollector extends ReifEntryPointCollector {
 

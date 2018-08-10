@@ -1,8 +1,8 @@
 package org.callGraphs;
 
-import org.classHierarchy.tree.JavaClass;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
+import org.classHierarchy.JavaClass;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 
 /**
  * Represents a single method invocation from a source method to a set of possible targets.

@@ -1,7 +1,7 @@
 package org.asm.factoryMethods;
 
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.JavaMethod;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 

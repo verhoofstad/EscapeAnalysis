@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.asm.JarFileSet;
-import org.classHierarchy.tree.JavaMethod;
-import org.classHierarchy.tree.JavaMethodSet;
-import org.classHierarchy.tree.JavaType;
-import org.classHierarchy.tree.JavaTypeSet;
+import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
+import org.classHierarchy.JavaType;
+import org.classHierarchy.JavaTypeSet;
 import org.escapeAnalysis.connectionGraph.EscapeState;
 import org.escapeAnalysis.connectionGraph.ObjectNode;
 
