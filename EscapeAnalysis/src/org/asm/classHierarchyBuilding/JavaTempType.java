@@ -1,4 +1,4 @@
-package org.classHierarchy;
+package org.asm.classHierarchyBuilding;
 
 import java.util.ArrayList;
 import java.util.List;

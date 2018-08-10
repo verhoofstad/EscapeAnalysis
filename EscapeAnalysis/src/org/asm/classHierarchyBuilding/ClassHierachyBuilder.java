@@ -1,4 +1,4 @@
-package org.classHierarchy;
+package org.asm.classHierarchyBuilding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import org.asm.JarClass;
 import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.JarFileSetVisitor;
+import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;
 import org.classHierarchy.tree.JavaType;

@@ -1,4 +1,4 @@
-package org.methodFinding;
+package org.asm.methodFinding;
 
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;

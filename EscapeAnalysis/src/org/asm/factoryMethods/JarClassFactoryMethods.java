@@ -1,4 +1,4 @@
-package org.classHierarchy.factoryMethods;
+package org.asm.factoryMethods;
 
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaMethod;

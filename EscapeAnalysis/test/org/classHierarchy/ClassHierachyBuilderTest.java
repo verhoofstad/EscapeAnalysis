@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.Environment;
 import org.asm.JarFile;
 import org.asm.JarFileSet;
-import org.classHierarchy.ClassHierachyBuilder;
+import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaClass;
 import org.classHierarchy.tree.JavaInterface;

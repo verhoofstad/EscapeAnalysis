@@ -1,4 +1,4 @@
-package org.classHierarchy;
+package org.asm.classHierarchyBuilding;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;

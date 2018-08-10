@@ -1,6 +1,5 @@
-package org.counting;
+package org.asm.counting;
 
-import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;

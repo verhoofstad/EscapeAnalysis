@@ -10,10 +10,13 @@ import java.util.List;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
+import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
+import org.asm.counting.ClassCounter;
+import org.asm.counting.CountResults;
+import org.asm.methodFinding.JarFileSetMethodFinder;
 import org.callGraphs.CallGraph;
 import org.callGraphs.cha.ClassHierarchyAnalysis;
 import org.callGraphs.rta.RapidTypeAnalysis;
-import org.classHierarchy.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
 import org.classHierarchy.entryPoints.ExportedMethodCollector;
@@ -23,14 +26,11 @@ import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;
 import org.classHierarchy.tree.JavaTypeSet;
-import org.counting.ClassCounter;
-import org.counting.CountResults;
 import org.dataSets.Library;
 import org.results.LibraryResult;
 import org.results.reif.ReifLibraryResult;
 import org.results.reif.ReifLibraryResultSet;
 import org.escapeAnalysis.EscapeAnalysis;
-import org.methodFinding.JarFileSetMethodFinder;
 
 public class LibraryAnalyser {
 

@@ -1,4 +1,4 @@
-package org.methodFinding;
+package org.asm.methodFinding;
 
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;

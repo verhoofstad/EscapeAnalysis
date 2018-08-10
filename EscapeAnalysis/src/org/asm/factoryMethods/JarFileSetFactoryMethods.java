@@ -1,4 +1,4 @@
-package org.classHierarchy.factoryMethods;
+package org.asm.factoryMethods;
 
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;

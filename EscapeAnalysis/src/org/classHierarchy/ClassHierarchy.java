@@ -2,7 +2,7 @@ package org.classHierarchy;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
-import org.classHierarchy.factoryMethods.JarFileSetFactoryMethods;
+import org.asm.factoryMethods.JarFileSetFactoryMethods;
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaMethodSet;
 import org.classHierarchy.tree.JavaType;

@@ -1,4 +1,4 @@
-package org.counting;
+package org.asm.counting;
 
 public class CountResults {
 

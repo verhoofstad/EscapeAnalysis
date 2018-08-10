@@ -2,7 +2,7 @@ package org;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
-import org.classHierarchy.ClassHierachyBuilder;
+import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.counting.ClassAndMethodCounter;
 import org.classHierarchy.counting.CountResults;

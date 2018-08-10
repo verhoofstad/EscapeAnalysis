@@ -1,4 +1,4 @@
-package org.counting;
+package org.asm.counting;
 
 import org.asm.JarClass;
 import org.asm.JarFile;

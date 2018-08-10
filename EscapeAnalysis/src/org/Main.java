@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.asm.JarFileSet;
+import org.asm.validation.LibraryValidator;
 import org.dataSets.DataSet;
 import org.dataSets.Library;
 import org.results.JDKResults;
@@ -12,7 +13,6 @@ import org.results.LibraryResult;
 import org.results.LibraryResultSet;
 import org.results.reif.ReifLibraryResult;
 import org.results.reif.ReifLibraryResultSet;
-import org.validation.LibraryValidator;
 
 public class Main {
 

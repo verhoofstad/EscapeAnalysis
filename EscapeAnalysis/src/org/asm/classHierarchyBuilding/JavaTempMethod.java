@@ -1,4 +1,4 @@
-package org.classHierarchy;
+package org.asm.classHierarchyBuilding;
 
 import org.classHierarchy.tree.JavaMethod;
 import org.classHierarchy.tree.JavaType;

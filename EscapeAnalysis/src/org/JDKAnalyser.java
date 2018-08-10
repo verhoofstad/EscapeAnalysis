@@ -1,11 +1,11 @@
 package org;
 
 import org.asm.JarFileSet;
-import org.classHierarchy.ClassHierachyBuilder;
+import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
+import org.asm.methodFinding.JarFileSetMethodFinder;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.tree.JavaTypeSet;
 import org.escapeAnalysis.EscapeAnalysis;
-import org.methodFinding.JarFileSetMethodFinder;
 import org.results.JDKResults;
 
 public class JDKAnalyser {

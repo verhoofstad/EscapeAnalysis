@@ -29,24 +29,28 @@ abstract class ProjectEntryPointCollector extends ClassHierarchyVisitor {
     
     protected abstract void visitProjectMethod(JavaMethod javaMethod);
 
+    @Override
     public void visitPublicMethod(JavaMethod javaMethod) { 
         if(javaMethod.isLoadedFrom(this.projectFile)) {
             this.visitProjectMethod(javaMethod);
         }
     }
 
+    @Override
     public void visitProtectedMethod(JavaMethod javaMethod) { 
         if(javaMethod.isLoadedFrom(this.projectFile)) {
             this.visitProjectMethod(javaMethod);
         }
     }
 
+    @Override
     public void visitPackagePrivateMethod(JavaMethod javaMethod) {
         if(javaMethod.isLoadedFrom(this.projectFile)) {
             this.visitProjectMethod(javaMethod);
         }
     }
 
+    @Override
     public void visitPrivateMethod(JavaMethod javaMethod) { 
         if(javaMethod.isLoadedFrom(this.projectFile)) {
             this.visitProjectMethod(javaMethod);

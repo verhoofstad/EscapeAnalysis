@@ -2,11 +2,10 @@ package org.classHierarchy.entryPoints;
 
 import org.asm.JarFile;
 import org.classHierarchy.tree.JavaMethod;
+import org.classHierarchy.tree.JavaType;
 
 /**
- * Gets the exported methods for RTA which are contained in a given library project (JAR-file).
- * Abstract methods are excluded since they do not affect the call graph.
- * //We also filter out synthetic methods since those 'should' not be called directly. --> We assume a Closed Package scenario.
+ * Collects the exported methods as defined in Rapid Type Analysis.
  */
 public class ExportedMethodCollector extends ProjectEntryPointCollector {
     
@@ -17,8 +16,9 @@ public class ExportedMethodCollector extends ProjectEntryPointCollector {
     @Override
     public void visitProjectMethod(JavaMethod javaMethod) {
         
-        boolean isEntryPoint = !javaMethod.isAbstract() && javaMethod.containedIn().isPublic()
-            && (javaMethod.isPublic() || (javaMethod.isProtected() && !javaMethod.containedIn().isFinal()));
+        JavaType declType = javaMethod.containedIn();
+        boolean isEntryPoint = !javaMethod.isAbstract() && declType.isPublic()
+            && (javaMethod.isPublic() || (javaMethod.isProtected() && !declType.isFinal()));
         
         if(isEntryPoint) {
             this.addEntryPoint(javaMethod);

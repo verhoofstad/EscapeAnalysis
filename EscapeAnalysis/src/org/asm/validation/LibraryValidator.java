@@ -1,4 +1,4 @@
-package org.validation;
+package org.asm.validation;
 
 import java.util.HashSet;
 import java.util.Set;
