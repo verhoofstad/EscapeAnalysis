@@ -14,9 +14,9 @@ class JavaMethodTest {
     @Test
     void testId() {
         // Act & Assert
-        assertEquals("java/lang/Object/wait():(V)", TestData.waitMethod().id());
-        assertEquals("java/lang/Object/wait(long):(V)", TestData.waitMethodWithTimeoutParameter().id());
-        assertEquals("java/lang/Object/wait(long,int):(V)", TestData.waitMethodWithTimeoutAndNanosParameters().id());
+        assertEquals("java/lang/Object/wait():V", TestData.waitMethod().id());
+        assertEquals("java/lang/Object/wait(long):V", TestData.waitMethodWithTimeoutParameter().id());
+        assertEquals("java/lang/Object/wait(long,int):V", TestData.waitMethodWithTimeoutAndNanosParameters().id());
     }
 
     @Test
@@ -109,27 +109,7 @@ class JavaMethodTest {
     }
 
     @Test
-    void testSootName() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testSootParameters() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testSootReturnType() {
-        fail("Not yet implemented");
-    }
-
-    @Test
     void testToString() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testToSignature() {
         fail("Not yet implemented");
     }
 }

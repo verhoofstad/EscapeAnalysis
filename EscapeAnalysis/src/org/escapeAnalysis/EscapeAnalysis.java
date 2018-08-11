@@ -67,12 +67,16 @@ public class EscapeAnalysis {
         int methodCount = 0;
 
         Set<String> escapingClasses = new HashSet<String>();
+        
+        SootFactory sootFactory = new SootFactory();
 
         for (JavaType currentClass : methods.getClasses()) {
+            
+            String sootClassName = sootFactory.getSootClassName(currentClass);
 
-            println("Loading: %s from %s", currentClass.sootName(), currentClass.jarFile());
+            println("Loading: %s from %s", sootClassName, currentClass.jarFile());
 
-            SootClass sootClass = scene.loadClassAndSupport(currentClass.sootName());
+            SootClass sootClass = scene.loadClassAndSupport(sootClassName);
             // Make it an application class as it will be analyzed.
             sootClass.setApplicationClass();
 
@@ -81,8 +85,7 @@ public class EscapeAnalysis {
 
             for (JavaMethod method : methods.getMethodsOfClass(currentClass)) {
 
-                SootMethod sootMethod = sootClass.getMethod(method.sootName(), method.sootParameters(),
-                        method.sootReturnType());
+                SootMethod sootMethod = sootFactory.getSootMethod(sootClass, method);
 
                 if (sootMethod != null) {
 
@@ -90,7 +93,7 @@ public class EscapeAnalysis {
 
                     UnitGraph graph = new ExceptionalUnitGraph(body);
 
-                    println("Method: %s.%s", sootClass.getName(), method.sootName());
+                    println("Method: %s.%s", sootClass.getName(), method.name());
                     UnitGraphContainer visitor = new UnitGraphContainer(graph);
 
                     ConnectionGraphBuilder builder = new ConnectionGraphBuilder();

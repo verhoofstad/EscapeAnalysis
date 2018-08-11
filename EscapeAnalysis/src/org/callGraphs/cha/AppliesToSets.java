@@ -3,6 +3,7 @@ package org.callGraphs.cha;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.asm.jvm.MethodSignature;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
@@ -15,12 +16,12 @@ import org.classHierarchy.JavaTypeSet;
 class AppliesToSets {
 
     // Contains all the method's applies-to sets grouped by their signature.
-    Map<String, JavaMethodSet> appliesToSet;
+    Map<MethodSignature, JavaMethodSet> appliesToSet;
 
     public AppliesToSets(ClassHierarchy classHierarchy) {
         if (classHierarchy == null) { throw new IllegalArgumentException("Parameter 'classHierarchy' should not be null."); }
 
-        this.appliesToSet = new HashMap<String, JavaMethodSet>();
+        this.appliesToSet = new HashMap<MethodSignature, JavaMethodSet>();
 
         for (JavaType javaClass : classHierarchy.getClasses()) {
 
@@ -66,7 +67,7 @@ class AppliesToSets {
         if (name == null) { throw new IllegalArgumentException("Parameter 'name' should not be null."); }
         if (desc == null) { throw new IllegalArgumentException("Parameter 'desc' should not be null."); }
 
-        String signature = JavaMethod.toSignature(name, desc);
+        MethodSignature signature = new MethodSignature(name, desc);
 
         JavaMethodSet methods = new JavaMethodSet();
 

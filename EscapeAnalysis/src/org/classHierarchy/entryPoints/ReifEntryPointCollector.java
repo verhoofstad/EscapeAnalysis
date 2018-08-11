@@ -13,7 +13,7 @@ abstract class ReifEntryPointCollector extends ProjectEntryPointCollector {
     }
     
     protected boolean maybeCalledByTheJVM(JavaMethod javaMethod) {
-        return javaMethod.name().equals("finalize") || this.isPotentiallySerializationRelated(javaMethod);
+        return /*javaMethod.name().equals("finalize") ||*/ this.isPotentiallySerializationRelated(javaMethod);
     }
     
     protected boolean typeIsInstantiable(JavaType javaType) {       

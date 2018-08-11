@@ -2,6 +2,7 @@ package org.classHierarchy;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.asm.jvm.MethodSignature;
 
 /**
  * Represents a Java class or interface.
@@ -145,10 +146,6 @@ public abstract class JavaType {
         return this.declaredMethods;
     }
 
-    public String sootName() {
-        return this.internalName.replace('/', '.');
-    }
-
     @Override
     public int hashCode() {
         return this.internalName.hashCode();
@@ -223,7 +220,7 @@ public abstract class JavaType {
     /**
      * Finds a method that matches the given signature.
      */
-    public JavaMethod findMethod(String signature) {
+    public JavaMethod findMethod(MethodSignature signature) {
         for (JavaMethod method : this.declaredMethods) {
             if (method.signature().equals(signature)) {
                 return method;
@@ -279,7 +276,7 @@ public abstract class JavaType {
     public boolean containsMethod(JavaMethod method) {
 
         for (JavaMethod javaMethod : this.declaredMethods) {
-            if (method.signatureEquals(javaMethod)) {
+            if (method.signature().equals(javaMethod.signature())) {
                 return true;
             }
         }

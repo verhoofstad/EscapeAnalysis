@@ -1,23 +1,9 @@
 package org.classHierarchy;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.asm.jvm.MethodSignature;
 import org.objectweb.asm.Type;
-
-import soot.ArrayType;
-import soot.BooleanType;
-import soot.ByteType;
-import soot.CharType;
-import soot.DoubleType;
-import soot.FloatType;
-import soot.IntType;
-import soot.LongType;
-import soot.RefType;
-import soot.VoidType;
-import soot.ShortType;
 
 /**
  * Represents a Java method in a specific class or interface.
@@ -25,12 +11,9 @@ import soot.ShortType;
 public class JavaMethod {
 
     private String id;
-    private AccessFlags accessFlags;
     private String name;
-    private String desc;
-    private String signature;
-
-    private Type methodType;
+    private AccessFlags accessFlags;
+    private MethodSignature signature;
 
     private JavaType containedIn;
     private JavaMethodSet overridenBy;
@@ -44,17 +27,14 @@ public class JavaMethod {
 
         if (containedIn == null) { throw new IllegalArgumentException("Parameter 'containedIn' should not be null."); }
 
-        this.accessFlags = new AccessFlags(access);
         this.name = name;
-        this.desc = desc;
-        this.signature = toSignature(name, desc);
+        this.accessFlags = new AccessFlags(access);
+        this.signature = new MethodSignature(name, desc);
 
         this.containedIn = containedIn;
-        this.methodType = Type.getMethodType(desc);
-
         this.overridenBy = new JavaMethodSet();
 
-        this.id = createId();
+        this.id = containedIn.id() + "/" + this.signature.toString();
     }
 
     /**
@@ -68,7 +48,7 @@ public class JavaMethod {
         return this.name;
     }
 
-    public String signature() {
+    public MethodSignature signature() {
         return this.signature;
     }
 
@@ -209,26 +189,13 @@ public class JavaMethod {
         }
     }
 
-    /**
-     * Determines whether a given method has the same signature (i.e. name,
-     * arguments and return type) as the current instance.
-     */
-    public boolean signatureEquals(JavaMethod other) {
-
-        if (other == null) {
-            return false;
-        }
-
-        return this.signature.equals(other.signature());
-    }
-
     public boolean signatureEquals(String name, String desc) {
-        return this.name.equals(name) && this.desc.equals(desc);
+        return this.signature.equals(name, desc);
     }
     
     public String referenceReturnType() {
         
-        Type returnType = this.methodType.getReturnType();
+        Type returnType = this.signature.returnType();
 
         switch(returnType.getSort()) {
         case Type.OBJECT:
@@ -245,112 +212,12 @@ public class JavaMethod {
         return this.referenceReturnType() != null;
     }
 
-    public String sootName() {
-        return this.name;
-    }
-
-    public List<soot.Type> sootParameters() {
-        List<soot.Type> parameterTypes = new ArrayList<soot.Type>();
-
-        for (Type argumentType : this.methodType.getArgumentTypes()) {
-            parameterTypes.add(toSootType(argumentType));
-        }
-
-        return parameterTypes;
-    }
-
-    public soot.Type sootReturnType() {
-        return toSootType(this.methodType.getReturnType());
-    }
-
-    private soot.Type toSootType(org.objectweb.asm.Type asmType) {
-        switch (asmType.getSort()) {
-        case Type.VOID:
-            return VoidType.v();
-        case Type.BOOLEAN:
-            return BooleanType.v();
-        case Type.CHAR:
-            return CharType.v();
-        case Type.BYTE:
-            return ByteType.v();
-        case Type.SHORT:
-            return ShortType.v();
-        case Type.INT:
-            return IntType.v();
-        case Type.FLOAT:
-            return FloatType.v();
-        case Type.LONG:
-            return LongType.v();
-        case Type.DOUBLE:
-            return DoubleType.v();
-        case Type.ARRAY:
-            try {
-                return ArrayType.v(toSootType(asmType.getElementType()), asmType.getDimensions());
-            } catch (NullPointerException ex) {
-                System.out.format("Error: Null pointer exception. Method: %s", this.name);
-            }
-        case Type.OBJECT:
-            return RefType.v(asmType.getClassName());
-        case Type.METHOD:
-            System.out.println("Error: Unexpected type. [method]");
-            return null;
-        }
-        System.out.format("Error: Nothing found: %s\n", asmType.getSort());
-        return null;
-    }
-
     @Override
     public String toString() {
-
-        List<String> arguments = new ArrayList<String>();
-        for (Type argumentType : this.methodType.getArgumentTypes()) {
-            arguments.add(argumentToString(argumentType));
-        }
-
-        return String.format("%s/%s(%s)", this.containedIn.id(), this.name, String.join(",", arguments));
-    }
-
-    public static String toSignature(String name, String desc) {
-        return String.format("%s::%s", name, desc);
+        return String.format("%s/%s", this.name, this.signature.toString());
     }
     
     public String modifiers() {
         return this.accessFlags.toModifierString();
-    }
-
-    private String createId() {
-        List<String> arguments = new ArrayList<String>();
-        for (Type argumentType : this.methodType.getArgumentTypes()) {
-            arguments.add(argumentToString(argumentType));
-        }
-        return String.format("%s/%s(%s):(%s)", this.containedIn.id(), this.name, String.join(",", arguments),
-                argumentToString(this.methodType.getReturnType()));
-    }
-
-    private static String argumentToString(org.objectweb.asm.Type argumentType) {
-        switch (argumentType.getSort()) {
-        case Type.BOOLEAN:
-        case Type.CHAR:
-        case Type.BYTE:
-        case Type.SHORT:
-        case Type.INT:
-        case Type.FLOAT:
-        case Type.LONG:
-        case Type.DOUBLE:
-            return argumentType.getClassName();
-        case Type.ARRAY:
-            try {
-                return argumentToString(argumentType.getElementType())
-                        + new String(new char[argumentType.getDimensions()]).replace("\0", "[]");
-            } catch (NullPointerException ex) {
-                throw new Error("Null pointer exception.");
-            }
-        case Type.OBJECT:
-            return argumentType.getInternalName();
-        case Type.VOID:
-            return "V";
-        default:
-            throw new Error("Unexpected argument type for method.");
-        }
     }
 }

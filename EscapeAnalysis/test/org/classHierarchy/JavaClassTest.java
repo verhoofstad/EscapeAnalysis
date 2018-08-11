@@ -278,11 +278,6 @@ class JavaClassTest {
     }
     
     @Test
-    void JavaClass_sootName() {
-        assertEquals("java.lang.Object", TestData.javaObject().sootName());
-    }
-    
-    @Test
     void JavaClass_addMethod() {
         // Arrange
         JavaClass classA = TestData.createPublicClass("org/A");

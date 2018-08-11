@@ -76,8 +76,7 @@ class ClassHierachyBuilderTest {
         JavaTypeSet finalPackagePrivateClasses = jdkHierarchy.getFinalPackagePrivateClasses();
         JavaTypeSet allClasses = jdkHierarchy.getClasses();
 
-        assertNotNull(finalPackagePrivateClasses,
-                "The method ClassHierarchy.getFinalPackagePrivateClasses() should never return null.");
+        assertNotNull(finalPackagePrivateClasses, "The method ClassHierarchy.getFinalPackagePrivateClasses() should never return null.");
         assertTrue(finalPackagePrivateClasses.isSubSetOfOrEqualTo(allClasses));
 
         for (JavaType javaType : finalPackagePrivateClasses) {
@@ -85,17 +84,6 @@ class ClassHierachyBuilderTest {
             assertTrue(javaType.isFinalPackagePrivate());
         }
     }
-
-    /*@Test
-    void ClassHierarchy_getExportedMethods() {
-        JarFile jarFile = new JarFile("C:\\CallGraphData\\JavaJDK\\java-8-openjdk-amd64\\jre\\lib\\rt.jar");
-        JavaMethodSet exportedMethods = jdkHierarchy.getExportedMethods(jarFile);
-
-        assertNotNull(exportedMethods, "The method ClassHierarchy.getExportedMethods() should never return null.");
-        for(JavaMethod exportedMethod : exportedMethods) {
-            assertEquals(jarFile, exportedMethod.jarFile());
-        }
-    }*/
 
     @Test
     void JavaClass_id() {
@@ -106,17 +94,6 @@ class ClassHierachyBuilderTest {
             assertNotNull(javaClass.id(), "The method JavaType.id() should never return null.");
             assertNotEquals("", javaClass.id(), "The method JavaType.id() should never return an empty string.");
             assertFalse(javaClass.id().startsWith("/"));
-        }
-    }
-
-    @Test
-    void JavaClass_sootName() {
-        JavaTypeSet allClasses = jdkHierarchy.getClasses();
-
-        // Assert that all classes have a Soot name.
-        for (JavaType javaClass : allClasses) {
-            assertNotNull(javaClass.sootName(), "The method JavaType.sootName() should never return null.");
-            assertNotEquals("", javaClass.sootName(), "The method JavaType.sootName() should never return an empty string.");
         }
     }
 
@@ -175,6 +152,7 @@ class ClassHierachyBuilderTest {
         for (JavaType javaClass : allClasses) {
             assertNotNull(javaClass.packagePath(), "The method JavaType.packagePath() should never return null.");
             assertNotEquals("", javaClass.packagePath(), "The method JavaType.packagePath() should never return an empty string.");
+            assertEquals('/', javaClass.packagePath().charAt(0));
         }
     }
 
@@ -194,6 +172,14 @@ class ClassHierachyBuilderTest {
 
             // The set of sub classes is always a sub-set of the cone set.
             assertTrue(javaClass.subClasses().isSubSetOfOrEqualTo(javaClass.coneSet()));
+            
+            // The set of sub classes does not contain the class it self
+            assertFalse(javaClass.subClasses().contains(javaClass));
+            
+            // All sub classes have the current class as their super class.
+            for (JavaType subType : subClasses) {
+                assertTrue(((JavaClass)subType).superClass().equals(javaClass));
+            }            
         }
     }
 
@@ -253,17 +239,6 @@ class ClassHierachyBuilderTest {
         for (JavaType javaInterface : allInterfaces) {
             assertNotNull(javaInterface.id(), "The method JavaType.id() should never return null.");
             assertNotEquals("", javaInterface.id(), "The method JavaType.id() should never return an empty string.");
-        }
-    }
-
-    @Test
-    void JavaInterface_sootName() {
-        JavaTypeSet allInterfaces = jdkHierarchy.getInterfaces();
-
-        // Assert all interfaces have a name.
-        for (JavaType javaInterface : allInterfaces) {
-            assertNotNull(javaInterface.sootName(), "The method JavaType.sootName() should never return null.");
-            assertNotEquals("", javaInterface.sootName(), "The method JavaType.sootName() should never return an empty string.");
         }
     }
 
@@ -460,7 +435,7 @@ class ClassHierachyBuilderTest {
                 // Assert that overriding methods...
                 for (JavaMethod overridingMethod : overridenBy) {
                     // have the same signature,
-                    assertTrue(overridingMethod.signatureEquals(javaMethod));
+                    assertTrue(overridingMethod.signature().equals(javaMethod.signature()));
                     // but are contained in a different class,
                     assertTrue(overridingMethod.containedIn() != javaClass);
                     // are contained in one of the sub classes
@@ -584,7 +559,7 @@ class ClassHierachyBuilderTest {
                 // Assert that overriding methods...
                 for (JavaMethod overridingMethod : overridenBy) {
                     // have the same signature,
-                    assertTrue(overridingMethod.signatureEquals(javaMethod));
+                    assertTrue(overridingMethod.signature().equals(javaMethod.signature()));
                     // but are contained in a different class or interface,
                     assertTrue(overridingMethod.containedIn() != javaInterface);
                     // are contained in one of the sub classes
