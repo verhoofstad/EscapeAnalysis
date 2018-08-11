@@ -18,16 +18,16 @@ public class Main {
 
     public static void main(String[] args) {
         
-        //DataSet dataSet = DataSet.getCorrectSet();
+        DataSet dataSet = DataSet.getCorrectSet();
         //DataSet dataSet = DataSet.getTestSet();
-        DataSet dataSet = DataSet.getUnmodifiedSet();
+        //DataSet dataSet = DataSet.getUnmodifiedSet();
         
         long startTime = System.nanoTime(); 
         
         //validateLibraries(dataSet);
-        //analyseLibraries(dataSet);
+        analyseLibraries(dataSet);
         //compareCounts(DataSet.getUnmodifiedSet());
-        analyseEntryPoints(dataSet);
+        //analyseEntryPoints(dataSet);
         
         long runningTime = (System.nanoTime() - startTime);
         DecimalFormat formatter = new DecimalFormat("#.00");

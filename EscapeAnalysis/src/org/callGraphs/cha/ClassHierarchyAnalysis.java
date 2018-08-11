@@ -2,6 +2,7 @@ package org.callGraphs.cha;
 
 import org.asm.JarClass;
 import org.asm.JarFileSetVisitor;
+import org.asm.jvm.MethodSignature;
 import org.callGraphs.CallGraph;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.JavaMethod;
@@ -120,6 +121,7 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
             }
 
             JavaType declaredType = this.classHierarchy.getType(owner);
+            MethodSignature signature = new MethodSignature(name, desc);
 
             switch (opcode) {
             case Opcodes.INVOKESPECIAL:
@@ -127,15 +129,15 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
                 if (name.equals("<init>")) {
                     visitInvokeConstructor(declaredType, name, desc);
                 } else {
-                    visitInvokeVirtual(declaredType, name, desc);
+                    visitInvokeVirtual(declaredType, signature);
                 }
                 break;
             case Opcodes.INVOKESTATIC:
-                visitInvokeStatic(declaredType, name, desc);
+                visitInvokeStatic(declaredType, signature);
                 break;
             case Opcodes.INVOKEVIRTUAL:
             case Opcodes.INVOKEINTERFACE:
-                visitInvokeVirtual(declaredType, name, desc);
+                visitInvokeVirtual(declaredType, signature);
                 break;
             default:
                 throw new Error("Unexpected opcode.");
@@ -143,13 +145,13 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
             super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
 
-        private void visitInvokeVirtual(JavaType declaredType, String name, String desc) {
+        private void visitInvokeVirtual(JavaType declaredType, MethodSignature signature) {
 
             if (declaredType.id().equals("java/lang/invoke/MethodHandle")) {
                 return;
             }
 
-            JavaMethodSet virtualTargets = appliesToSets.appliesTo(declaredType.coneSet(), name, desc);
+            JavaMethodSet virtualTargets = appliesToSets.appliesTo(declaredType.coneSet(), signature);
             
             // If the declared type is an abstract class or an interface, the invoked method may not 
             // have a concrete implementation. If the call-site has no target methods, we omit it from the call graph.
@@ -158,10 +160,10 @@ public class ClassHierarchyAnalysis extends JarFileSetVisitor {
             }
         }
 
-        private void visitInvokeStatic(JavaType declaredType, String name, String desc) {
+        private void visitInvokeStatic(JavaType declaredType, MethodSignature signature) {
 
             // Note that the static method can also reside in one of the super classes.
-            JavaMethod staticTarget = declaredType.findStaticMethod(name, desc);
+            JavaMethod staticTarget = declaredType.findStaticMethod(signature);
 
             this.callGraph.addStaticCallSite(this.currentMethod, staticTarget);
         }

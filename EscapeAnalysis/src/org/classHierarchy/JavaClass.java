@@ -2,6 +2,7 @@ package org.classHierarchy;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.asm.jvm.MethodSignature;
 
 /**
  * Represents a Java class.
@@ -120,15 +121,15 @@ public final class JavaClass extends JavaType {
      * Finds the static method that matches the given signature.
      */
     @Override
-    public JavaMethod findStaticMethod(String name, String desc) {
+    public JavaMethod findStaticMethod(MethodSignature signature) {
 
         if (this.hasSuperClass()) {
-            JavaMethod staticMethod = this.superClass.findStaticMethod(name, desc);
+            JavaMethod staticMethod = this.superClass.findStaticMethod(signature);
             if (staticMethod != null) {
                 return staticMethod;
             }
         }
-        return super.findStaticMethod(name, desc);
+        return super.findStaticMethod(signature);
     }
 
     @Override

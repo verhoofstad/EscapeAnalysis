@@ -62,12 +62,9 @@ class AppliesToSets {
         }
     }
 
-    public JavaMethodSet appliesTo(JavaTypeSet coneSet, String name, String desc) {
+    public JavaMethodSet appliesTo(JavaTypeSet coneSet, MethodSignature signature) {
         if (coneSet == null) { throw new IllegalArgumentException("Parameter 'coneSet' should not be null."); }
-        if (name == null) { throw new IllegalArgumentException("Parameter 'name' should not be null."); }
-        if (desc == null) { throw new IllegalArgumentException("Parameter 'desc' should not be null."); }
-
-        MethodSignature signature = new MethodSignature(name, desc);
+        if (signature == null) { throw new IllegalArgumentException("Parameter 'signature' should not be null."); }
 
         JavaMethodSet methods = new JavaMethodSet();
 

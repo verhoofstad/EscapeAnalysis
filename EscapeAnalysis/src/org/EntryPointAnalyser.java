@@ -9,6 +9,7 @@ import org.classHierarchy.counting.ClassAndMethodCounter;
 import org.classHierarchy.counting.CountResults;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector;
+import org.classHierarchy.entryPoints.OPAEntryPointCollector2;
 import org.classHierarchy.entryPoints.OldEntryPointCollector;
 import org.dataSets.Library;
 import org.results.LibraryResult;
@@ -60,7 +61,7 @@ public class EntryPointAnalyser {
         System.out.print("Find entry points for library...");
         OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile);
         JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        OPAEntryPointCollector opaEntryPointCollector = new OPAEntryPointCollector(cpFile);
+        OPAEntryPointCollector2 opaEntryPointCollector = new OPAEntryPointCollector2(cpFile);
         JavaMethodSet libraryEntryPointsOpa = opaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile);
         JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);

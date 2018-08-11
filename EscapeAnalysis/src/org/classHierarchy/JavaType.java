@@ -254,18 +254,18 @@ public abstract class JavaType {
      * Finds a static method that matches the given signature. If it cannot be found
      * in the current type, the super interfaces of this type are searched.
      */
-    public JavaMethod findStaticMethod(String name, String desc) {
+    public JavaMethod findStaticMethod(MethodSignature signature) {
 
         for (JavaMethod declaredMethod : this.declaredMethods()) {
 
-            if (declaredMethod.signatureEquals(name, desc) && declaredMethod.isStatic()) {
+            if (declaredMethod.signature().equals(signature) && declaredMethod.isStatic()) {
                 return declaredMethod;
             }
         }
 
         for (JavaType superInterface : this.superInterfaces) {
 
-            JavaMethod staticMethod = superInterface.findStaticMethod(name, desc);
+            JavaMethod staticMethod = superInterface.findStaticMethod(signature);
             if (staticMethod != null) {
                 return staticMethod;
             }
