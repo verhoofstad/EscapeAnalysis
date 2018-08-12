@@ -1,5 +1,6 @@
 package org.asm.classHierarchyBuilding;
 
+import org.asm.jvm.MethodSignature;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -17,7 +18,9 @@ class MethodLoader extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 
-        this.currentType.addMethod(new JavaTempMethod(access, name, desc));
-        return null;
+        JavaTempMethod currentMethod = new JavaTempMethod(access, new MethodSignature(name, desc));
+        this.currentType.addMethod(currentMethod);
+        
+        return new MethodInvocationLoader(currentMethod);
     }
 }

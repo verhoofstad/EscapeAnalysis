@@ -8,7 +8,6 @@ import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.counting.ClassAndMethodCounter;
 import org.classHierarchy.counting.CountResults;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
-import org.classHierarchy.entryPoints.OPAEntryPointCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector2;
 import org.classHierarchy.entryPoints.OldEntryPointCollector;
 import org.dataSets.Library;
@@ -54,16 +53,14 @@ public class EntryPointAnalyser {
         
         
         System.out.print("Find types with factory method...");
-        classHierarchy.loadFactoryMethods();
-        System.out.println("Ok");
-        //System.out.format("Found %s types with factory methods.\n", typesWithFactoryMethods.size());
+
         
         System.out.print("Find entry points for library...");
-        OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile);
+        OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile, null);
         JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        OPAEntryPointCollector2 opaEntryPointCollector = new OPAEntryPointCollector2(cpFile);
+        OPAEntryPointCollector2 opaEntryPointCollector = new OPAEntryPointCollector2(cpFile, null);
         JavaMethodSet libraryEntryPointsOpa = opaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile);
+        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, null);
         JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         System.out.println("Ok");
 

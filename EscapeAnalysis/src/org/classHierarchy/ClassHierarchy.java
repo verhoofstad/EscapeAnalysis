@@ -1,26 +1,21 @@
 package org.classHierarchy;
 
 import org.asm.JarFile;
-import org.asm.JarFileSet;
-import org.asm.factoryMethods.JarFileSetFactoryMethods;
 
 public class ClassHierarchy {
 
     private JavaType rootNode;
     private JavaTypeSet interfaces;
     private JavaTypeSet classes;
-    private JarFileSet jarFiles;
 
-    public ClassHierarchy(JavaType rootNode, JavaTypeSet classes, JavaTypeSet interfaces, JarFileSet jarFiles) {
+    public ClassHierarchy(JavaType rootNode, JavaTypeSet classes, JavaTypeSet interfaces) {
         if(rootNode == null) { throw new IllegalArgumentException("Parameter 'rootNode' should not be null."); }
         if(classes == null) { throw new IllegalArgumentException("Parameter 'classes' should not be null."); }
         if(interfaces == null) { throw new IllegalArgumentException("Parameter 'interfaces' should not be null."); }
-        if(jarFiles == null) { throw new IllegalArgumentException("Parameter 'jarFiles' should not be null."); }
 
         this.rootNode = rootNode;
         this.classes = classes;
         this.interfaces = interfaces;
-        this.jarFiles = jarFiles;
     }
 
     public JavaType rootNode() {
@@ -156,15 +151,6 @@ public class ClassHierarchy {
         }
         return concreteMethods;        
     }
-    
-    
-    public void loadFactoryMethods() {
-        
-        JarFileSetFactoryMethods factoryLoader = new JarFileSetFactoryMethods(this);
-        
-        this.jarFiles.accept(factoryLoader);
-    }
-    
     
     public void accept(ClassHierarchyVisitor visitor) {
         for(JavaType javaClass : this.classes) {

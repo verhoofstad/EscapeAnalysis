@@ -1,21 +1,30 @@
 package org.asm.classHierarchyBuilding;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.asm.jvm.InvokedMethod;
+import org.asm.jvm.MethodSignature;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaType;
 
 class JavaTempMethod {
 
     private int access;
-    private String name;
-    private String desc;
+    private MethodSignature signature;
+    private List<InvokedMethod> invokedMethods;
 
-    JavaTempMethod(int access, String name, String desc) {
+    JavaTempMethod(int access, MethodSignature signature) {
         this.access = access;
-        this.name = name;
-        this.desc = desc;
+        this.signature = signature;
+        this.invokedMethods = new ArrayList<InvokedMethod>();
     }
 
+    public void addInvokedMethod(InvokedMethod invokedMethod) {
+        this.invokedMethods.add(invokedMethod);
+    }
+    
     public JavaMethod resolveToJavaMethod(JavaType containedIn) {
-        return new JavaMethod(containedIn, this.access, this.name, this.desc);
+        return new JavaMethod(containedIn, this.access, this.signature, this.invokedMethods);
     }
 }

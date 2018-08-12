@@ -3,12 +3,13 @@ package org.classHierarchy.entryPoints;
 import org.asm.JarFile;
 import org.classHierarchy.JavaClass;
 import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 
 public class CPAEntryPointCollector extends ReifEntryPointCollector {
 
-    public CPAEntryPointCollector(JarFile projectFile) {
-        super(projectFile);
+    public CPAEntryPointCollector(JarFile projectFile, JavaMethodSet factoryMethods) {
+        super(projectFile, factoryMethods);
     }
 
     @Override

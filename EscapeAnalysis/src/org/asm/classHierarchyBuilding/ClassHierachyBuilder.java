@@ -2,14 +2,11 @@ package org.asm.classHierarchyBuilding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.asm.JarClass;
 import org.asm.JarFile;
-import org.asm.JarFileSet;
 import org.asm.JarFileSetVisitor;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.JavaClass;
@@ -24,7 +21,6 @@ public class ClassHierachyBuilder extends JarFileSetVisitor {
 
     private boolean verbose = false;
 
-    private Set<JarFile> jarFiles = new HashSet<JarFile>();
     private JarFile currentJarFile;
 
     private Map<String, JavaTempType> tempClasses = new HashMap<String, JavaTempType>();
@@ -38,12 +34,11 @@ public class ClassHierachyBuilder extends JarFileSetVisitor {
      * Gets the constructed class hierarchy.
      */
     public ClassHierarchy classHierarchy() {
-        return new ClassHierarchy(this.rootNode, this.classes, this.interfaces, new JarFileSet(this.jarFiles));
+        return new ClassHierarchy(this.rootNode, this.classes, this.interfaces);
     }
 
     @Override
     public void visitJarFile(JarFile jarFile) {
-        this.jarFiles.add(jarFile);
         this.currentJarFile = jarFile;
     }
 

@@ -4,12 +4,17 @@ import org.asm.JarFile;
 import org.asm.jvm.MethodDescriptor;
 import org.classHierarchy.JavaClass;
 import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 
 abstract class ReifEntryPointCollector extends ProjectEntryPointCollector {
+    
+    protected JavaMethodSet factoryMethods;
 
-    protected ReifEntryPointCollector(JarFile projectFile) {
+    protected ReifEntryPointCollector(JarFile projectFile, JavaMethodSet factoryMethods) {
         super(projectFile);
+        
+        this.factoryMethods = factoryMethods;
     }
     
     protected boolean maybeCalledByTheJVM(JavaMethod javaMethod) {
@@ -25,7 +30,7 @@ abstract class ReifEntryPointCollector extends ProjectEntryPointCollector {
         boolean hasFactoryMethod = false;
         
         for(JavaMethod declaredMethod : javaClass.declaredMethods()) {
-            if(declaredMethod.isFactoryMethod() && declaredMethod.referenceReturnType() != null) {
+            if(this.factoryMethods.contains(declaredMethod) && declaredMethod.referenceReturnType() != null) {
                 
                 if(javaClass.coneSet().contains(declaredMethod.referenceReturnType())) {
                     hasFactoryMethod = true;

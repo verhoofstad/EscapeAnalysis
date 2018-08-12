@@ -2,6 +2,7 @@ package org.classHierarchy.entryPoints;
 
 import org.asm.JarFile;
 import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 
 /**
@@ -10,8 +11,8 @@ import org.classHierarchy.JavaType;
  */
 public class OPAEntryPointCollector extends ReifEntryPointCollector {
 
-    public OPAEntryPointCollector(JarFile projectFile) {
-        super(projectFile);
+    public OPAEntryPointCollector(JarFile projectFile, JavaMethodSet factoryMethods) {
+        super(projectFile, factoryMethods);
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.classHierarchy;
 
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.asm.jvm.MethodSignature;
 import org.classHierarchy.JavaClass;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaType;
@@ -38,7 +39,7 @@ public class TestData {
     }
     
     public static JavaMethod createMethod(String name, JavaType containedIn) {
-        return new JavaMethod(containedIn, Opcodes.ACC_PUBLIC, name, "()V");
+        return new JavaMethod(containedIn, Opcodes.ACC_PUBLIC, new MethodSignature(name, "()V"));
     }
     
     /**
@@ -84,21 +85,21 @@ public class TestData {
         
         int access = Opcodes.ACC_PUBLIC;
         
-        return new JavaMethod(javaObject(), access, "wait", "()V");
+        return new JavaMethod(javaObject(), access, new MethodSignature("wait", "()V"));
     }
     
     public static JavaMethod waitMethodWithTimeoutParameter() {
         
         int access = Opcodes.ACC_PUBLIC;
         
-        return new JavaMethod(javaObject(), access, "wait", "(J)V");
+        return new JavaMethod(javaObject(), access, new MethodSignature("wait", "(J)V"));
     }
     
     public static JavaMethod waitMethodWithTimeoutAndNanosParameters() {
         
         int access = Opcodes.ACC_PUBLIC;
         
-        return new JavaMethod(javaObject(), access, "wait", "(JI)V");
+        return new JavaMethod(javaObject(), access, new MethodSignature("wait", "(JI)V"));
     }
 
 }

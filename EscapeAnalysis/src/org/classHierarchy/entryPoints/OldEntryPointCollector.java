@@ -3,11 +3,12 @@ package org.classHierarchy.entryPoints;
 import org.asm.JarFile;
 import org.classHierarchy.JavaClass;
 import org.classHierarchy.JavaMethod;
+import org.classHierarchy.JavaMethodSet;
 
 public class OldEntryPointCollector extends ReifEntryPointCollector {
-
-    public OldEntryPointCollector(JarFile projectFile) {
-        super(projectFile);
+    
+    public OldEntryPointCollector(JarFile projectFile, JavaMethodSet factoryMethods) {
+        super(projectFile, factoryMethods);
     }
     
     @Override
@@ -33,7 +34,7 @@ public class OldEntryPointCollector extends ReifEntryPointCollector {
         boolean hasFactoryMethod = false;
         
         for(JavaMethod declaredMethod : javaClass.declaredMethods()) {
-            if(declaredMethod.isFactoryMethod()) {
+            if(this.factoryMethods.contains(declaredMethod)) {
                 hasFactoryMethod = true;
             }
             if(declaredMethod.isStatic() && !declaredMethod.isStaticInitializer() && declaredMethod.isNative()) {

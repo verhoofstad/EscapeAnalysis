@@ -1,7 +1,10 @@
 package org.classHierarchy;
 
+import java.util.List;
+
 import org.asm.JarFile;
 import org.asm.jvm.AccessFlags;
+import org.asm.jvm.InvokedMethod;
 import org.asm.jvm.MethodSignature;
 import org.objectweb.asm.Type;
 
@@ -17,19 +20,19 @@ public class JavaMethod {
 
     private JavaType containedIn;
     private JavaMethodSet overridenBy;
+    private List<InvokedMethod> invokedMethods;
 
     // The method's applies-to set
     private JavaTypeSet appliesTo;
-    
-    private boolean isFactoryMethod = false;
 
-    public JavaMethod(JavaType containedIn, int access, String name, String desc) {
+    public JavaMethod(JavaType containedIn, int access, MethodSignature signature) {
 
         if (containedIn == null) { throw new IllegalArgumentException("Parameter 'containedIn' should not be null."); }
+        if (signature == null) { throw new IllegalArgumentException("Parameter 'signature' should not be null."); }
 
-        this.name = name;
+        this.name = signature.name();
         this.accessFlags = new AccessFlags(access);
-        this.signature = new MethodSignature(name, desc);
+        this.signature = signature;
 
         this.containedIn = containedIn;
         this.overridenBy = new JavaMethodSet();
@@ -37,6 +40,12 @@ public class JavaMethod {
         this.id = containedIn.id() + "/" + this.signature.toString();
     }
 
+    public JavaMethod(JavaType containedIn, int access, MethodSignature signature, List<InvokedMethod> invokedMethods) {
+        this(containedIn, access, signature);
+        
+        this.invokedMethods = invokedMethods;
+    }
+    
     /**
      * Gets the fully qualified name that uniquely identifies this method.
      */
@@ -54,6 +63,10 @@ public class JavaMethod {
 
     public JavaType containedIn() {
         return this.containedIn;
+    }
+    
+    public List<InvokedMethod> invokedMethods() {
+        return this.invokedMethods;
     }
 
     /**
@@ -118,14 +131,6 @@ public class JavaMethod {
      */
     public boolean isLoadedFrom(JarFile jarFile) {
         return this.containedIn.isLoadedFrom(jarFile);
-    }
-    
-    public boolean isFactoryMethod() {
-        return this.isFactoryMethod;
-    }
-
-    public void isFactoryMethod(boolean value) {
-        this.isFactoryMethod = value;
     }
     
     void accept(ClassHierarchyVisitor visitor) {
@@ -214,7 +219,7 @@ public class JavaMethod {
 
     @Override
     public String toString() {
-        return String.format("%s/%s", this.name, this.signature.toString());
+        return String.format("%s/%s", this.containedIn.toString(), this.signature.toString());
     }
     
     public String modifiers() {

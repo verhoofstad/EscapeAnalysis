@@ -82,15 +82,6 @@ public final class JavaClass extends JavaType {
         }
         return false;
     }
-    
-    public boolean hasFactoryMethod() {
-        for(JavaMethod declaredMethod : this.declaredMethods()) {
-            if(declaredMethod.isFactoryMethod()) {
-                return true;
-            }
-        }
-        return true;
-    }
 
     @Override
     protected void addToConeSet(JavaType subType) {

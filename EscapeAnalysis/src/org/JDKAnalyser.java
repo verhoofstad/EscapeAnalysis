@@ -2,9 +2,9 @@ package org;
 
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
-import org.asm.methodFinding.JarFileSetMethodFinder;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.JavaTypeSet;
+import org.classHierarchy.methodFinding.PackagePrivateClassMethodCollector;
 import org.escapeAnalysis.EscapeAnalysis;
 import org.results.JDKResults;
 
@@ -29,8 +29,8 @@ public class JDKAnalyser {
         JavaTypeSet jdkPackagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
 
         System.out.print("Find the methods in which package-private classes are instantiated...");
-        JarFileSetMethodFinder methodFinder = new JarFileSetMethodFinder(classHierarchy, jdkPackagePrivateClasses);
-        jdkFiles.accept(methodFinder);
+        PackagePrivateClassMethodCollector methodFinder = new PackagePrivateClassMethodCollector(jdkPackagePrivateClasses);
+        classHierarchy.accept(methodFinder);
         System.out.println("Ok");
         System.out.format("Total of %s methods found.\n", methodFinder.foundMethods().size());
 
