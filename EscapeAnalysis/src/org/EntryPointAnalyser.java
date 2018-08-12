@@ -10,6 +10,8 @@ import org.classHierarchy.counting.CountResults;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector2;
 import org.classHierarchy.entryPoints.OldEntryPointCollector;
+import org.classHierarchy.factoryMethods.OPAFactoryMethodCollector;
+import org.classHierarchy.factoryMethods.OldFactoryMethodCollector;
 import org.dataSets.Library;
 import org.results.LibraryResult;
 import org.results.reif.ReifLibraryResult;
@@ -53,14 +55,20 @@ public class EntryPointAnalyser {
         
         
         System.out.print("Find types with factory method...");
-
+        OldFactoryMethodCollector factoryMethodCollector = new OldFactoryMethodCollector();
+        JavaMethodSet oldFactoryMethods = factoryMethodCollector.collectFactoryMethodsFrom(classHierarchy);
+        OPAFactoryMethodCollector opaFactoryMethodCollector = new OPAFactoryMethodCollector();
+        JavaMethodSet opaFactoryMethods = opaFactoryMethodCollector.collectFactoryMethodsFrom(classHierarchy);
+        System.out.println("Ok");
+        System.out.format("Found %s old factory methods.\n", oldFactoryMethods.size());
+        System.out.format("Found %s OPA factory methods.\n", opaFactoryMethods.size());
         
         System.out.print("Find entry points for library...");
-        OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile, null);
+        OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile, oldFactoryMethods);
         JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        OPAEntryPointCollector2 opaEntryPointCollector = new OPAEntryPointCollector2(cpFile, null);
+        OPAEntryPointCollector2 opaEntryPointCollector = new OPAEntryPointCollector2(cpFile, opaFactoryMethods);
         JavaMethodSet libraryEntryPointsOpa = opaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, null);
+        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, opaFactoryMethods);
         JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         System.out.println("Ok");
 

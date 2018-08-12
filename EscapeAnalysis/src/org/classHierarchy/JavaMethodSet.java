@@ -60,6 +60,19 @@ public class JavaMethodSet implements Iterable<JavaMethod> {
     }
 
     /**
+     * Determines whether this set has at least one element in common with a given set.
+     */
+    public boolean overlapsWith(JavaMethodSet methodSet) {
+
+        for (String id : this.methods.keySet()) {
+            if (methodSet.contains(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Gets a value indicating whether this set contains a constructor method.
      * 
      * @return True, if this set contains a constructor; otherwise, false.

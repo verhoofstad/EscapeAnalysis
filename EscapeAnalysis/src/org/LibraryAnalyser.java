@@ -25,6 +25,7 @@ import org.classHierarchy.entryPoints.CPAEntryPointCollector;
 import org.classHierarchy.entryPoints.ExportedMethodCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector;
 import org.classHierarchy.entryPoints.OldEntryPointCollector;
+import org.classHierarchy.factoryMethods.OPAFactoryMethodCollector;
 import org.classHierarchy.factoryMethods.OldFactoryMethodCollector;
 import org.classHierarchy.methodFinding.PackagePrivateClassMethodCollector;
 import org.dataSets.Library;
@@ -81,29 +82,30 @@ public class LibraryAnalyser {
         System.out.print("Find factory methods...");
         OldFactoryMethodCollector factoryMethodCollector = new OldFactoryMethodCollector();
         JavaMethodSet factoryMethods = factoryMethodCollector.collectFactoryMethodsFrom(classHierarchy);
+        OPAFactoryMethodCollector opaFactoryMethodCollector = new OPAFactoryMethodCollector();
+        JavaMethodSet opaFactoryMethods = opaFactoryMethodCollector.collectFactoryMethodsFrom(classHierarchy);
         System.out.println("Ok");
-        System.out.format("Found %s factory methods.\n", factoryMethods.size());
+        System.out.format("Found %s old factory methods.\n", factoryMethods.size());
+        System.out.format("Found %s OPA factory methods.\n", opaFactoryMethods.size());
 
         System.out.print("Find entry points for library...");
         ExportedMethodCollector exportedMethodCollector = new ExportedMethodCollector(cpFile);
         JavaMethodSet libraryEntryPoints = exportedMethodCollector.collectEntryPointsFrom(classHierarchy);
         OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile, factoryMethods);
         JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        OldEntryPointCollector oldEntryPointCollector2 = new OldEntryPointCollector(cpFile, factoryMethods);
-        JavaMethodSet libraryEntryPointsOld2 = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        OPAEntryPointCollector opaEntryPointCollector = new OPAEntryPointCollector(cpFile, factoryMethods);
+        OPAEntryPointCollector opaEntryPointCollector = new OPAEntryPointCollector(cpFile, opaFactoryMethods);
         JavaMethodSet libraryEntryPointsOpa = opaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
-        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, factoryMethods);
+        CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, opaFactoryMethods);
         JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         System.out.println("Ok");
 
         ReifLibraryResult reifResult = ReifLibraryResultSet.readFromFile().find(this.library);
         
-        System.out.format("Old 1 entry points: %s - %s\n", libraryEntryPointsOld.size(), reifResult.old_entryPoints);
-        System.out.format("Old 2 entry points: %s - %s\n", libraryEntryPointsOld2.size(), reifResult.old_entryPoints);
+        System.out.format("Old entry points: %s - %s\n", libraryEntryPointsOld.size(), reifResult.old_entryPoints);
         System.out.format("OPA entry points: %s - %s\n", libraryEntryPointsOpa.size(), reifResult.opa_entryPoints);
         System.out.format("CPA entry points: %s - %s\n", libraryEntryPointsCpa.size(), reifResult.cpa_entryPoints);
-        
+        System.out.format("RTA entry points: %s\n", libraryEntryPoints.size());
+
         System.out.print("Performing Class Hierarchy Analysis...");
         startTime = System.nanoTime(); 
         ClassHierarchyAnalysis cha = new ClassHierarchyAnalysis(classHierarchy);
@@ -126,7 +128,6 @@ public class LibraryAnalyser {
         int libraryConfinedClassCount = 0;
 
         System.out.format("There are %s final package-private classes.\n", packagePrivateClasses.size());
-        System.out.format("Number of RTA entry points: %s\n", libraryEntryPoints.size());
 
         if (this.includeEscapeAnalysis) {
 

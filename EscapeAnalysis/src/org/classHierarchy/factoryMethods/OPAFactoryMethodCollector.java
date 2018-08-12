@@ -4,12 +4,12 @@ import org.asm.jvm.InvokedMethod;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaType;
 
-public class OldFactoryMethodCollector extends FactoryMethodCollector {
-    
+public class OPAFactoryMethodCollector extends FactoryMethodCollector {
+
     @Override
     protected boolean isFactoryMethod(JavaMethod javaMethod) {
-        return (javaMethod.containedIn().isClass() && javaMethod.isStatic() && javaMethod.hasReferenceReturnType() && invokesPrivateConstructor(javaMethod))
-            || (javaMethod.isStatic() && !javaMethod.isStaticInitializer() && javaMethod.isNative());
+        return javaMethod.containedIn().isClass() && javaMethod.isStatic() && javaMethod.hasReferenceReturnType() && invokesPrivateConstructor(javaMethod)
+                && javaMethod.containedIn().coneSet().contains(javaMethod.referenceReturnType());
     }
     
     private boolean invokesPrivateConstructor(JavaMethod javaMethod) {

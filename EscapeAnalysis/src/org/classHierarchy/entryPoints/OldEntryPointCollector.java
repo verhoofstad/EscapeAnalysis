@@ -31,16 +31,8 @@ public class OldEntryPointCollector extends ReifEntryPointCollector {
     
     @Override
     protected boolean classIsInstantiable(JavaClass javaClass) {
-        boolean hasFactoryMethod = false;
         
-        for(JavaMethod declaredMethod : javaClass.declaredMethods()) {
-            if(this.factoryMethods.contains(declaredMethod)) {
-                hasFactoryMethod = true;
-            }
-            if(declaredMethod.isStatic() && !declaredMethod.isStaticInitializer() && declaredMethod.isNative()) {
-                hasFactoryMethod = true;
-            }
-        }
+        boolean hasFactoryMethod = this.factoryMethods.overlapsWith(javaClass.declaredMethods());
         
         return (javaClass.hasNonPrivateConstructor() || hasFactoryMethod
                 || javaClass.isSubTypeOf("java/io/Serializable"));        
