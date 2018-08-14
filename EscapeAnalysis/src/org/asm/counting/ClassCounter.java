@@ -43,11 +43,11 @@ public class ClassCounter extends JarFileSetVisitor {
         if(jarClass.jarFile().equals(this.libraryFile)) {
             this.result.project_classCount++;
             this.result.project_classFileCount++;
-            this.result.project_publicClassCount++;
+            this.result.project_packageVisibleClassCount++;
         } else {
             this.result.libraries_classCount++;
             this.result.libraries_classFileCount++;
-            this.result.libraries_publicClassCount++;
+            this.result.libraries_packageVisibleClassCount++;
         }
         countClassMethods(jarClass);
     }
@@ -77,11 +77,11 @@ public class ClassCounter extends JarFileSetVisitor {
         if(jarClass.jarFile().equals(this.libraryFile)) {
             this.result.project_classCount++;
             this.result.project_classFileCount++;
-            this.result.project_publicClassCount++;
+            this.result.project_packageVisibleClassCount++;
         } else {
             this.result.libraries_classCount++;
             this.result.libraries_classFileCount++;
-            this.result.libraries_publicClassCount++;
+            this.result.libraries_packageVisibleClassCount++;
         }
         countClassMethods(jarClass);
     }

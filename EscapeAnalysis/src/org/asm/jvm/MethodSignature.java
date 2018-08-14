@@ -6,7 +6,7 @@ import java.util.List;
 import org.objectweb.asm.Type;
 
 /**
- * Represents the signature of a method consisting of its name, retur type and argument types.
+ * Represents the signature of a method consisting of its name, return type and argument types.
  */
 public class MethodSignature {
 
@@ -37,7 +37,7 @@ public class MethodSignature {
     
     @Override
     public int hashCode() {
-        return this.name.hashCode() ^ this.desc.hashCode();
+        return this.name.hashCode() ^ this.desc.hashCode() ^ 31;
     }
     
     @Override
@@ -77,8 +77,7 @@ public class MethodSignature {
             return asmType.getClassName();
         case Type.ARRAY:
             try {
-                return typeToString(asmType.getElementType())
-                        + new String(new char[asmType.getDimensions()]).replace("\0", "[]");
+                return typeToString(asmType.getElementType()) + new String(new char[asmType.getDimensions()]).replace("\0", "[]");
             } catch (NullPointerException ex) {
                 throw new Error("Null pointer exception.");
             }
