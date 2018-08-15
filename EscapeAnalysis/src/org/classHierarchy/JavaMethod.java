@@ -147,6 +147,12 @@ public class JavaMethod {
             visitor.visitPackagePrivateMethod(this);
         }
     }
+    
+    void accept(ConcreteMethodVisitor visitor) {
+        if(!this.isAbstract()) {
+            visitor.visitConcreteMethod(this);
+        }
+    }
 
     /**
      * Resolves the applies-to set for this method. This method should only be

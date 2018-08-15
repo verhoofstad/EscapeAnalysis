@@ -5,14 +5,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
-import org.asm.counting.ClassCounter;
-import org.asm.counting.CountResults;
 import org.callGraphs.CallGraph;
 import org.callGraphs.cha.ClassHierarchyAnalysis;
 import org.callGraphs.rta.RapidTypeAnalysis;
@@ -21,6 +20,8 @@ import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 import org.classHierarchy.JavaTypeSet;
+import org.classHierarchy.counting.ClassAndMethodCounter;
+import org.classHierarchy.counting.CountResults;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
 import org.classHierarchy.entryPoints.ExportedMethodCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector;
@@ -37,8 +38,8 @@ import org.escapeAnalysis.EscapeAnalysis;
 public class LibraryAnalyser {
 
     private Library library;
-
-    private boolean includeEscapeAnalysis = true;
+    
+    private boolean includeEscapeAnalysis = false;
 
     private JavaTypeSet jdkPackagePrivateClasses;
     private JavaTypeSet jdkConfinedClasses;
@@ -62,21 +63,22 @@ public class LibraryAnalyser {
         System.out.format("PROCESSING: %s with %s | %s | %s\n", library.id(), library.organisation(), library.name(), library.revision());
         System.out.println();
         System.out.format("CPFILE: %s\n", cpFile.toString());
-        System.out.format("JAR FILES: %s\n", jarFiles.size());
+        System.out.format("LIB FILES: %s\n", jarFiles.size());
+        
         System.out.println();
 
-        System.out.print("Counting classes and methods...");
-        ClassCounter libraryCounter = new ClassCounter(cpFile);
-        cpFile.accept(libraryCounter);
-        CountResults libraryCounts = libraryCounter.countResults();
-        System.out.println("Ok");
-        
         System.out.print("Building class hierarchy...");
         startTime = System.nanoTime(); 
         ClassHierachyBuilder builder = new ClassHierachyBuilder();
         jarFiles.accept(builder);
         ClassHierarchy classHierarchy = builder.classHierarchy();
         libraryResult.classHierarchyBuildTime = (System.nanoTime() - startTime);
+        System.out.println("Ok");
+
+        System.out.print("Counting classes and methods...");
+        ClassAndMethodCounter libraryCounter = new ClassAndMethodCounter(cpFile);
+        classHierarchy.accept(libraryCounter);
+        CountResults libraryCounts = libraryCounter.countResults();
         System.out.println("Ok");
         
         System.out.print("Find factory methods...");
@@ -90,7 +92,7 @@ public class LibraryAnalyser {
 
         System.out.print("Find entry points for library...");
         ExportedMethodCollector exportedMethodCollector = new ExportedMethodCollector(cpFile);
-        JavaMethodSet libraryEntryPoints = exportedMethodCollector.collectEntryPointsFrom(classHierarchy);
+        JavaMethodSet libraryEntryPointsRta = exportedMethodCollector.collectEntryPointsFrom(classHierarchy);
         OldEntryPointCollector oldEntryPointCollector = new OldEntryPointCollector(cpFile, factoryMethods);
         JavaMethodSet libraryEntryPointsOld = oldEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         OPAEntryPointCollector opaEntryPointCollector = new OPAEntryPointCollector(cpFile, opaFactoryMethods);
@@ -104,24 +106,24 @@ public class LibraryAnalyser {
         System.out.format("Old entry points: %s - %s\n", libraryEntryPointsOld.size(), reifResult.old_entryPoints);
         System.out.format("OPA entry points: %s - %s\n", libraryEntryPointsOpa.size(), reifResult.opa_entryPoints);
         System.out.format("CPA entry points: %s - %s\n", libraryEntryPointsCpa.size(), reifResult.cpa_entryPoints);
-        System.out.format("RTA entry points: %s\n", libraryEntryPoints.size());
-
+        System.out.format("RTA entry points: %s\n", libraryEntryPointsRta.size());
+        
+        DecimalFormat formatter = new DecimalFormat("#.00");
         System.out.print("Performing Class Hierarchy Analysis...");
         startTime = System.nanoTime(); 
-        ClassHierarchyAnalysis cha = new ClassHierarchyAnalysis(classHierarchy);
-        jarFiles.accept(cha);
-        CallGraph chaGraph = cha.callGraph();
+        ClassHierarchyAnalysis cha = new ClassHierarchyAnalysis(classHierarchy, libraryEntryPointsRta);
+        CallGraph chaGraph = cha.computeCallGraph();
         libraryResult.chaBuildTime = (System.nanoTime() - startTime);
-        System.out.println("Ok");
-
+        System.out.println("Ok " + formatter.format((double)libraryResult.chaBuildTime / 1000 / 1000 / 1000));
+        
         System.out.print("Performing Rapid Type Analysis...");
         startTime = System.nanoTime(); 
         RapidTypeAnalysis rta = new RapidTypeAnalysis(chaGraph);
-        rta.setLibraryAnalysis(classHierarchy.getPublicClasses(), libraryEntryPoints);
+        rta.setLibraryAnalysis(classHierarchy.getPublicClasses(), libraryEntryPointsRta);
         CallGraph rtaGraph = rta.buildGraph();
         libraryResult.rtaBuildTime = (System.nanoTime() - startTime);
-        System.out.println("Ok");
-        
+        System.out.println("Ok " + formatter.format((double)libraryResult.rtaBuildTime / 1000 / 1000 / 1000));
+
         JavaTypeSet packagePrivateClasses = classHierarchy.getFinalPackagePrivateClasses();
         JavaTypeSet confinedClasses = new JavaTypeSet();
         CallGraph rtaGraphEA = new CallGraph();
@@ -188,7 +190,7 @@ public class LibraryAnalyser {
             System.out.print("Performing Rapid Type Analysis with Escape Analysis...");
             startTime = System.nanoTime();
             RapidTypeAnalysis rtaEA = new RapidTypeAnalysis(chaGraph);
-            rtaEA.setLibraryAnalysis(classHierarchy.getPublicClasses(), libraryEntryPoints);
+            rtaEA.setLibraryAnalysis(classHierarchy.getPublicClasses(), libraryEntryPointsRta);
             rtaEA.setConfinedClasses(confinedClasses);
             rtaGraphEA = rtaEA.buildGraph();
             libraryResult.rtaEaTime = (System.nanoTime() - startTime);
@@ -198,7 +200,7 @@ public class LibraryAnalyser {
         System.out.print("Performing Rapid Type Analysis with Escape Analysis (best-case)...");
         startTime = System.nanoTime();
         RapidTypeAnalysis rtaEAMax = new RapidTypeAnalysis(chaGraph);
-        rtaEAMax.setLibraryAnalysis(classHierarchy.getPublicClasses(), libraryEntryPoints);
+        rtaEAMax.setLibraryAnalysis(classHierarchy.getPublicClasses(), libraryEntryPointsRta);
         rtaEAMax.setConfinedClasses(classHierarchy.getFinalPackagePrivateClasses());
         CallGraph rtaGraphEAMax = rtaEAMax.buildGraph();
         libraryResult.rtaMaxTime = (System.nanoTime() - startTime);
@@ -209,18 +211,17 @@ public class LibraryAnalyser {
         JavaMethodSet rtaEaDeadMethods = rtaGraphEA.getDeadMethods(classHierarchy, cpFile);
         JavaMethodSet rtaMaxDeadMethods = rtaGraphEAMax.getDeadMethods(classHierarchy, cpFile);
         System.out.println("Ok");        
-        
         printGraphTotals(chaGraph, rtaGraph, rtaGraphEA, rtaGraphEAMax);
         System.out.println();
-        
+
         libraryResult.libraryPublicClassCount = libraryCounts.project_publicClassCount;
         libraryResult.libraryPackagePrivateClassCount = libraryCounts.project_packageVisibleClassCount;
         libraryResult.libraryConfinedClassCount = libraryConfinedClassCount;
         libraryResult.libraryConcreteMethodCount = classHierarchy.getConcreteMethods(cpFile).size();
-        libraryResult.libraryEntryPointMethodCount = libraryEntryPoints.size();
+        libraryResult.libraryEntryPointMethodCount = libraryEntryPointsRta.size();
         libraryResult.libraryCompilerMethodCount = classHierarchy.getCompilerGeneratedMethods(cpFile).size();
         
-        libraryResult.libraryRtaEntryPointCount = libraryEntryPoints.size();
+        libraryResult.libraryRtaEntryPointCount = libraryEntryPointsRta.size();
         libraryResult.libraryOldEntryPointCount = libraryEntryPointsOld.size();
         libraryResult.libraryOpaEntryPointCount = libraryEntryPointsOpa.size();
         libraryResult.libraryCpaEntryPointCount = libraryEntryPointsCpa.size();
@@ -247,7 +248,7 @@ public class LibraryAnalyser {
         libraryResult.rtaDeadMethods = rtaDeadMethods.size();
         libraryResult.rtaEaDeadMethods = rtaEaDeadMethods.size();
         libraryResult.rtaMaxDeadMethods = rtaMaxDeadMethods.size();
-        
+
         // Print dead methods to file
         List<String> content = new ArrayList<String>();
         
@@ -263,7 +264,6 @@ public class LibraryAnalyser {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
         return libraryResult;
     }
 
@@ -291,5 +291,50 @@ public class LibraryAnalyser {
                 chaGraph.nrOfStaticCallSites(), rtaGraph.nrOfStaticCallSites(), rtaGraphEA.nrOfStaticCallSites(),
                 rtaGraphEAMax.nrOfStaticCallSites());
         System.out.println("------------------------------------------------------------------------------------");
+    }
+
+    private static void printTotals(org.asm.counting.CountResults countResult, ReifLibraryResult result2) {
+
+        printLine("Public class count", countResult.all_publicClassCount, result2.all_publicClassCount);
+        printLine("Package-private class count", countResult.all_packageVisibleClassCount, result2.all_packageVisibleClassCount);
+        printLine("Total class count", countResult.all_classCount, result2.all_classCount);
+        System.out.println();
+        printLine("Public interface count", countResult.all_publicInterfaceCount, result2.all_publicInterfaceCount);
+        printLine("Package-private interface count", countResult.all_packageVisibleInterfaceCount, result2.all_packageVisibleInterfaceCount);
+        printLine("Total interface count", countResult.all_interfaceCount, result2.all_interfaceCount);
+        System.out.println();
+        printLine("Public method count", countResult.all_publicMethods, result2.all_publicMethods);
+        printLine("Protected method count", countResult.all_protectedMethods, result2.all_protectedMethods);
+        printLine("Package-private method count", countResult.all_packagePrivateMethods, result2.all_packagePrivateMethods);
+        printLine("Private method count", countResult.all_privateMethods, result2.all_privateMethods);
+        printLine("Total method count", countResult.all_methodCount, result2.all_methodCount);
+        System.out.println();
+    }
+    
+    private static void printTotals(CountResults countResult, ReifLibraryResult result2) {
+
+        printLine("Public class count", countResult.all_publicClassCount, result2.all_publicClassCount);
+        printLine("Package-private class count", countResult.all_packageVisibleClassCount, result2.all_packageVisibleClassCount);
+        printLine("Total class count", countResult.all_classCount, result2.all_classCount);
+        System.out.println();
+        printLine("Public interface count", countResult.all_publicInterfaceCount, result2.all_publicInterfaceCount);
+        printLine("Package-private interface count", countResult.all_packageVisibleInterfaceCount, result2.all_packageVisibleInterfaceCount);
+        printLine("Total interface count", countResult.all_interfaceCount, result2.all_interfaceCount);
+        System.out.println();
+        printLine("Public method count", countResult.all_publicMethods, result2.all_publicMethods);
+        printLine("Protected method count", countResult.all_protectedMethods, result2.all_protectedMethods);
+        printLine("Package-private method count", countResult.all_packagePrivateMethods, result2.all_packagePrivateMethods);
+        printLine("Private method count", countResult.all_privateMethods, result2.all_privateMethods);
+        printLine("Total method count", countResult.all_methodCount, result2.all_methodCount);
+        System.out.println();
+    }
+    
+    private static void printLine(String description, int result1, int result2) {
+        
+        System.out.format("%-38s : %9s  %9s", description, result1, result2);
+        if(result1 != result2) {
+            System.out.format("%9s", result1 - result2);
+        }
+        System.out.println();
     }
 }

@@ -34,6 +34,13 @@ public final class JavaInterface extends JavaType {
         }
     }
     
+    @Override
+    public void accept(ConcreteMethodVisitor visitor) {
+        for(JavaMethod declaredMethod : this.declaredMethods()) {
+            declaredMethod.accept(visitor);
+        }
+    }
+
     public void addSubInterface(JavaInterface subInterface) {
         this.subInterfaces.add(subInterface);
 

@@ -156,8 +156,17 @@ public class ClassHierarchy {
         for(JavaType javaClass : this.classes) {
             javaClass.accept(visitor);
         }
-        for(JavaType javaClass : this.interfaces) {
+        for(JavaType javaInterface : this.interfaces) {
+            javaInterface.accept(visitor);
+        }
+    }
+    
+    public void accept(ConcreteMethodVisitor visitor) {
+        for(JavaType javaClass : this.classes) {
             javaClass.accept(visitor);
+        }
+        for(JavaType javaInterface : this.interfaces) {
+            javaInterface.accept(visitor);
         }
     }
     

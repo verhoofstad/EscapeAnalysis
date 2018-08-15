@@ -35,6 +35,13 @@ public final class JavaClass extends JavaType {
             declaredMethod.accept(visitor);
         }
     }
+    
+    @Override
+    public void accept(ConcreteMethodVisitor visitor) {
+        for(JavaMethod declaredMethod : this.declaredMethods()) {
+            declaredMethod.accept(visitor);
+        }
+    }
 
     public JavaClass superClass() {
         return this.superClass;
@@ -121,14 +128,5 @@ public final class JavaClass extends JavaType {
             }
         }
         return super.findStaticMethod(signature);
-    }
-
-    @Override
-    public String toString() {
-        if (this.hasSuperClass()) {
-            return this.id() + " extends " + this.superClass.id();
-        } else {
-            return this.id();
-        }
     }
 }

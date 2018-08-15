@@ -42,6 +42,8 @@ public abstract class JavaType {
     }
     
     public abstract void accept(ClassHierarchyVisitor visitor);
+    
+    public abstract void accept(ConcreteMethodVisitor visitor);
 
     /**
      * Gets the fully qualified name that uniquely identifies this type.
@@ -229,24 +231,12 @@ public abstract class JavaType {
         return null;
     }
 
-    /**
-     * Finds a method that matches the given signature.
-     */
-    public JavaMethod findMethod(String name, String desc) {
-        for (JavaMethod method : this.declaredMethods) {
-            if (method.signatureEquals(name, desc)) {
-                return method;
-            }
-        }
-        return null;
-    }
-
-    public JavaMethod getMethod(String name, String desc) {
-        JavaMethod method = findMethod(name, desc);
+    public JavaMethod getMethod(MethodSignature signature) {
+        JavaMethod method = findMethod(signature);
         if (method != null) {
             return method;
         } else {
-            throw new Error("Cannot find method " + name + "() in type " + this.id() + " in JAR-file " + this.jarFile());
+            throw new Error("Cannot find method " + signature.toString() + " in type " + this.id() + " in JAR-file " + this.jarFile());
         }
     }
 
@@ -281,5 +271,10 @@ public abstract class JavaType {
             }
         }
         return false;
+    }
+    
+    @Override
+    public String toString() {
+        return this.id();
     }
 }

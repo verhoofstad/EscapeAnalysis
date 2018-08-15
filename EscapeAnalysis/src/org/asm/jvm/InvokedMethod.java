@@ -14,6 +14,10 @@ public class InvokedMethod {
         this.withNew = withNew;
     }
     
+    public InvocationType invocationType() {
+        return this.invocationType;
+    }
+    
     public String declaredType() {
         return this.declaredType;
     }

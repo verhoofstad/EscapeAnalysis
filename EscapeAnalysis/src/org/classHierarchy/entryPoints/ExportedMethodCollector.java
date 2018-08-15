@@ -17,8 +17,8 @@ public class ExportedMethodCollector extends ProjectEntryPointCollector {
     public void visitProjectMethod(JavaMethod javaMethod) {
         
         JavaType declType = javaMethod.containedIn();
-        boolean isEntryPoint = !javaMethod.isAbstract() && declType.isPublic()
-            && (javaMethod.isPublic() || (javaMethod.isProtected() && !declType.isFinal()));
+        boolean isEntryPoint = !javaMethod.isAbstract() && !javaMethod.isSynthetic() && declType.isPublic()
+            && ((javaMethod.isPublic() || (javaMethod.isProtected() && !declType.isFinal())) || declType.isInterface());
         
         if(isEntryPoint) {
             this.addEntryPoint(javaMethod);

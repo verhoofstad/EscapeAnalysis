@@ -55,9 +55,9 @@ public class Main {
             libResults.add(libraryResult);
         }
         
-        //libResults.printCallEdgeTable();
-        //libResults.printMonomorphicCallSitesTable();
-        //libResults.printDeadMethodsTable();
+        libResults.printCallEdgeTable();
+        libResults.printMonomorphicCallSitesTable();
+        libResults.printDeadMethodsTable();
         libResults.printEntryPointTable();
         //libResults.printLatexTable4();
         

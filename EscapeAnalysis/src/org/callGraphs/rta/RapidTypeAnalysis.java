@@ -3,6 +3,7 @@ package org.callGraphs.rta;
 import org.callGraphs.CallGraph;
 import org.callGraphs.CallSite;
 import org.callGraphs.CallSiteSet;
+import org.callGraphs.Worklist;
 import org.classHierarchy.JavaClass;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;

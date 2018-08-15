@@ -1,4 +1,4 @@
-package org.callGraphs.rta;
+package org.callGraphs;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -9,12 +9,12 @@ import org.classHierarchy.JavaMethodSet;
 /**
  * Represents a work list for Rapid Type Analysis in which a work item can only be processed once.
  */
-class Worklist {
+public class Worklist {
 
     private JavaMethodSet toProcess = new JavaMethodSet();
     private Set<String> processed = new HashSet<String>();
 
-    Worklist(JavaMethodSet worklist) {
+    public Worklist(JavaMethodSet worklist) {
         this.toProcess = new JavaMethodSet(worklist);
     }
 

@@ -12,6 +12,7 @@ import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 import org.classHierarchy.JavaTypeSet;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -453,6 +454,20 @@ class ClassHierachyBuilderTest {
 
         for (JavaType javaClass : allClasses) {
             for (JavaMethod javaMethod : javaClass.declaredMethods()) {
+                assertSame(javaClass.jarFile(), javaMethod.jarFile());
+            }
+        }
+    }
+    
+    @Test
+    void JavaClassMethod_invokedMethods() {
+        JavaTypeSet allClasses = jdkHierarchy.getClasses();
+
+        for (JavaType javaClass : allClasses) {
+            for (JavaMethod javaMethod : javaClass.declaredMethods()) {
+                if(javaMethod.isAbstract()) {
+                    assertEquals(0, javaMethod.invokedMethods().size());
+                }
                 assertSame(javaClass.jarFile(), javaMethod.jarFile());
             }
         }

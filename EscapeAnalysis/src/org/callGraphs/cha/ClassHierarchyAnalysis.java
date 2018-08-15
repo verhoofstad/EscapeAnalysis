@@ -1,178 +1,68 @@
 package org.callGraphs.cha;
 
-import org.asm.JarClass;
-import org.asm.JarFileSetVisitor;
-import org.asm.jvm.MethodSignature;
+import org.asm.jvm.InvocationType;
+import org.asm.jvm.InvokedMethod;
 import org.callGraphs.CallGraph;
+import org.callGraphs.Worklist;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
-/**
- * Constructs a call graph using Class Hierarchy Analysis.
- */
-public class ClassHierarchyAnalysis extends JarFileSetVisitor {
+public class ClassHierarchyAnalysis {
 
     private ClassHierarchy classHierarchy;
+    private Worklist worklist;
     private AppliesToSets appliesToSets;
-    private CallGraph callGraph;
-
-    public ClassHierarchyAnalysis(ClassHierarchy classHierarchy) {
-        this.classHierarchy = classHierarchy;
-        this.callGraph = new CallGraph();
+    
+    public ClassHierarchyAnalysis(ClassHierarchy classHierachy, JavaMethodSet entryPoints) {
+        this.classHierarchy = classHierachy;
+        this.worklist = new Worklist(entryPoints);
         this.appliesToSets = new AppliesToSets(this.classHierarchy);
     }
+    
+    public CallGraph computeCallGraph() {
+        
+        CallGraph callGraph = new CallGraph();
+        
+        while (!this.worklist.isEmpty()) {
 
-    /**
-     * Gets the constructed call graph.
-     */
-    public CallGraph callGraph() {
-        return this.callGraph;
-    }
-
-    @Override
-    public void visitPublicClass(JarClass jarClass) {
-        visitClass(jarClass);
-    }
-
-    @Override
-    public void visitPackagePrivateClass(JarClass jarClass) {
-        visitClass(jarClass);
-    }
-
-    @Override
-    public void visitPublicEnum(JarClass jarClass) {
-        visitClass(jarClass);
-    }
-
-    @Override
-    public void visitPackagePrivateEnum(JarClass jarClass) {
-        visitClass(jarClass);
-    }
-
-    private void visitClass(JarClass jarClass) {
-
-        JavaType currentClass = this.classHierarchy.getClass(jarClass.name());
-
-        CHAClassVisitor classVisitor = new CHAClassVisitor(currentClass, this.classHierarchy, this.appliesToSets,
-                this.callGraph);
-
-        jarClass.accept(classVisitor);
-    }
-
-    class CHAClassVisitor extends ClassVisitor {
-        private JavaType currentClass;
-        private ClassHierarchy classHierarchy;
-        private AppliesToSets appliesToSets;
-        private CallGraph callGraph;
-
-        CHAClassVisitor(JavaType currentClass, ClassHierarchy classHierarchy, AppliesToSets appliesToSets,
-                CallGraph callGraph) {
-            super(Opcodes.ASM6);
-
-            this.currentClass = currentClass;
-            this.classHierarchy = classHierarchy;
-            this.appliesToSets = appliesToSets;
-            this.callGraph = callGraph;
-        }
-
-        @Override
-        public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-
-            JavaMethod currentMethod = this.currentClass.getMethod(name, desc);
-
-            return new CHAMethodVisitor(currentMethod, this.classHierarchy, this.appliesToSets, this.callGraph);
-        }
-    }
-
-    class CHAMethodVisitor extends MethodVisitor {
-        private JavaMethod currentMethod;
-        private ClassHierarchy classHierarchy;
-        private AppliesToSets appliesToSets;
-        private CallGraph callGraph;
-
-        public CHAMethodVisitor(JavaMethod currentMethod, ClassHierarchy classHierarchy, AppliesToSets appliesToSets,
-                CallGraph callGraph) {
-            super(Opcodes.ASM6);
-
-            this.currentMethod = currentMethod;
-            this.classHierarchy = classHierarchy;
-            this.appliesToSets = appliesToSets;
-            this.callGraph = callGraph;
-        }
-
-        /**
-         * Visits a method instruction. A method instruction is an instruction that
-         * invokes a method.
-         * 
-         * https://stackoverflow.com/questions/24510785/explanation-of-itf-parameter-of-visitmethodinsn-in-asm-5
-         * 
-         */
-        @Override
-        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-
-            // Ignore array types.
-            if (owner.startsWith("[")) {
-                return;
-            }
-
-            JavaType declaredType = this.classHierarchy.getType(owner);
-            MethodSignature signature = new MethodSignature(name, desc);
-
-            switch (opcode) {
-            case Opcodes.INVOKESPECIAL:
-                // Invocation of constructors, private methods, super() calls.
-                if (name.equals("<init>")) {
-                    visitInvokeConstructor(declaredType, name, desc);
-                } else {
-                    visitInvokeVirtual(declaredType, signature);
-                }
-                break;
-            case Opcodes.INVOKESTATIC:
-                visitInvokeStatic(declaredType, signature);
-                break;
-            case Opcodes.INVOKEVIRTUAL:
-            case Opcodes.INVOKEINTERFACE:
-                visitInvokeVirtual(declaredType, signature);
-                break;
-            default:
-                throw new Error("Unexpected opcode.");
-            }
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
-        }
-
-        private void visitInvokeVirtual(JavaType declaredType, MethodSignature signature) {
-
-            if (declaredType.id().equals("java/lang/invoke/MethodHandle")) {
-                return;
-            }
-
-            JavaMethodSet virtualTargets = appliesToSets.appliesTo(declaredType.coneSet(), signature);
+            JavaMethod currentMethod = this.worklist.getItem();
             
-            // If the declared type is an abstract class or an interface, the invoked method may not 
-            // have a concrete implementation. If the call-site has no target methods, we omit it from the call graph.
-            if(!virtualTargets.isEmpty()) {
-                this.callGraph.addVirtualCallSite(this.currentMethod, virtualTargets);
+            for (InvokedMethod invokedMethod : currentMethod.invokedMethods()) {
+
+                JavaType declType = this.classHierarchy.getType(invokedMethod.declaredType());
+
+                if(invokedMethod.invocationType() == InvocationType.CONSTRUCTOR) {
+                    JavaMethod target = declType.getMethod(invokedMethod.signature());
+                    
+                    callGraph.addStaticCallSite(currentMethod, target);
+                    this.worklist.add(target);
+                    
+                } else if(invokedMethod.invocationType() == InvocationType.STATIC) {
+                    
+                    JavaMethod target = declType.findStaticMethod(invokedMethod.signature());
+                    
+                    callGraph.addStaticCallSite(currentMethod, target);
+                    this.worklist.add(target);
+                }
+                else {
+                    
+                    if (!declType.id().equals("java/lang/invoke/MethodHandle")) {
+                        JavaMethodSet virtualTargets = appliesToSets.appliesTo(declType.coneSet(), invokedMethod.signature());
+                        
+                        // If the declared type is an abstract class or an interface, the invoked method may not 
+                        // have a concrete implementation. If the call-site has no target methods, we omit it from the call graph.
+                        if(!virtualTargets.isEmpty()) {
+                            callGraph.addVirtualCallSite(currentMethod, virtualTargets);
+                            for(JavaMethod virtualTarget : virtualTargets) {
+                                this.worklist.add(virtualTarget);
+                            }
+                        }                    
+                    }
+                }
             }
         }
-
-        private void visitInvokeStatic(JavaType declaredType, MethodSignature signature) {
-
-            // Note that the static method can also reside in one of the super classes.
-            JavaMethod staticTarget = declaredType.findStaticMethod(signature);
-
-            this.callGraph.addStaticCallSite(this.currentMethod, staticTarget);
-        }
-
-        private void visitInvokeConstructor(JavaType declaredType, String name, String desc) {
-
-            JavaMethod constructor = declaredType.getMethod(name, desc);
-
-            this.callGraph.addStaticCallSite(this.currentMethod, constructor);
-        }
+        return callGraph;
     }
 }
