@@ -7,7 +7,7 @@ import org.classHierarchy.JavaType;
 public class OldFactoryMethodCollector extends FactoryMethodCollector {
     
     @Override
-    protected boolean isFactoryMethod(JavaMethod javaMethod) {
+    public boolean isFactoryMethod(JavaMethod javaMethod) {
         return (javaMethod.containedIn().isClass() && javaMethod.isStatic() && javaMethod.hasReferenceReturnType() && invokesPrivateConstructor(javaMethod))
             || (javaMethod.isStatic() && !javaMethod.isStaticInitializer() && javaMethod.isNative());
     }

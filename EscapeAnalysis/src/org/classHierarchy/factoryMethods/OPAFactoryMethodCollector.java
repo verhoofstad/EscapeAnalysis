@@ -5,9 +5,9 @@ import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaType;
 
 public class OPAFactoryMethodCollector extends FactoryMethodCollector {
-
+    
     @Override
-    protected boolean isFactoryMethod(JavaMethod javaMethod) {
+    public boolean isFactoryMethod(JavaMethod javaMethod) {
         return javaMethod.containedIn().isClass() && javaMethod.isStatic() && javaMethod.hasReferenceReturnType() && invokesPrivateConstructor(javaMethod)
                 && javaMethod.containedIn().coneSet().contains(javaMethod.referenceReturnType());
     }

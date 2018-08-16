@@ -2,11 +2,11 @@ package org.classHierarchy.entryPoints;
 
 import org.asm.JarFile;
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.ClassHierarchyVisitor;
+import org.classHierarchy.ConcreteMethodVisitor;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 
-abstract class ProjectEntryPointCollector extends ClassHierarchyVisitor {
+abstract class ProjectEntryPointCollector extends ConcreteMethodVisitor {
 
     private JarFile projectFile;
     private JavaMethodSet entryPoints;
@@ -17,43 +17,18 @@ abstract class ProjectEntryPointCollector extends ClassHierarchyVisitor {
         this.projectFile = projectFile;
     }
 
+    protected abstract boolean isEntryPoint(JavaMethod javaMethod);
+
     public JavaMethodSet collectEntryPointsFrom(ClassHierarchy classHierarchy) {
         this.entryPoints = new JavaMethodSet();
         classHierarchy.accept(this);
         return this.entryPoints;
     }
-
-    protected void addEntryPoint(JavaMethod entryPoint) {
-        this.entryPoints.add(entryPoint);
-    }
     
-    protected abstract void visitProjectMethod(JavaMethod javaMethod);
-
     @Override
-    public void visitPublicMethod(JavaMethod javaMethod) { 
-        if(javaMethod.isLoadedFrom(this.projectFile)) {
-            this.visitProjectMethod(javaMethod);
-        }
-    }
-
-    @Override
-    public void visitProtectedMethod(JavaMethod javaMethod) { 
-        if(javaMethod.isLoadedFrom(this.projectFile)) {
-            this.visitProjectMethod(javaMethod);
-        }
-    }
-
-    @Override
-    public void visitPackagePrivateMethod(JavaMethod javaMethod) {
-        if(javaMethod.isLoadedFrom(this.projectFile)) {
-            this.visitProjectMethod(javaMethod);
-        }
-    }
-
-    @Override
-    public void visitPrivateMethod(JavaMethod javaMethod) { 
-        if(javaMethod.isLoadedFrom(this.projectFile)) {
-            this.visitProjectMethod(javaMethod);
+    public void visitConcreteMethod(JavaMethod javaMethod) { 
+        if(javaMethod.isLoadedFrom(this.projectFile) && this.isEntryPoint(javaMethod)) {
+            this.entryPoints.add(javaMethod);
         }
     }
 }

@@ -12,15 +12,8 @@ public class CPAEntryPointCollector extends ReifEntryPointCollector {
         super(projectFile, factoryMethods);
     }
 
-    @Override
-    public void visitProjectMethod(JavaMethod javaMethod) {
-        
-        if(this.isEntryPoint(javaMethod)) {
-            this.addEntryPoint(javaMethod);
-        }
-    }
-    
-    private boolean isEntryPoint(JavaMethod javaMethod) {
+    @Override  
+    public boolean isEntryPoint(JavaMethod javaMethod) {
         JavaType declType = javaMethod.containedIn();
         
         return this.maybeCalledByTheJVM(javaMethod) ||

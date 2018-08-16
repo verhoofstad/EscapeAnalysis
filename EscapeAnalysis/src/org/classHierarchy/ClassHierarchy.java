@@ -203,4 +203,15 @@ public class ClassHierarchy {
         }
         return compilerGeneratedMethods;
     }
+    
+    public void resolveAppliesToSets() {
+
+        for (JavaType javaClass : this.classes) {
+            javaClass.resolveAppliesToSets();
+        }
+
+        for (JavaType javaInterface : this.interfaces) {
+            javaInterface.resolveAppliesToSets();
+        }
+    }
 }

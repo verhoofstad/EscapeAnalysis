@@ -12,20 +12,19 @@ public class OldEntryPointCollector extends ReifEntryPointCollector {
     }
     
     @Override
-    public void visitProjectMethod(JavaMethod javaMethod) {
-        
-        if(javaMethod.isAbstract()) {
-            return;
-        }
+    public boolean isEntryPoint(JavaMethod javaMethod) {
         
         boolean classIsInstantiable = typeIsInstantiable(javaMethod.containedIn());
         boolean isImplicitlyUsed = false;
         
         if ((classIsInstantiable || javaMethod.containedIn().isInterface() || javaMethod.isStatic()) &&
                 (!javaMethod.isPrivate() || this.isPotentiallySerializationRelated(javaMethod))) {
-            this.addEntryPoint(javaMethod);
+            return true;
         } else if (isImplicitlyUsed) {
-            this.addEntryPoint(javaMethod);
+            return true;
+        }
+        else {
+            return false;
         }
     }
     

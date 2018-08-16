@@ -74,6 +74,10 @@ public class LibraryAnalyser {
         ClassHierarchy classHierarchy = builder.classHierarchy();
         libraryResult.classHierarchyBuildTime = (System.nanoTime() - startTime);
         System.out.println("Ok");
+        
+        System.out.print("Resolving applies-to sets...");
+        classHierarchy.resolveAppliesToSets();
+        System.out.println("Ok");
 
         System.out.print("Counting classes and methods...");
         ClassAndMethodCounter libraryCounter = new ClassAndMethodCounter(cpFile);

@@ -48,13 +48,16 @@ public class EntryPointAnalyser {
         ClassHierarchy classHierarchy = builder.classHierarchy();
         libraryResult.classHierarchyBuildTime = (System.nanoTime() - startTime);
         System.out.println("Ok");
+        
+        System.out.print("Resolving applies-to sets...");
+        classHierarchy.resolveAppliesToSets();
+        System.out.println("Ok");
 
         System.out.print("Counting classes and methods...");
         ClassAndMethodCounter counter = new ClassAndMethodCounter(cpFile);
         classHierarchy.accept(counter);
         CountResults libraryCounts = counter.countResults();
         System.out.println("Ok");
-        
         
         System.out.print("Find types with factory method...");
         OldFactoryMethodCollector factoryMethodCollector = new OldFactoryMethodCollector();

@@ -12,13 +12,7 @@ public class OPAEntryPointCollector2 extends ReifEntryPointCollector{
     }
 
     @Override
-    protected void visitProjectMethod(JavaMethod javaMethod) {
-        if(this.isEntryPoint(javaMethod)) {
-            this.addEntryPoint(javaMethod);
-        }
-    }
-
-    private boolean isEntryPoint(JavaMethod javaMethod) {
+    public boolean isEntryPoint(JavaMethod javaMethod) {
         
         JavaType declType = javaMethod.containedIn();
         
@@ -61,8 +55,6 @@ public class OPAEntryPointCollector2 extends ReifEntryPointCollector{
                 return false;
             }
         }
-        
-        
     }
     
     private boolean isClientCallable(JavaMethod javaMethod) {

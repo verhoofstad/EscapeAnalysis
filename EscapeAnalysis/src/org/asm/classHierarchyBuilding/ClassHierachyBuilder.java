@@ -86,9 +86,6 @@ public class ClassHierachyBuilder extends JarFileSetVisitor {
         println("Building class hierarchy...");
         this.rootNode = buildClassHierarchy();
 
-        println("Resolving applies-to sets...");
-        this.resolveAppliesTo();
-
         this.tempClasses = null;
         this.tempInterfaces = null;
     }
@@ -236,17 +233,6 @@ public class ClassHierachyBuilder extends JarFileSetVisitor {
             }
         }
         return rootInterfaces;
-    }
-
-    private void resolveAppliesTo() {
-
-        for (JavaType javaClass : this.classes) {
-            javaClass.resolveAppliesToSets();
-        }
-
-        for (JavaType javaInterface : this.interfaces) {
-            javaInterface.resolveAppliesToSets();
-        }
     }
 
     private void println(String format, Object... args) {

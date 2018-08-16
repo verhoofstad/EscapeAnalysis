@@ -7,7 +7,6 @@ import org.classHierarchy.JavaType;
 
 /**
  * Finds the methods that are entry points under the open-package assumption.
- *
  */
 public class OPAEntryPointCollector extends ReifEntryPointCollector {
 
@@ -16,13 +15,7 @@ public class OPAEntryPointCollector extends ReifEntryPointCollector {
     }
 
     @Override
-    public void visitProjectMethod(JavaMethod javaMethod) {
-        if(this.isEntryPoint(javaMethod)) {
-            this.addEntryPoint(javaMethod);
-        }
-    }
-    
-    private boolean isEntryPoint(JavaMethod javaMethod) {
+    public boolean isEntryPoint(JavaMethod javaMethod) {
         JavaType declType = javaMethod.containedIn();
 
         return this.maybeCalledByTheJVM(javaMethod) ||

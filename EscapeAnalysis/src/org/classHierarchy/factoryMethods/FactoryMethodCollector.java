@@ -1,11 +1,11 @@
 package org.classHierarchy.factoryMethods;
 
 import org.classHierarchy.ClassHierarchy;
-import org.classHierarchy.ClassHierarchyVisitor;
+import org.classHierarchy.ConcreteMethodVisitor;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 
-public abstract class FactoryMethodCollector  extends ClassHierarchyVisitor{
+public abstract class FactoryMethodCollector extends ConcreteMethodVisitor {
 
     private JavaMethodSet factoryMethods;
 
@@ -18,28 +18,9 @@ public abstract class FactoryMethodCollector  extends ClassHierarchyVisitor{
     protected abstract boolean isFactoryMethod(JavaMethod javaMethod);
     
     @Override
-    public void visitPublicMethod(JavaMethod javaMethod) { 
-        this.visitMethod(javaMethod);
-    }
-
-    @Override
-    public void visitProtectedMethod(JavaMethod javaMethod) {
-        this.visitMethod(javaMethod);
-    }
-
-    @Override
-    public void visitPackagePrivateMethod(JavaMethod javaMethod) {
-        this.visitMethod(javaMethod);
-    }
-
-    @Override
-    public void visitPrivateMethod(JavaMethod javaMethod) { 
-        this.visitMethod(javaMethod);
-    }
-    
-    private void visitMethod(JavaMethod javaMethod) {
+    public void visitConcreteMethod(JavaMethod javaMethod) { 
         if(isFactoryMethod(javaMethod)) {
             this.factoryMethods.add(javaMethod);
-        }
+        }        
     }
 }
