@@ -38,4 +38,7 @@ public class CountResults {
     public int libraries_protectedMethods = 0;
     public int libraries_packagePrivateMethods = 0;
     public int libraries_privateMethods = 0;
+    
+    public int project_packageVisibleClassWithPackageVisibleAndPublicSubClassCount = 0;
+    public int project_packageVisibleClassWithPackageVisibleSubClassCount = 0;
 }

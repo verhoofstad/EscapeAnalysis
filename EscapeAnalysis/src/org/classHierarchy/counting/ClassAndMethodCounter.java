@@ -47,6 +47,8 @@ public class ClassAndMethodCounter extends ClassHierarchyVisitor {
         if(javaClass.isLoadedFrom(this.projectFile)) {
             this.countResults.project_classCount++;
             this.countResults.project_packageVisibleClassCount++;
+
+            this.countPackagePrivateSubClasses(javaClass);
         } else {
             this.countResults.libraries_classCount++;
             this.countResults.libraries_packageVisibleClassCount++;
@@ -140,6 +142,27 @@ public class ClassAndMethodCounter extends ClassHierarchyVisitor {
         } else {
             this.countResults.libraries_methodCount++;
             this.countResults.libraries_privateMethods++;
+        }
+    }
+    
+    private void countPackagePrivateSubClasses(JavaType javaClass) {
+        
+        boolean hasPublicSubClass = false;
+        boolean hasPackagePrivateSubClass = false;
+        
+        for(JavaType subClass : javaClass.coneSet()) {
+            if(!subClass.equals(javaClass)) {
+                hasPublicSubClass = hasPublicSubClass || subClass.isPublic();
+                hasPackagePrivateSubClass = hasPackagePrivateSubClass || subClass.isPackagePrivate();
+            }
+        }
+        
+        if(hasPackagePrivateSubClass) {
+            if(hasPublicSubClass) {
+                this.countResults.project_packageVisibleClassWithPackageVisibleAndPublicSubClassCount++;
+            } else {
+                this.countResults.project_packageVisibleClassWithPackageVisibleSubClassCount++;
+            }
         }
     }
 }
