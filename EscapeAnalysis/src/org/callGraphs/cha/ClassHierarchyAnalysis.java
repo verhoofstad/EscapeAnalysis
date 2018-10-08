@@ -31,35 +31,42 @@ public class ClassHierarchyAnalysis {
             
             for (InvokedMethod invokedMethod : currentMethod.invokedMethods()) {
 
-                JavaType declType = this.classHierarchy.getType(invokedMethod.declaredType());
-
-                if(invokedMethod.invocationType() == InvocationType.CONSTRUCTOR) {
-                    JavaMethod target = declType.getMethod(invokedMethod.signature());
-                    
-                    callGraph.addStaticCallSite(currentMethod, target);
-                    this.worklist.add(target);
-                    
-                } else if(invokedMethod.invocationType() == InvocationType.STATIC) {
-                    
-                    JavaMethod target = declType.findStaticMethod(invokedMethod.signature());
-                    
-                    callGraph.addStaticCallSite(currentMethod, target);
-                    this.worklist.add(target);
+                if(this.classHierarchy.containsType(invokedMethod.declaredType())) {
+                
+                    JavaType declType = this.classHierarchy.getType(invokedMethod.declaredType());
+    
+                    if(invokedMethod.invocationType() == InvocationType.CONSTRUCTOR) {
+                        JavaMethod target = declType.getMethod(invokedMethod.signature());
+                        
+                        callGraph.addStaticCallSite(currentMethod, target);
+                        this.worklist.add(target);
+                        
+                    } else if(invokedMethod.invocationType() == InvocationType.STATIC) {
+                        
+                        JavaMethod target = declType.findStaticMethod(invokedMethod.signature());
+                        
+                        callGraph.addStaticCallSite(currentMethod, target);
+                        this.worklist.add(target);
+                    }
+                    else {
+                        
+                        if (!declType.id().equals("java/lang/invoke/MethodHandle")) {
+                            JavaMethodSet virtualTargets = appliesToSets.appliesTo(declType.coneSet(), invokedMethod.signature());
+                            
+                            // If the declared type is an abstract class or an interface, the invoked method may not 
+                            // have a concrete implementation. If the call-site has no target methods, we omit it from the call graph.
+                            if(!virtualTargets.isEmpty()) {
+                                callGraph.addVirtualCallSite(currentMethod, virtualTargets);
+                                for(JavaMethod virtualTarget : virtualTargets) {
+                                    this.worklist.add(virtualTarget);
+                                }
+                            }                    
+                        }
+                    }
                 }
                 else {
-                    
-                    if (!declType.id().equals("java/lang/invoke/MethodHandle")) {
-                        JavaMethodSet virtualTargets = appliesToSets.appliesTo(declType.coneSet(), invokedMethod.signature());
-                        
-                        // If the declared type is an abstract class or an interface, the invoked method may not 
-                        // have a concrete implementation. If the call-site has no target methods, we omit it from the call graph.
-                        if(!virtualTargets.isEmpty()) {
-                            callGraph.addVirtualCallSite(currentMethod, virtualTargets);
-                            for(JavaMethod virtualTarget : virtualTargets) {
-                                this.worklist.add(virtualTarget);
-                            }
-                        }                    
-                    }
+                    // Missing type in the class hierarchy
+                    System.out.println("Warning: Could not find type " + invokedMethod.declaredType() + " in the class hierarchy.");
                 }
             }
         }

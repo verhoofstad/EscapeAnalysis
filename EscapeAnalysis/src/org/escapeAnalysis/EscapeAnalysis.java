@@ -48,8 +48,11 @@ public class EscapeAnalysis {
         Options.v().set_app(true);
         // Options.v().set_src_prec(Options.src_prec_class);
         // Options.v().set_prepend_classpath(true);
-        // Options.v().set_whole_program(true);
-
+        Options.v().set_whole_program(true);
+        Options.v().set_ignore_classpath_errors(true);
+        Options.v().set_ignore_resolving_levels(true);
+        
+        
         Options.v().set_process_dir(methods.jarFiles().toSootStringList());
         println("Process-dir: %s", methods.jarFiles().toSootStringList());
 
@@ -58,6 +61,8 @@ public class EscapeAnalysis {
         // PhaseOptions.v().setPhaseOption("jj.a", "on");
         // PhaseOptions.v().setPhaseOption("jj.ule", "on");
 
+
+        
         Scene scene = Scene.v();
 
         scene.loadNecessaryClasses(); // Triggers Soot exception

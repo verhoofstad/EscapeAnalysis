@@ -1,7 +1,5 @@
 package org.results;
 
-import java.text.DecimalFormat;
-
 import org.dataSets.Library;
 
 /**
@@ -83,7 +81,7 @@ public class LibraryResult {
     }
     
     
-    void addToLatexTable(StringBuilder latexTable) {
+    void addToCallEdgeTable(StringBuilder latexTable) {
         
         this.calculate();
         
@@ -112,7 +110,7 @@ public class LibraryResult {
         latexTable.append("\n");
     }
     
-    void addToLatexTable2(StringBuilder latexTable) {
+    void addToMonomorphicCallSitesTable(StringBuilder latexTable) {
         
         latexTable.append(this.library.name());
         latexTable.append(" & ");
@@ -162,29 +160,6 @@ public class LibraryResult {
         latexTable.append("\n");
     }
     
-    void addToLatexTable4(StringBuilder latexTable) {
-        
-        latexTable.append(this.library.name());
-        latexTable.append(" & ");
-
-        latexTable.append(formatNanoTime(this.classHierarchyBuildTime));
-        latexTable.append(" & ");
-        latexTable.append(formatNanoTime(this.chaBuildTime));
-        latexTable.append(" & ");
-        latexTable.append(formatNanoTime(this.rtaBuildTime));
-        latexTable.append(" & ");
-        latexTable.append(formatNanoTime(this.escapeAnalysisTime));
-        latexTable.append(" & ");
-        latexTable.append(formatNanoTime(this.rtaEaTime));
-        latexTable.append(" & ");
-        latexTable.append(formatNanoTime(this.rtaMaxTime));
-        latexTable.append(" & ");
-        latexTable.append(formatNanoTime(this.totalAnalysisTime));
-        
-        latexTable.append("\\\\");
-        latexTable.append("\n");
-    }
-    
     void addToEntryPointTable(StringBuilder latexTable) {
         latexTable.append(this.library.name());
         latexTable.append(" & ");
@@ -207,11 +182,6 @@ public class LibraryResult {
         latexTable.append("\n");        
     }
     
-    private String formatNanoTime(long nanoTime) {
-        
-        DecimalFormat formatter = new DecimalFormat("#.00");
-        return formatter.format((double)nanoTime / 1000 / 1000 / 1000);
-    }
     /*
     private void printToFile(File file, CountResults totalCounts, CountResults libraryCounts, LibraryResult chaCpaResult, JavaMethodSet entryPoints, 
             JavaTypeSet confinedClasses, CallGraph chaGraph, CallGraph rtaGraph, CallGraph rtaGraphEA, CallGraph rtaGraphEAMax) {

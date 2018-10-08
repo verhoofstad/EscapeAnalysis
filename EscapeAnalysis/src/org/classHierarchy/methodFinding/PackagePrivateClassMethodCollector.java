@@ -1,13 +1,14 @@
 package org.classHierarchy.methodFinding;
 
 import org.asm.jvm.InvokedMethod;
-import org.classHierarchy.ClassHierarchyVisitor;
+import org.classHierarchy.ClassHierarchy;
+import org.classHierarchy.ConcreteMethodVisitor;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 import org.classHierarchy.JavaTypeSet;
 
-public class PackagePrivateClassMethodCollector extends ClassHierarchyVisitor {
+public class PackagePrivateClassMethodCollector extends ConcreteMethodVisitor {
     
     private JavaTypeSet classes;
     private JavaMethodSet foundMethods = new JavaMethodSet();
@@ -16,31 +17,14 @@ public class PackagePrivateClassMethodCollector extends ClassHierarchyVisitor {
         this.classes = classes;
     }
 
-    public JavaMethodSet foundMethods() {
+    public JavaMethodSet findMethodsIn(ClassHierarchy classHierarchy) {
+        this.foundMethods = new JavaMethodSet();
+        classHierarchy.accept(this);
         return this.foundMethods;
     }
     
     @Override
-    public void visitPublicMethod(JavaMethod javaMethod) { 
-        this.visitMethod(javaMethod);
-    }
-
-    @Override
-    public void visitProtectedMethod(JavaMethod javaMethod) {
-        this.visitMethod(javaMethod);
-    }
-
-    @Override
-    public void visitPackagePrivateMethod(JavaMethod javaMethod) {
-        this.visitMethod(javaMethod);
-    }
-
-    @Override
-    public void visitPrivateMethod(JavaMethod javaMethod) { 
-        this.visitMethod(javaMethod);
-    }
-    
-    private void visitMethod(JavaMethod javaMethod) {
+    public void visitConcreteMethod(JavaMethod javaMethod) { 
         if(this.invokesTargetClass(javaMethod)) {
             this.foundMethods.add(javaMethod);
         }        

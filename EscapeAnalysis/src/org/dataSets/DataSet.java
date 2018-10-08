@@ -94,6 +94,52 @@ public class DataSet implements Iterable<Library> {
         return correctSet;        
     }
     
+    public static DataSet getApplicationSet() {
+        
+        DataSet applicationSet = new DataSet();
+
+        applicationSet.addLibrary(0, "org.soot", "org.soot", "x.x", 
+                "Applications\\soot\\sootclasses-trunk-jar-with-dependencies.jar",
+                new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+        applicationSet.addLibrary(1, "smallsql", "smallsql", "0.21", 
+                "Applications\\smallsql\\smallsql0.21_lib\\smallsql.jar",
+                new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+        applicationSet.addLibrary(2, "hsqldb", "sqltool", "2.4.1", 
+                "Applications\\hsql\\hsqldb-2.4.1\\hsqldb\\lib\\sqltool.jar",
+                new String[] {
+                        "Applications\\hsql\\hsqldb-2.4.1\\hsqldb\\lib\\hsqldb.jar",
+                        "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" 
+                });
+        applicationSet.addLibrary(3, "org.jwork", "jPort", "1.8", 
+                "Applications\\jPort\\jPort-1.8\\jPort\\jport.jar",
+                new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+                // http://jwork.org/jport/
+        applicationSet.addLibrary(4, "org.jedit", "jEdit", "5.5.0", 
+                "Applications\\jEdit\\jEdit-5.5.0\\jedit.jar",
+                new String[] { "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+        applicationSet.addLibrary(5, "jpc", "JPC", "1.0", 
+                "Applications\\jpc\\JPCApplication.jar",
+                new String[] {
+                        "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+        applicationSet.addLibrary(6, "jlGui", "jlGui", "3.0", 
+                "Applications\\jlgui\\jlgui3.0\\jlgui3.0.jar",
+                new String[] {
+                        "Applications\\jlgui\\jlgui3.0\\lib\\jl1.0.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\mp3spi1.9.4.jar", 
+                        "Applications\\jlgui\\jlgui3.0\\lib\\jorbis-0.0.15.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\jogg-0.0.7.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\vorbisspi1.0.2.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\tritonus_share.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\jspeex0.9.7.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\basicplayer3.0.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\kj_dsp1.1.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\commons-logging-api.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\jmactritonusspi1.74.jar",
+                        "Applications\\jlgui\\jlgui3.0\\lib\\jflac-1.2.jar",
+                        "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+        return applicationSet;
+    }
+    
     public static DataSet getUnmodifiedSet() {
 
         DataSet completeSet = DataSet.getCompleteSet();

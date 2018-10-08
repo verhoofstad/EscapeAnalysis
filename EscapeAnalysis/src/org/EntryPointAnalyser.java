@@ -3,14 +3,12 @@ package org;
 import org.asm.JarFile;
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
-import org.asm.counting.ClassCounter;
 import org.classHierarchy.ClassHierarchy;
 import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.counting.ClassAndMethodCounter;
 import org.classHierarchy.counting.CountResults;
 import org.classHierarchy.entryPoints.CPAEntryPointCollector;
 import org.classHierarchy.entryPoints.OPAEntryPointCollector;
-import org.classHierarchy.entryPoints.OPAEntryPointCollector2;
 import org.classHierarchy.entryPoints.OldEntryPointCollector;
 import org.classHierarchy.factoryMethods.OPAFactoryMethodCollector;
 import org.classHierarchy.factoryMethods.OldFactoryMethodCollector;
@@ -48,17 +46,14 @@ public class EntryPointAnalyser {
         ClassHierarchy classHierarchy = builder.classHierarchy();
         libraryResult.classHierarchyBuildTime = (System.nanoTime() - startTime);
         System.out.println("Ok");
-        
-        System.out.print("Resolving applies-to sets...");
-        classHierarchy.resolveAppliesToSets();
-        System.out.println("Ok");
 
         System.out.print("Counting classes and methods...");
         ClassAndMethodCounter counter = new ClassAndMethodCounter(cpFile);
         classHierarchy.accept(counter);
         CountResults libraryCounts = counter.countResults();
         System.out.println("Ok");
-        
+
+        /*
         System.out.print("Find types with factory method...");
         OldFactoryMethodCollector factoryMethodCollector = new OldFactoryMethodCollector();
         JavaMethodSet oldFactoryMethods = factoryMethodCollector.collectFactoryMethodsFrom(classHierarchy);
@@ -74,15 +69,15 @@ public class EntryPointAnalyser {
         CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, opaFactoryMethods);
         JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         System.out.println("Ok");
-
-               
+          */     
         printTotals(libraryCounts, this.reifResult);
+/*
         printLine("Old factory methods:", oldFactoryMethods.size());
         printLine("OPA factory methods:", opaFactoryMethods.size());
         System.out.println();
         printLine("Old entry points", libraryEntryPointsOld.size(), this.reifResult.old_entryPoints);
         printLine("OPA entry points", libraryEntryPointsOpa.size(), this.reifResult.opa_entryPoints);
-        printLine("CPA entry points", libraryEntryPointsCpa.size(), this.reifResult.cpa_entryPoints);
+        printLine("CPA entry points", libraryEntryPointsCpa.size(), this.reifResult.cpa_entryPoints);*/
     }
     
     private static void printTotals(CountResults countResult, ReifLibraryResult result2) {
@@ -100,6 +95,9 @@ public class EntryPointAnalyser {
         printLine("Package-private method count", countResult.all_packagePrivateMethods, result2.all_packagePrivateMethods);
         printLine("Private method count", countResult.all_privateMethods, result2.all_privateMethods);
         printLine("Total method count", countResult.all_methodCount, result2.all_methodCount);
+        System.out.println();
+        printLine("Package-private class with package-private sub class count", countResult.project_packageVisibleClassWithPackageVisibleSubClassCount);
+        printLine("Package-private class with package-private and public sub class count", countResult.project_packageVisibleClassWithPackageVisibleAndPublicSubClassCount);
         System.out.println();
     }
     

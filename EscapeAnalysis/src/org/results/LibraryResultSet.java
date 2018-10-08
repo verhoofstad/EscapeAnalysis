@@ -18,7 +18,7 @@ public class LibraryResultSet {
     }
 
 
-    public void printCallEdgeTable() {
+    public void printCallEdgeTable(String label) {
         
         StringBuilder latexTable = new StringBuilder();
         double totalRtaReductionEa = 0;
@@ -31,7 +31,7 @@ public class LibraryResultSet {
         latexTable.append(" & Pub. & Pkg. & Conf. & RTA & RTA\\textsubscript{EA} & RTA\\textsubscript{MAX} & RTA\\textsubscript{EA} & RTA\\textsubscript{MAX} \\\\ \n");
         latexTable.append("\\hline\n");
         for(LibraryResult libraryResult : this.libraryResults) {
-            libraryResult.addToLatexTable(latexTable);
+            libraryResult.addToCallEdgeTable(latexTable);
             
             totalRtaReductionEa += libraryResult.rtaReductionEa();
             totalRtaReductionMax += libraryResult.rtaReductionMax();
@@ -43,13 +43,13 @@ public class LibraryResultSet {
         latexTable.append("\\multicolumn{7}{l|}{Average} & " + averageReductionRtaEa + "\\% & " + averageReductionRtaMax + "\\% \\\\ \n");
         
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:tableEdges}Reduction of call edges from RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Reduction of call edges from RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());
     }
     
-    public void printMonomorphicCallSitesTable() {
+    public void printMonomorphicCallSitesTable(String label) {
         
         StringBuilder latexTable = new StringBuilder();
         
@@ -60,17 +60,17 @@ public class LibraryResultSet {
         latexTable.append(" & Virtual & Mono & Virtual & Mono & New & Virtual & Mono & New \\\\ \n");
         latexTable.append("\\hline\n");
         for(LibraryResult libraryResult : this.libraryResults) {
-            libraryResult.addToLatexTable2(latexTable);
+            libraryResult.addToMonomorphicCallSitesTable(latexTable);
         }
         latexTable.append("\\hline\n");
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:monomorphicCallSites}Discovering of new monomorphic virtual call sites in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new monomorphic virtual call sites in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());
     }
     
-    public void printDeadMethodsTable() {
+    public void printDeadMethodsTable(String label) {
         StringBuilder latexTable = new StringBuilder();
         
         latexTable.append("\\begin{table}\n");
@@ -84,13 +84,13 @@ public class LibraryResultSet {
         }
         latexTable.append("\\hline\n");
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:deadMethods}Discovering of new dead methods in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new dead methods in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());        
     }
     
-    public void printEntryPointTable() {
+    public void printEntryPointTable(String label) {
         
         StringBuilder latexTable = new StringBuilder();
         
@@ -105,27 +105,7 @@ public class LibraryResultSet {
         }
         latexTable.append("\\hline\n");
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:entryPoints}Entry point calculation.}\n");
-        latexTable.append("\\end{table}\n");
-        
-        System.out.println(latexTable.toString());
-    }
-    
-    public void printLatexTable4() {
-        
-        StringBuilder latexTable = new StringBuilder();
-        
-        latexTable.append("\\begin{table}\n");
-        latexTable.append("\\begin{tabular}{ l | r r r r r r r}\n");
-        latexTable.append("\\hline\n");
-        latexTable.append("Project & Class Hierachy & CHA & RTA & Escape Analysis & RTA\\textsubscript{EA} & RTA\\textsubscript{MAX} & Total \\\\ \n");
-        latexTable.append("\\hline\n");
-        for(LibraryResult libraryResult : this.libraryResults) {
-            libraryResult.addToLatexTable4(latexTable);
-        }
-        latexTable.append("\\hline\n");
-        latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:calculationTime}Calculation time in seconds.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Entry point calculation.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());

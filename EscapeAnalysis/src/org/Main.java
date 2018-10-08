@@ -18,20 +18,48 @@ public class Main {
 
     public static void main(String[] args) {
         
-        DataSet dataSet = DataSet.getCorrectSet();
+        //DataSet dataSet = DataSet.getCorrectSet();
         //DataSet dataSet = DataSet.getTestSet();
         //DataSet dataSet = DataSet.getUnmodifiedSet();
         
         long startTime = System.nanoTime(); 
         
+        analysePrograms(DataSet.getApplicationSet());
         //validateLibraries(dataSet);
-        analyseLibraries(dataSet);
+        //analyseLibraries(dataSet);
         //compareCounts(DataSet.getUnmodifiedSet());
         //analyseEntryPoints(dataSet);
         
         long runningTime = (System.nanoTime() - startTime);
         DecimalFormat formatter = new DecimalFormat("#.00");
         System.out.println("Total running time: " + formatter.format((double)runningTime / 1000 / 1000 / 1000) + " seconds");
+    }
+    
+    private static void analysePrograms(DataSet dataSet) {
+
+        // Because the JDK is a dependency of every other library,
+        // we analyze it one time separately so we can re-use the results.
+        JDKAnalyser jdkAnalyser = new JDKAnalyser(Environment.jdkFolder);
+        JDKResults jdkResults = jdkAnalyser.analyseJDK();
+
+        LibraryResultSet programResults = new LibraryResultSet();
+
+        for (Library program : dataSet) {
+            
+            long startTime = System.nanoTime();
+
+            LibraryAnalyser analyser = new LibraryAnalyser(program);
+            analyser.setJDKResults(jdkResults.finalPackagePrivateClasses(), jdkResults.confinedClasses());
+
+            LibraryResult programResult = analyser.analyse();
+            programResult.totalAnalysisTime = (System.nanoTime() - startTime);
+            programResults.add(programResult);
+        }
+        
+        programResults.printCallEdgeTable("progCallEdges");
+        programResults.printMonomorphicCallSitesTable("progMonomorphicCallSites");
+        programResults.printDeadMethodsTable("progDeadMethods");
+        programResults.printEntryPointTable("progEntryPoints");
     }
     
     private static void analyseLibraries(DataSet dataSet) {
@@ -55,13 +83,9 @@ public class Main {
             libResults.add(libraryResult);
         }
         
-        libResults.printCallEdgeTable();
-        libResults.printMonomorphicCallSitesTable();
-        libResults.printDeadMethodsTable();
-        libResults.printEntryPointTable();
-        //libResults.printLatexTable4();
-        
-        System.out.println("Finished");
+        libResults.printCallEdgeTable("libCallEdges");
+        libResults.printDeadMethodsTable("libDeadMethods");
+        libResults.printEntryPointTable("libEntryPoints");
     }
 
     private static void analyseEntryPoints(DataSet dataSet) {

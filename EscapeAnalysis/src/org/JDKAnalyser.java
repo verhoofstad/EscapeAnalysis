@@ -3,6 +3,7 @@ package org;
 import org.asm.JarFileSet;
 import org.asm.classHierarchyBuilding.ClassHierachyBuilder;
 import org.classHierarchy.ClassHierarchy;
+import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaTypeSet;
 import org.classHierarchy.methodFinding.PackagePrivateClassMethodCollector;
 import org.escapeAnalysis.EscapeAnalysis;
@@ -30,13 +31,13 @@ public class JDKAnalyser {
 
         System.out.print("Find the methods in which package-private classes are instantiated...");
         PackagePrivateClassMethodCollector methodFinder = new PackagePrivateClassMethodCollector(jdkPackagePrivateClasses);
-        classHierarchy.accept(methodFinder);
+        JavaMethodSet foundMethods = methodFinder.findMethodsIn(classHierarchy);
         System.out.println("Ok");
-        System.out.format("Total of %s methods found.\n", methodFinder.foundMethods().size());
+        System.out.format("Total of %s methods found.\n", foundMethods.size());
 
         EscapeAnalysis escapeAnalysis = new EscapeAnalysis(classHierarchy.getClasses());
 
-        escapeAnalysis.analyse(methodFinder.foundMethods(), jdkFiles);
+        escapeAnalysis.analyse(foundMethods, jdkFiles);
 
         JavaTypeSet confinedClasses = jdkPackagePrivateClasses.difference(escapeAnalysis.escapingClasses());
 

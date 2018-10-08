@@ -22,34 +22,26 @@ public class ClassHierarchy {
         return this.rootNode;
     }
 
-    public JavaType findType(String internalName) {
-        if (this.classes.contains(internalName)) {
-            return this.classes.get(internalName);
-        } else if (this.interfaces.contains(internalName)) {
-            return this.interfaces.get(internalName);
-        } else {
-            return null;
-        }
+    public boolean containsType(String internalName) {
+        return this.classes.contains(internalName) || this.interfaces.contains(internalName);
     }
-
-    public JavaType findClass(String internalName) {
-        return this.classes.find(internalName);
-    }
-
+    
     public JavaType getClass(String internalName) {
         return this.classes.get(internalName);
     }
 
     public JavaType getType(String internalName) {
-        if (this.containsType(internalName)) {
-            return this.findType(internalName);
+        JavaType javaType = this.classes.find(internalName);
+        
+        if(javaType == null) {
+            javaType = this.interfaces.find(internalName);
+        }
+        
+        if(javaType != null) {
+            return javaType;
         } else {
             throw new Error("Could not find type " + internalName);
         }
-    }
-
-    public boolean containsType(String internalName) {
-        return this.classes.contains(internalName) || this.interfaces.contains(internalName);
     }
 
     public JavaTypeSet getClasses() {
@@ -127,9 +119,32 @@ public class ClassHierarchy {
         }
         return finalPackagePrivateClasses;
     }
+    
+    /**
+     * Returns the set of all methods that were loaded from a given JAR-file.
+     */
+    public JavaMethodSet getMethods(JarFile jarFile) {
+        JavaMethodSet allMethods = new JavaMethodSet();
+        
+        for (JavaType javaClass : this.classes) {
+            for (JavaMethod method : javaClass.declaredMethods()) {
+                if (javaClass.isLoadedFrom(jarFile)) {
+                    allMethods.add(method);
+                }
+            }
+        }
+        for (JavaType javaInterface : this.interfaces) {
+            for (JavaMethod method : javaInterface.declaredMethods()) {
+                if (javaInterface.isLoadedFrom(jarFile)) {
+                    allMethods.add(method);
+                }
+            }
+        }
+        return allMethods;         
+    }
 
     /**
-     * Returns the set of concrete methods (methods with an implementation) in a given JAR-file.
+     * Returns the set of concrete methods (methods with an implementation) that were loaded from a given JAR-file.
      */
     public JavaMethodSet getConcreteMethods(JarFile jarFile) {
         JavaMethodSet concreteMethods = new JavaMethodSet();
@@ -150,24 +165,6 @@ public class ClassHierarchy {
             }
         }
         return concreteMethods;        
-    }
-    
-    public void accept(ClassHierarchyVisitor visitor) {
-        for(JavaType javaClass : this.classes) {
-            javaClass.accept(visitor);
-        }
-        for(JavaType javaInterface : this.interfaces) {
-            javaInterface.accept(visitor);
-        }
-    }
-    
-    public void accept(ConcreteMethodVisitor visitor) {
-        for(JavaType javaClass : this.classes) {
-            javaClass.accept(visitor);
-        }
-        for(JavaType javaInterface : this.interfaces) {
-            javaInterface.accept(visitor);
-        }
     }
     
     public JavaMethodSet getCompilerGeneratedMethods(JarFile jarFile) {
@@ -203,6 +200,26 @@ public class ClassHierarchy {
         }
         return compilerGeneratedMethods;
     }
+    
+    public void accept(ClassHierarchyVisitor visitor) {
+        for(JavaType javaClass : this.classes) {
+            javaClass.accept(visitor);
+        }
+        for(JavaType javaInterface : this.interfaces) {
+            javaInterface.accept(visitor);
+        }
+    }
+    
+    public void accept(ConcreteMethodVisitor visitor) {
+        for(JavaType javaClass : this.classes) {
+            javaClass.accept(visitor);
+        }
+        for(JavaType javaInterface : this.interfaces) {
+            javaInterface.accept(visitor);
+        }
+    }
+    
+
     
     public void resolveAppliesToSets() {
 
