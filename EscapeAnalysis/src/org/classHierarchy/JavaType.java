@@ -32,7 +32,9 @@ public abstract class JavaType {
         this.declaredMethods = new JavaMethodSet();
         this.coneSet = new JavaTypeSet(this);
 
-        this.packagePath = internalName.substring(0, internalName.lastIndexOf("/"));
+        if (internalName.contains("/")) {
+            this.packagePath = internalName.substring(0, internalName.lastIndexOf("/"));
+        }
     }
     
     public abstract boolean isClass();
