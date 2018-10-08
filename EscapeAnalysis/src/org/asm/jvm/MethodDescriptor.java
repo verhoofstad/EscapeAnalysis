@@ -3,6 +3,8 @@ package org.asm.jvm;
 public class MethodDescriptor {
     
     public static String noArgsAndReturnVoid = "()V";
+    
+    public static String stringArrayArgAndReturnVoid = "([Ljava/lang/String;)V";
 
     public static String justReturnsObject = "()Ljava/lang/Object;";
             

@@ -213,13 +213,13 @@ public class CallGraph {
      * Returns the set of methods that have never been invoked.
      * Because the call graph never contains edges to abstract methods, only concrete methods are considered.
      * @param classHierarchy The class hierarchy that contains all methods.
+     * @param entryPoints The set of entry point methods. These will never be considered dead methods.
      * @param jarFile 
      * @return The set of methods that have never been invoked.
      */
-    public JavaMethodSet getDeadMethods(ClassHierarchy classHierarchy, JarFile jarFile) {
+    public JavaMethodSet getDeadMethods(ClassHierarchy classHierarchy, JavaMethodSet entryPoints, JarFile jarFile) {
         
-        JavaMethodSet methodsInJarFile = classHierarchy.getConcreteMethods(jarFile);
-        JavaMethodSet entryPoints = new JavaMethodSet(); //classHierarchy.getExportedMethods(jarFile);
+        JavaMethodSet methodsInJarFile = classHierarchy.getMethods(jarFile);
         JavaMethodSet compilerGenerated = classHierarchy.getCompilerGeneratedMethods(jarFile);
         
         return methodsInJarFile.difference(this.invokedMethods).difference(entryPoints).difference(compilerGenerated);
