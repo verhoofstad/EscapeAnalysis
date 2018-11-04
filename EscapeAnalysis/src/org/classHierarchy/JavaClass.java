@@ -109,6 +109,7 @@ public final class JavaClass extends JavaType {
 
             if (baseMethod != null) {
                 baseMethod.overridenBy(overridingMethod);
+                overridingMethod.overrides(baseMethod);
             } else {
                 this.superClass.setOverride(overridingMethod);
             }

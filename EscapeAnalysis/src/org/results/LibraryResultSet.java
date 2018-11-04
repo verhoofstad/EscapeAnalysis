@@ -49,6 +49,27 @@ public class LibraryResultSet {
         System.out.println(latexTable.toString());
     }
     
+    public void printPackagePrivateClassDistribution(String label) {
+        
+        StringBuilder latexTable = new StringBuilder();
+        
+        latexTable.append("\\begin{table}\n");
+        latexTable.append("\\begin{tabular}{ l | r r | r r | r r }\n");
+        latexTable.append("\\hline\n");
+        latexTable.append("Project & \\multicolumn{2}{c|}{Classes} & \\multicolumn{2}{c|}{Extending} & \\multicolumn{2}{c}{Overriding Methods} \\\\ \n");
+        latexTable.append(" & Pub. & Pkg. & Object & Other & Object & Other \\\\ \n");
+        latexTable.append("\\hline\n");
+        for(LibraryResult libraryResult : this.libraryResults) {
+            libraryResult.addToPackagePrivateClassDistribution(latexTable);
+        }
+        latexTable.append("\\hline\n");
+        latexTable.append("\\end{tabular}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new monomorphic virtual call sites in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\end{table}\n");
+        
+        System.out.println(latexTable.toString());        
+    }
+    
     public void printMonomorphicCallSitesTable(String label) {
         
         StringBuilder latexTable = new StringBuilder();

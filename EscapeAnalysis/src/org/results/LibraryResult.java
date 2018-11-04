@@ -25,6 +25,11 @@ public class LibraryResult {
     public int libraryReifOpaEntryPointCount = 0;
     public int libraryReifCpaEntryPointCount = 0;
     
+    public int libraryPackagePrivateClassInheritFromObjectCount = 0;
+    public int libraryPackagePrivateClassInheritFromOtherCount = 0;
+    public int libraryPackagePrivateClassOverridingMethodCount = 0;
+    public int libraryPackagePrivateClassOverridingObjectMethodCount = 0;
+    
     public int rtaEdgeCount = 0;
     public int rtaEaEdgeCount = 0;
     public int rtaMaxEdgeCount = 0;
@@ -108,6 +113,27 @@ public class LibraryResult {
         
         latexTable.append("\\\\");
         latexTable.append("\n");
+    }
+    
+    void addToPackagePrivateClassDistribution(StringBuilder latexTable) {
+        
+        latexTable.append(this.library.name());
+        latexTable.append(" & ");
+
+        latexTable.append(this.libraryPublicClassCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryPackagePrivateClassCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryPackagePrivateClassInheritFromObjectCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryPackagePrivateClassInheritFromOtherCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryPackagePrivateClassOverridingObjectMethodCount);
+        latexTable.append(" & ");
+        latexTable.append(this.libraryPackagePrivateClassOverridingMethodCount);
+        
+        latexTable.append("\\\\");
+        latexTable.append("\n");       
     }
     
     void addToMonomorphicCallSitesTable(StringBuilder latexTable) {

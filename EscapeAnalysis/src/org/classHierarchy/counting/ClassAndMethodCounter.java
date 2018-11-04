@@ -2,6 +2,7 @@ package org.classHierarchy.counting;
 
 import org.asm.JarFile;
 import org.classHierarchy.ClassHierarchyVisitor;
+import org.classHierarchy.JavaClass;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaType;
 
@@ -49,6 +50,8 @@ public class ClassAndMethodCounter extends ClassHierarchyVisitor {
             this.countResults.project_packageVisibleClassCount++;
 
             this.countPackagePrivateSubClasses(javaClass);
+            
+            this.countOverridenMethodsByPackagePrivateClasses((JavaClass)javaClass);
         } else {
             this.countResults.libraries_classCount++;
             this.countResults.libraries_packageVisibleClassCount++;
@@ -162,6 +165,29 @@ public class ClassAndMethodCounter extends ClassHierarchyVisitor {
                 this.countResults.project_packageVisibleClassWithPackageVisibleAndPublicSubClassCount++;
             } else {
                 this.countResults.project_packageVisibleClassWithPackageVisibleSubClassCount++;
+            }
+        }
+    }
+    
+    private void countOverridenMethodsByPackagePrivateClasses(JavaClass javaClass) {
+        
+        if(javaClass.isFinalPackagePrivate()) {
+
+            for(JavaMethod declaredMethod : javaClass.declaredMethods()) {
+                if(declaredMethod.overrides() != null ) {
+                    
+                    if(declaredMethod.overrides().containedIn().id().equalsIgnoreCase("java/lang/Object")) {
+                        this.countResults.project_packageVisibleClassOverrideObjectMethods += 1;
+                    } else {
+                        this.countResults.project_packageVisibleClassOverrideNonObjectMethods += 1;
+                    }
+                }
+            }
+
+            if(javaClass.superClass().id().equals("java/lang/Object")) {
+                this.countResults.project_packageVisibleClassInheritFromJavaLangObject += 1;
+            } else {
+                this.countResults.project_packageVisibleClassInheritFromOther += 1;
             }
         }
     }

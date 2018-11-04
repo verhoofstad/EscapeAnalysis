@@ -41,4 +41,9 @@ public class CountResults {
     
     public int project_packageVisibleClassWithPackageVisibleAndPublicSubClassCount = 0;
     public int project_packageVisibleClassWithPackageVisibleSubClassCount = 0;
+    
+    public int project_packageVisibleClassInheritFromJavaLangObject = 0;
+    public int project_packageVisibleClassInheritFromOther = 0;
+    public int project_packageVisibleClassOverrideObjectMethods = 0;
+    public int project_packageVisibleClassOverrideNonObjectMethods = 0;
 }

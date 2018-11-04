@@ -244,6 +244,11 @@ public class LibraryAnalyser {
         //libraryResult.libraryReifOpaEntryPointCount = reifResult.opa_entryPoints;
         //libraryResult.libraryReifCpaEntryPointCount = reifResult.cpa_entryPoints;
         
+        libraryResult.libraryPackagePrivateClassInheritFromObjectCount = libraryCounts.project_packageVisibleClassInheritFromJavaLangObject;
+        libraryResult.libraryPackagePrivateClassInheritFromOtherCount = libraryCounts.project_packageVisibleClassInheritFromOther;
+        libraryResult.libraryPackagePrivateClassOverridingObjectMethodCount = libraryCounts.project_packageVisibleClassOverrideObjectMethods;
+        libraryResult.libraryPackagePrivateClassOverridingMethodCount = libraryCounts.project_packageVisibleClassOverrideNonObjectMethods;
+        
         libraryResult.rtaEdgeCount = rtaGraph.nrOfEdges(cpFile);
         libraryResult.rtaEaEdgeCount = rtaGraphEA.nrOfEdges(cpFile);
         libraryResult.rtaMaxEdgeCount = rtaGraphEAMax.nrOfEdges(cpFile);

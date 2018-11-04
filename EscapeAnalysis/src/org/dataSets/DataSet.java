@@ -137,6 +137,11 @@ public class DataSet implements Iterable<Library> {
                         "Applications\\jlgui\\jlgui3.0\\lib\\jmactritonusspi1.74.jar",
                         "Applications\\jlgui\\jlgui3.0\\lib\\jflac-1.2.jar",
                         "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });
+        /*
+        applicationSet.addLibrary(7, "jhlabs", "ImageEditor", "1.0", 
+                "Applications\\jhlabs\\ImageEditor\\ImageEditor.jar",
+                new String[] {
+                        "JavaJDK\\java-8-openjdk-amd64\\jre\\lib" });*/
         return applicationSet;
     }
     

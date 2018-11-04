@@ -12,7 +12,6 @@ import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 import org.classHierarchy.JavaType;
 import org.classHierarchy.JavaTypeSet;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +30,7 @@ class ClassHierachyBuilderTest {
         ClassHierachyBuilder builder = new ClassHierachyBuilder();
         jdkFiles.accept(builder);
         jdkHierarchy = builder.classHierarchy();
+        jdkHierarchy.resolveAppliesToSets();
     }
 
     @Test
@@ -153,7 +153,7 @@ class ClassHierachyBuilderTest {
         for (JavaType javaClass : allClasses) {
             assertNotNull(javaClass.packagePath(), "The method JavaType.packagePath() should never return null.");
             assertNotEquals("", javaClass.packagePath(), "The method JavaType.packagePath() should never return an empty string.");
-            assertEquals('/', javaClass.packagePath().charAt(0));
+            assertNotEquals('/', javaClass.packagePath().charAt(0));
         }
     }
 
@@ -443,7 +443,9 @@ class ClassHierachyBuilderTest {
                     assertTrue(javaClass.coneSet().contains(overridingMethod.containedIn()));
                     // and apply to a different set of types than the overridden method.
                     assertTrue(overridingMethod.appliesTo().isDisjointOf(javaMethod.appliesTo()));
-                }
+                    
+                    assertTrue(overridingMethod.overrides().equals(javaMethod));
+                } 
             }
         }
     }

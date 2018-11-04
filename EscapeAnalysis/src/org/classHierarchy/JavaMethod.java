@@ -20,6 +20,7 @@ public class JavaMethod {
 
     private JavaType containedIn;
     private JavaMethodSet overridenBy;
+    private JavaMethod overrides;
     private List<InvokedMethod> invokedMethods;
 
     // The method's applies-to set
@@ -36,6 +37,7 @@ public class JavaMethod {
 
         this.containedIn = containedIn;
         this.overridenBy = new JavaMethodSet();
+        this.overrides = null;
 
         this.id = containedIn.id() + "/" + this.signature.toString();
     }
@@ -70,12 +72,22 @@ public class JavaMethod {
     }
 
     /**
-     * Returns the set of method that directly overrides this method (non-transitive).
+     * Returns the set of methods that directly overrides this method (non-transitive).
      */
     public JavaMethodSet overridenBy() {
         return this.overridenBy;
     }
-
+    
+    /**
+     * Returns the method that is overridden by this method -or- null if this method doen not override any method.
+     */
+    public JavaMethod overrides() {
+        return this.overrides;
+    }
+    
+    /**
+     * Returns a value indicating whether this is a public method.
+     */
     public boolean isPublic() {
         return this.accessFlags.isPublic();
     }
@@ -184,6 +196,18 @@ public class JavaMethod {
      */
     public void overridenBy(JavaMethod overridingMethod) {
         this.overridenBy.add(overridingMethod);
+    }
+    
+    /**
+     * Set the concrete method this method overrides.
+     */
+    public void overrides(JavaMethod baseMethod) {
+        if(this.overrides == null) {
+            this.overrides = baseMethod;
+        }
+        else {
+            throw new IllegalStateException("");
+        }
     }
 
     @Override

@@ -26,6 +26,9 @@ public class InvokedMethod {
         return this.signature;
     }
 
+    /**
+     * Returns a value indicating whether the constructor was called directly with the 'new' keyword (i.e. it was not a call from a constructor to a parent constructor).
+     */
     public boolean withNew() {
         return this.withNew;
     }

@@ -22,9 +22,12 @@ public class Main {
         //DataSet dataSet = DataSet.getTestSet();
         //DataSet dataSet = DataSet.getUnmodifiedSet();
         
+        DataSet programSet = DataSet.getApplicationSet();
+        
         long startTime = System.nanoTime(); 
         
-        analysePrograms(DataSet.getApplicationSet());
+        //validateLibraries(programSet);
+        analysePrograms(programSet);
         //validateLibraries(dataSet);
         //analyseLibraries(dataSet);
         //compareCounts(DataSet.getUnmodifiedSet());
@@ -60,6 +63,7 @@ public class Main {
         programResults.printMonomorphicCallSitesTable("progMonomorphicCallSites");
         programResults.printDeadMethodsTable("progDeadMethods");
         programResults.printEntryPointTable("progEntryPoints");
+        programResults.printPackagePrivateClassDistribution("progClassDistribution");
     }
     
     private static void analyseLibraries(DataSet dataSet) {
