@@ -58,9 +58,12 @@ public class LibraryResult {
     public long rtaMaxTime = 0;
     public long totalAnalysisTime = 0;
     
+    private double libraryPublicClassPercentage = 0;
+    private double libraryPackagePrivateClassPercentage = 0;
+    private double libraryConfinedClassPercentage = 0;
+    
     private double rtaReductionEa = 0;
     private double rtaReductionMax = 0;
-    
     
     
     public LibraryResult(Library library) {
@@ -72,6 +75,18 @@ public class LibraryResult {
         return this.library.name();
     }
     
+    public double libraryPublicClassPercentage() {
+        return this.libraryPublicClassPercentage;
+    }
+    
+    public double libraryPackagePrivateClassPercentage() {
+        return this.libraryPackagePrivateClassPercentage;
+    }
+    
+    public double libraryConfinedClassPercentage() {
+        return this.libraryConfinedClassPercentage;
+    }
+    
     public double rtaReductionEa() {
         return this.rtaReductionEa;
     }
@@ -81,8 +96,12 @@ public class LibraryResult {
     }
     
     private void calculate() {
-        this.rtaReductionEa = Math.round((double)(this.rtaEdgeCount - this.rtaEaEdgeCount) / this.rtaEdgeCount * 100 * 100.0) / 100.0;
-        this.rtaReductionMax = Math.round((double)(this.rtaEdgeCount - this.rtaMaxEdgeCount) / this.rtaEdgeCount * 100 * 100.0) / 100.0;
+        int totalLibraryClassCount = this.libraryPublicClassCount + this.libraryPackagePrivateClassCount;
+        this.libraryPublicClassPercentage = (double)this.libraryPublicClassCount / totalLibraryClassCount * 100;
+        this.libraryPackagePrivateClassPercentage = (double)this.libraryPackagePrivateClassCount / totalLibraryClassCount * 100;
+        this.libraryConfinedClassPercentage = (double)this.libraryConfinedClassCount / totalLibraryClassCount * 100;
+        this.rtaReductionEa = (double)(this.rtaEdgeCount - this.rtaEaEdgeCount) / this.rtaEdgeCount * 100;
+        this.rtaReductionMax = (double)(this.rtaEdgeCount - this.rtaMaxEdgeCount) / this.rtaEdgeCount * 100;
     }
     
     
@@ -106,9 +125,9 @@ public class LibraryResult {
         latexTable.append(this.rtaMaxEdgeCount);
         
         latexTable.append(" & ");
-        latexTable.append(this.rtaReductionEa + "\\%");
+        latexTable.append(roundToTwoDecimals(this.rtaReductionEa) + "\\%");
         latexTable.append(" & ");
-        latexTable.append(this.rtaReductionMax + "\\%");
+        latexTable.append(roundToTwoDecimals(this.rtaReductionMax) + "\\%");
         
         
         latexTable.append("\\\\");
@@ -206,6 +225,10 @@ public class LibraryResult {
         
         latexTable.append("\\\\");
         latexTable.append("\n");        
+    }
+    
+    private double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
     
     /*

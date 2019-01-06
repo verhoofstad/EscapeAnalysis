@@ -116,11 +116,11 @@ public class LibraryAnalyser {
             System.out.println(mainMethod.toString());
         }
         
-        JavaMethodSet entryPoints = mainFunctions;
+        JavaMethodSet entryPoints = libraryEntryPointsRta;
         
-        //System.out.format("Old entry points: %s - %s\n", libraryEntryPointsOld.size(), reifResult.old_entryPoints);
-        //System.out.format("OPA entry points: %s - %s\n", libraryEntryPointsOpa.size(), reifResult.opa_entryPoints);
-        //System.out.format("CPA entry points: %s - %s\n", libraryEntryPointsCpa.size(), reifResult.cpa_entryPoints);
+        System.out.format("Old entry points: %s - %s\n", libraryEntryPointsOld.size(), reifResult.old_entryPoints);
+        System.out.format("OPA entry points: %s - %s\n", libraryEntryPointsOpa.size(), reifResult.opa_entryPoints);
+        System.out.format("CPA entry points: %s - %s\n", libraryEntryPointsCpa.size(), reifResult.cpa_entryPoints);
         System.out.format("RTA entry points: %s\n", libraryEntryPointsRta.size());
         
         DecimalFormat formatter = new DecimalFormat("#.00");

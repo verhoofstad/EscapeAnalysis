@@ -204,9 +204,8 @@ public class JavaMethod {
     public void overrides(JavaMethod baseMethod) {
         if(this.overrides == null) {
             this.overrides = baseMethod;
-        }
-        else {
-            throw new IllegalStateException("");
+        } else {
+            throw new IllegalStateException("The base method can only be set once.");
         }
     }
 

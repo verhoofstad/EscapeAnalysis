@@ -21,6 +21,10 @@ public class LibraryResultSet {
     public void printCallEdgeTable(String label) {
         
         StringBuilder latexTable = new StringBuilder();
+        
+        double totalPublicClassPercentage = 0;
+        double totalPackagePrivateClassPercentage = 0;
+        double totalConfinedClassPercentage = 0;
         double totalRtaReductionEa = 0;
         double totalRtaReductionMax = 0;
         
@@ -33,14 +37,23 @@ public class LibraryResultSet {
         for(LibraryResult libraryResult : this.libraryResults) {
             libraryResult.addToCallEdgeTable(latexTable);
             
+            totalPublicClassPercentage += libraryResult.libraryPublicClassPercentage();
+            totalPackagePrivateClassPercentage += libraryResult.libraryPackagePrivateClassPercentage();
+            totalConfinedClassPercentage += libraryResult.libraryConfinedClassPercentage();
             totalRtaReductionEa += libraryResult.rtaReductionEa();
             totalRtaReductionMax += libraryResult.rtaReductionMax();
         }
         latexTable.append("\\hline\n");
         
-        double averageReductionRtaEa = Math.round(totalRtaReductionEa / this.libraryResults.size() * 100.0) / 100.0;
-        double averageReductionRtaMax = Math.round(totalRtaReductionMax / this.libraryResults.size() * 100.0) / 100.0;
-        latexTable.append("\\multicolumn{7}{l|}{Average} & " + averageReductionRtaEa + "\\% & " + averageReductionRtaMax + "\\% \\\\ \n");
+        int nrOfLibraries = this.libraryResults.size();
+        double averagePublicClassCount = roundToTwoDecimals(totalPublicClassPercentage / nrOfLibraries);
+        double averagePackagePrivateClassCount = roundToTwoDecimals(totalPackagePrivateClassPercentage / nrOfLibraries);
+        double averageConfinedClassCount = roundToTwoDecimals(totalConfinedClassPercentage / nrOfLibraries);
+        double averageReductionRtaEa = roundToTwoDecimals(totalRtaReductionEa / nrOfLibraries);
+        double averageReductionRtaMax = roundToTwoDecimals(totalRtaReductionMax / nrOfLibraries);
+        
+        latexTable.append("Average & " + averagePublicClassCount + "\\% & " + averagePackagePrivateClassCount + "\\% & ");
+        latexTable.append(averageConfinedClassCount + "\\% & & & & " + averageReductionRtaEa + "\\% & " + averageReductionRtaMax + "\\% \\\\ \n");
         
         latexTable.append("\\end{tabular}\n");
         latexTable.append("\\caption{\\label{tbl:" + label + "}Reduction of call edges from RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
@@ -185,5 +198,9 @@ public class LibraryResultSet {
         }
 
         return resultsFile;
+    }
+    
+    private double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }

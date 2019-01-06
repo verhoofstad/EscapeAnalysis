@@ -18,18 +18,18 @@ public class Main {
 
     public static void main(String[] args) {
         
-        //DataSet dataSet = DataSet.getCorrectSet();
+        DataSet dataSet = DataSet.getCorrectSet();
         //DataSet dataSet = DataSet.getTestSet();
         //DataSet dataSet = DataSet.getUnmodifiedSet();
         
-        DataSet programSet = DataSet.getApplicationSet();
+        //DataSet programSet = DataSet.getApplicationSet();
         
         long startTime = System.nanoTime(); 
         
         //validateLibraries(programSet);
-        analysePrograms(programSet);
+        //analysePrograms(programSet);
         //validateLibraries(dataSet);
-        //analyseLibraries(dataSet);
+        analyseLibraries(dataSet);
         //compareCounts(DataSet.getUnmodifiedSet());
         //analyseEntryPoints(dataSet);
         
