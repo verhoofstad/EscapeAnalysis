@@ -1,11 +1,12 @@
 package org;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.asm.JarFileSet;
 import org.asm.validation.LibraryValidator;
+import org.classHierarchy.entryPoints.ExportedMethodCollector;
+import org.classHierarchy.entryPoints.MainMethodCollector;
 import org.dataSets.DataSet;
 import org.dataSets.Library;
 import org.results.JDKResults;
@@ -18,29 +19,28 @@ public class Main {
 
     public static void main(String[] args) {
         
-        DataSet dataSet = DataSet.getCorrectSet();
+        //DataSet dataSet = DataSet.getCorrectSet();
         //DataSet dataSet = DataSet.getTestSet();
         //DataSet dataSet = DataSet.getUnmodifiedSet();
         
-        //DataSet programSet = DataSet.getApplicationSet();
+        DataSet programSet = DataSet.getApplicationSet();
         
-        long startTime = System.nanoTime(); 
+        Timer.start("completeAnalysis");
         
         //validateLibraries(programSet);
         //analysePrograms(programSet);
-        //validateLibraries(dataSet);
-        analyseLibraries(dataSet);
+        validateLibraries(programSet);
+        //analyseLibraries(dataSet);
         //compareCounts(DataSet.getUnmodifiedSet());
         //analyseEntryPoints(dataSet);
         
-        long runningTime = (System.nanoTime() - startTime);
-        DecimalFormat formatter = new DecimalFormat("#.00");
-        System.out.println("Total running time: " + formatter.format((double)runningTime / 1000 / 1000 / 1000) + " seconds");
+        Timer.stop("completeAnalysis");
+        Timer.print("completeAnalysis");
     }
     
     private static void analysePrograms(DataSet dataSet) {
 
-        // Because the JDK is a dependency of every other library,
+        // Because the JDK is a dependency of every other program,
         // we analyze it one time separately so we can re-use the results.
         JDKAnalyser jdkAnalyser = new JDKAnalyser(Environment.jdkFolder);
         JDKResults jdkResults = jdkAnalyser.analyseJDK();
@@ -49,13 +49,15 @@ public class Main {
 
         for (Library program : dataSet) {
             
-            long startTime = System.nanoTime();
+            Timer.start("programAnalysis");
 
-            LibraryAnalyser analyser = new LibraryAnalyser(program);
+            LibraryAnalyser analyser = new LibraryAnalyser(new MainMethodCollector(program.cpFile()));
             analyser.setJDKResults(jdkResults.finalPackagePrivateClasses(), jdkResults.confinedClasses());
 
-            LibraryResult programResult = analyser.analyse();
-            programResult.totalAnalysisTime = (System.nanoTime() - startTime);
+            LibraryResult programResult = analyser.analyse(program);
+            
+            Timer.stop("programAnalysis");
+            programResult.totalAnalysisTime = Timer.get("programAnalysis");
             programResults.add(programResult);
         }
         
@@ -77,13 +79,16 @@ public class Main {
 
         for (Library library : dataSet) {
             
-            long startTime = System.nanoTime();
-
-            LibraryAnalyser analyser = new LibraryAnalyser(library);
+            Timer.start("libraryAnalysis");
+            
+            LibraryAnalyser analyser = new LibraryAnalyser(new ExportedMethodCollector(library.cpFile()));
             analyser.setJDKResults(jdkResults.finalPackagePrivateClasses(), jdkResults.confinedClasses());
 
-            LibraryResult libraryResult = analyser.analyse();
-            libraryResult.totalAnalysisTime = (System.nanoTime() - startTime);
+            LibraryResult libraryResult = analyser.analyse(library);
+            
+            Timer.stop("libraryAnalysis");
+            
+            libraryResult.totalAnalysisTime = Timer.get("libraryAnalysis");
             libResults.add(libraryResult);
         }
         
@@ -106,7 +111,11 @@ public class Main {
         }
     }
 
-    
+    /**
+     * Validates that all programs/libraries in a given dataSet are complete and have no missing dependencies. 
+     * i.e. all classes and interfaces that are extended, implemented, instantiated, invoked, etc. are 
+     * present in the program/library.
+     */
     private static void validateLibraries(DataSet dataSet) {
 
         List<String> validLibraries = new ArrayList<String>();

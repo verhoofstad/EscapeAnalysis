@@ -32,7 +32,7 @@ public class LibraryResultSet {
         latexTable.append("\\begin{tabular}{ l | r r r | r r r | r r}\n");
         latexTable.append("\\hline\n");
         latexTable.append("Project & \\multicolumn{3}{c|}{Class count} & \\multicolumn{3}{c|}{Call Edges} & \\multicolumn{2}{c}{Reduction} \\\\ \n");
-        latexTable.append(" & Pub. & Pkg. & Conf. & RTA & RTA\\textsubscript{EA} & RTA\\textsubscript{MAX} & RTA\\textsubscript{EA} & RTA\\textsubscript{MAX} \\\\ \n");
+        latexTable.append(" & Pub. & Pkg. & Conf. & RTA & CCA\\textsubscript{EA} & CCA\\textsubscript{MAX} & CCA\\textsubscript{EA} & CCA\\textsubscript{MAX} \\\\ \n");
         latexTable.append("\\hline\n");
         for(LibraryResult libraryResult : this.libraryResults) {
             libraryResult.addToCallEdgeTable(latexTable);
@@ -56,7 +56,7 @@ public class LibraryResultSet {
         latexTable.append(averageConfinedClassCount + "\\% & & & & " + averageReductionRtaEa + "\\% & " + averageReductionRtaMax + "\\% \\\\ \n");
         
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:" + label + "}Reduction of call edges from RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Reduction of call edges from CCA\\textsubscript{EA} and CCA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());
@@ -77,7 +77,7 @@ public class LibraryResultSet {
         }
         latexTable.append("\\hline\n");
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new monomorphic virtual call sites in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new monomorphic virtual call sites in CCA\\textsubscript{EA} and CCA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());        
@@ -88,17 +88,17 @@ public class LibraryResultSet {
         StringBuilder latexTable = new StringBuilder();
         
         latexTable.append("\\begin{table}\n");
-        latexTable.append("\\begin{tabular}{ l | r r | r r r | r r r}\n");
+        latexTable.append("\\begin{tabular}{ l | r r | r r r r | r r r r }\n");
         latexTable.append("\\hline\n");
-        latexTable.append("Project & \\multicolumn{2}{c|}{Call Sites RTA} & \\multicolumn{3}{c|}{Call Sites RTA\\textsubscript{EA}} & \\multicolumn{3}{c}{Call Sites RTA\\textsubscript{MAX}} \\\\ \n");
-        latexTable.append(" & Virtual & Mono & Virtual & Mono & New & Virtual & Mono & New \\\\ \n");
+        latexTable.append("Project & \\multicolumn{2}{c|}{Call Sites RTA} & \\multicolumn{4}{c|}{Call Sites CCA\\textsubscript{EA}} & \\multicolumn{4}{c}{Call Sites CCA\\textsubscript{MAX}} \\\\ \n");
+        latexTable.append(" & Virtual & Mono & Virtual & Mono & New & \\% & Virtual & Mono & New & \\% \\\\ \n");
         latexTable.append("\\hline\n");
         for(LibraryResult libraryResult : this.libraryResults) {
             libraryResult.addToMonomorphicCallSitesTable(latexTable);
         }
         latexTable.append("\\hline\n");
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new monomorphic virtual call sites in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new monomorphic virtual call sites in CCA\\textsubscript{EA} and CCA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());
@@ -110,15 +110,15 @@ public class LibraryResultSet {
         latexTable.append("\\begin{table}\n");
         latexTable.append("\\begin{tabular}{ l | r r r | r r r}\n");
         latexTable.append("\\hline\n");
-        latexTable.append("Project & \\multicolumn{3}{c}{Method count} & \\multicolumn{3}{c}{Dead methods} \\\\ \n");
-        latexTable.append(" & Total & Entry point & Compiler Gen. & RTA & RTA\\textsubscript{EA} & RTA\\textsubscript{MAX} \\\\ \n");
+        latexTable.append("Project & \\multicolumn{3}{c|}{Method count} & \\multicolumn{3}{c}{Dead methods} \\\\ \n");
+        latexTable.append(" & Total & Entry point & Compiler Gen. & RTA & CCA\\textsubscript{EA} & CCA\\textsubscript{MAX} \\\\ \n");
         latexTable.append("\\hline\n");
         for(LibraryResult libraryResult : this.libraryResults) {
             libraryResult.addToDeadMethodsTable(latexTable);
         }
         latexTable.append("\\hline\n");
         latexTable.append("\\end{tabular}\n");
-        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new dead methods in RTA\\textsubscript{EA} and RTA\\textsubscript{MAX} compared to RTA.}\n");
+        latexTable.append("\\caption{\\label{tbl:" + label + "}Discovering of new dead methods in CCA\\textsubscript{EA} and CCA\\textsubscript{MAX} compared to RTA.}\n");
         latexTable.append("\\end{table}\n");
         
         System.out.println(latexTable.toString());        

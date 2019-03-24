@@ -65,6 +65,11 @@ public class LibraryResult {
     private double rtaReductionEa = 0;
     private double rtaReductionMax = 0;
     
+    private double rtaEaNewMonomorphicCallSitePercentage = 0;
+    private double rtaMaxNewMonomorphicCallSitePercentage = 0;
+    
+    private double rtaEaDeadMethodsPercentage = 0;
+    private double rtaMaxDeadMethodsPercentage = 0;
     
     public LibraryResult(Library library) {
         
@@ -102,6 +107,16 @@ public class LibraryResult {
         this.libraryConfinedClassPercentage = (double)this.libraryConfinedClassCount / totalLibraryClassCount * 100;
         this.rtaReductionEa = (double)(this.rtaEdgeCount - this.rtaEaEdgeCount) / this.rtaEdgeCount * 100;
         this.rtaReductionMax = (double)(this.rtaEdgeCount - this.rtaMaxEdgeCount) / this.rtaEdgeCount * 100;
+        
+        if (this.rtaEaMonomorphicCallSiteCount != 0) {
+            this.rtaEaNewMonomorphicCallSitePercentage = (double)(this.rtaEaNewMonomorphicCallSiteCount / this.rtaEaMonomorphicCallSiteCount) * 100;
+        }
+        if (this.rtaMaxMonomorphicCallSiteCount != 0) {
+            this.rtaMaxNewMonomorphicCallSitePercentage = (double)(this.rtaMaxNewMonomorphicCallSiteCount / this.rtaMaxMonomorphicCallSiteCount) * 100;
+        }
+        
+        this.rtaEaDeadMethodsPercentage = (double)(this.rtaEaDeadMethods - this.rtaDeadMethods) / this.rtaDeadMethods * 100;
+        this.rtaMaxDeadMethodsPercentage = (double)(this.rtaMaxDeadMethods - this.rtaDeadMethods) / this.rtaDeadMethods * 100;
     }
     
     
@@ -128,7 +143,6 @@ public class LibraryResult {
         latexTable.append(roundToTwoDecimals(this.rtaReductionEa) + "\\%");
         latexTable.append(" & ");
         latexTable.append(roundToTwoDecimals(this.rtaReductionMax) + "\\%");
-        
         
         latexTable.append("\\\\");
         latexTable.append("\n");
@@ -164,17 +178,23 @@ public class LibraryResult {
         latexTable.append(" & ");
         latexTable.append(this.rtaMonomorphicCallSiteCount);
         latexTable.append(" & ");
+        
         latexTable.append(this.rtaEaVirtualCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaEaMonomorphicCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaEaNewMonomorphicCallSiteCount);
         latexTable.append(" & ");
+        latexTable.append(roundToThreeDecimals(this.rtaEaNewMonomorphicCallSitePercentage) + "\\%");
+        latexTable.append(" & ");
+        
         latexTable.append(this.rtaMaxVirtualCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaMaxMonomorphicCallSiteCount);
         latexTable.append(" & ");
         latexTable.append(this.rtaMaxNewMonomorphicCallSiteCount);
+        latexTable.append(" & ");
+        latexTable.append(roundToThreeDecimals(this.rtaMaxNewMonomorphicCallSitePercentage) + "\\%");
         
         latexTable.append("\\\\");
         latexTable.append("\n");
@@ -197,9 +217,9 @@ public class LibraryResult {
         
         latexTable.append(this.rtaDeadMethods);
         latexTable.append(" & ");
-        latexTable.append(additionalRtaEa == 0 ? "0" : "+" + additionalRtaEa);
+        latexTable.append(additionalRtaEa == 0 ? "0\\%" : roundToTwoDecimals(this.rtaEaDeadMethodsPercentage) + "\\%");
         latexTable.append(" & ");
-        latexTable.append(additionalrtaMax == 0 ? "0" : "+" + additionalrtaMax);
+        latexTable.append(additionalrtaMax == 0 ? "0\\%" : roundToTwoDecimals(this.rtaMaxDeadMethodsPercentage) + "\\%");
 
         latexTable.append("\\\\");
         latexTable.append("\n");
@@ -229,6 +249,10 @@ public class LibraryResult {
     
     private double roundToTwoDecimals(double value) {
         return Math.round(value * 100.0) / 100.0;
+    }
+    
+    private double roundToThreeDecimals(double value) {
+        return Math.round(value * 1000.0) / 1000.0;
     }
     
     /*

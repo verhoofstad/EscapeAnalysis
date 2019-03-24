@@ -53,7 +53,6 @@ public class EntryPointAnalyser {
         CountResults libraryCounts = counter.countResults();
         System.out.println("Ok");
 
-        /*
         System.out.print("Find types with factory method...");
         OldFactoryMethodCollector factoryMethodCollector = new OldFactoryMethodCollector();
         JavaMethodSet oldFactoryMethods = factoryMethodCollector.collectFactoryMethodsFrom(classHierarchy);
@@ -69,15 +68,15 @@ public class EntryPointAnalyser {
         CPAEntryPointCollector cpaEntryPointCollector = new CPAEntryPointCollector(cpFile, opaFactoryMethods);
         JavaMethodSet libraryEntryPointsCpa = cpaEntryPointCollector.collectEntryPointsFrom(classHierarchy);
         System.out.println("Ok");
-          */     
+
         printTotals(libraryCounts, this.reifResult);
-/*
+
         printLine("Old factory methods:", oldFactoryMethods.size());
         printLine("OPA factory methods:", opaFactoryMethods.size());
         System.out.println();
         printLine("Old entry points", libraryEntryPointsOld.size(), this.reifResult.old_entryPoints);
         printLine("OPA entry points", libraryEntryPointsOpa.size(), this.reifResult.opa_entryPoints);
-        printLine("CPA entry points", libraryEntryPointsCpa.size(), this.reifResult.cpa_entryPoints);*/
+        printLine("CPA entry points", libraryEntryPointsCpa.size(), this.reifResult.cpa_entryPoints);
     }
     
     private static void printTotals(CountResults countResult, ReifLibraryResult result2) {

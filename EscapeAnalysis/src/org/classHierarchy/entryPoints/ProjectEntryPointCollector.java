@@ -6,7 +6,7 @@ import org.classHierarchy.ConcreteMethodVisitor;
 import org.classHierarchy.JavaMethod;
 import org.classHierarchy.JavaMethodSet;
 
-abstract class ProjectEntryPointCollector extends ConcreteMethodVisitor {
+public abstract class ProjectEntryPointCollector extends ConcreteMethodVisitor {
 
     private JarFile projectFile;
     private JavaMethodSet entryPoints;
